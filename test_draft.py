@@ -185,6 +185,78 @@ def test_board_injury_fields():
     assert board["is_season_out"].dtype == bool or board["is_season_out"].dtype == "bool"
 
 
+def test_temporal_conflict_resolution():
+    from injury_sync import (
+        normalize_to_iso8601_utc,
+        resolve_injury_temporal_conflict,
+        generate_git_commit_snippet,
+        format_display_timestamp
+    )
+
+    # 1. Test timestamp normalization
+    iso1 = normalize_to_iso8601_utc("2026-09-01T19:38Z")
+    assert iso1 == "2026-09-01T19:38:00Z"
+
+    epoch_ms = 1788017147544  # Sleeper ms epoch
+    iso_epoch = normalize_to_iso8601_utc(epoch_ms)
+    assert iso_epoch.endswith("Z")
+    assert len(iso_epoch) == 20
+
+    # 2. Test conflict resolution: new record
+    incoming_1 = {
+        "player_name": "Puka Nacua",
+        "status": "Questionable",
+        "timestamp_utc": "2026-09-01T19:38:00Z",
+        "blurb": "Limited participant in practice."
+    }
+    is_up, rec1 = resolve_injury_temporal_conflict(None, incoming_1)
+    assert is_up is True
+    assert rec1["status"] == "Questionable"
+
+    # 3. Test monotonic progression: newer update (T_new > T_current)
+    incoming_newer = {
+        "player_name": "Puka Nacua",
+        "status": "Active",
+        "timestamp_utc": "2026-09-02T14:30:00Z",
+        "blurb": "Upgraded to full participant in Wednesday practice."
+    }
+    is_up, rec2 = resolve_injury_temporal_conflict(rec1, incoming_newer)
+    assert is_up is True
+    assert rec2["status"] == "Active"
+    assert rec2["blurb"] == "Upgraded to full participant in Wednesday practice."
+
+    # 4. Test monotonic progression: stale update (T_new < T_current) MUST BE REJECTED
+    incoming_stale = {
+        "player_name": "Puka Nacua",
+        "status": "Out",
+        "timestamp_utc": "2026-08-25T10:00:00Z",
+        "blurb": "Stale report from two weeks ago."
+    }
+    is_up, rec3 = resolve_injury_temporal_conflict(rec2, incoming_stale)
+    assert is_up is False
+    # Verified: Status remains Active, blurb remains newer one!
+    assert rec3["status"] == "Active"
+    assert rec3["blurb"] == "Upgraded to full participant in Wednesday practice."
+
+    # 5. Test identical timestamp (T_new == T_current) MUST BE REJECTED
+    incoming_identical = {
+        "player_name": "Puka Nacua",
+        "status": "Doubtful",
+        "timestamp_utc": "2026-09-02T14:30:00Z",
+        "blurb": "Duplicate report."
+    }
+    is_up, rec4 = resolve_injury_temporal_conflict(rec2, incoming_identical)
+    assert is_up is False
+    assert rec4["status"] == "Active"
+
+    # 6. Test Git commit snippet generation
+    snippet = generate_git_commit_snippet(["Puka Nacua", "Ja'Marr Chase"], "2026-09-02T16:00:00Z")
+    assert "feat(injuries): auto-sync update for 2 players (2026-09-02)" in snippet
+    assert "- Puka Nacua" in snippet
+    assert "- Ja'Marr Chase" in snippet
+    assert "T_new > T_current" in snippet
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -194,5 +266,6 @@ if __name__ == "__main__":
     test_unicode_strikethrough()
     test_curated_injury_ledger()
     test_board_injury_fields()
+    test_temporal_conflict_resolution()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 

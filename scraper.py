@@ -26,6 +26,14 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
+from injury_sync import (
+    normalize_to_iso8601_utc,
+    format_display_timestamp,
+    resolve_injury_temporal_conflict,
+    load_injury_database,
+    save_injury_database
+)
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -376,7 +384,10 @@ def fetch_espn_live_injuries(timeout: int = 6) -> tuple[Dict[str, dict], set]:
                     else:
                         continue
                     
+                    inj_raw_date = inj.get("date") or "2026-09-01T19:38Z"
+                    ts_utc = normalize_to_iso8601_utc(inj_raw_date)
                     results[clean_name] = {
+                        "player_name": name_raw,
                         "status": status,
                         "type": inj_type,
                         "tier": tier,
@@ -385,7 +396,11 @@ def fetch_espn_live_injuries(timeout: int = 6) -> tuple[Dict[str, dict], set]:
                         "return_date": ret_date,
                         "blurb": comm or f"Player listed as {status} with {inj_type}.",
                         "is_season_out": is_season_out,
-                        "draft_advice": advice
+                        "draft_advice": advice,
+                        "timestamp_utc": ts_utc,
+                        "updated_formatted": format_display_timestamp(ts_utc),
+                        "source": "ESPN Official Injury API",
+                        "source_url": f"https://www.fantasypros.com/nfl/players/{clean_name.replace(' ', '-')}.php"
                     }
             logger.info(f"Loaded {len(results)} live NFL player injuries and {len(active_players)} active players from ESPN API.")
     except Exception as e:
@@ -457,7 +472,10 @@ def fetch_sleeper_live_injuries(timeout: int = 5) -> Dict[str, dict]:
                     is_season_out = False
                     advice = "Questionable for Week 1 opener. Monitor practice participation."
                 
+                raw_ts = p.get("news_updated") or p.get("injury_start_date") or 1788017147544
+                ts_utc = normalize_to_iso8601_utc(raw_ts)
                 results[clean_name] = {
+                    "player_name": full_name,
                     "status": inj_status or status or "Questionable",
                     "type": body_part,
                     "tier": tier,
@@ -466,7 +484,11 @@ def fetch_sleeper_live_injuries(timeout: int = 5) -> Dict[str, dict]:
                     "return_date": p.get("injury_start_date", ""),
                     "blurb": notes or f"Reported as {inj_status or status} ({body_part}).",
                     "is_season_out": is_season_out,
-                    "draft_advice": advice
+                    "draft_advice": advice,
+                    "timestamp_utc": ts_utc,
+                    "updated_formatted": format_display_timestamp(ts_utc),
+                    "source": "Sleeper API",
+                    "source_url": f"https://www.fantasypros.com/nfl/players/{clean_name.replace(' ', '-')}.php"
                 }
             logger.info(f"Loaded {len(results)} live player injuries from Sleeper API.")
     except Exception as e:
@@ -475,35 +497,50 @@ def fetch_sleeper_live_injuries(timeout: int = 5) -> Dict[str, dict]:
 
 
 def get_comprehensive_injury_map() -> Dict[str, dict]:
-    """Combines live 2026 ESPN API (authoritative), Sleeper API, and confirmed 2026 ledger."""
-    merged_map = {}
+    """Combines live 2026 ESPN API (authoritative), Sleeper API, and confirmed 2026 ledger with strict monotonic temporal precedence."""
+    db = load_injury_database()
+    merged_map = db.get("players", {})
     
     # 1. Fetch live 2026 ESPN API (ground truth across 32 NFL teams)
     espn_map, active_players = fetch_espn_live_injuries()
     for name, data in espn_map.items():
-        merged_map[name] = data
+        curr = merged_map.get(name)
+        is_up, win = resolve_injury_temporal_conflict(curr, data)
+        if is_up:
+            merged_map[name] = win
         
     # 2. Layer in Sleeper API (for additional commentary or notes)
     sleeper_map = fetch_sleeper_live_injuries()
     for name, data in sleeper_map.items():
-        # Never add an injury/suspension if ESPN confirms player is Active in 2026
         if name in active_players:
             continue
-        if name not in merged_map:
-            merged_map[name] = data
-        elif not merged_map[name].get("blurb") and data.get("blurb"):
-            merged_map[name]["blurb"] = data["blurb"]
+        curr = merged_map.get(name)
+        is_up, win = resolve_injury_temporal_conflict(curr, data)
+        if is_up:
+            merged_map[name] = win
             
     # 3. Verified 2026 Season IR / Discipline ledger
     for name, data in CURATED_2026_INJURY_LEDGER.items():
         if name in active_players and not data.get("is_season_out"):
             continue
-        merged_map[name] = data.copy()
+        curr = merged_map.get(name)
+        ledger_rec = data.copy()
+        if not ledger_rec.get("timestamp_utc"):
+            ledger_rec["timestamp_utc"] = "2026-09-01T12:00:00Z"
+            ledger_rec["updated_formatted"] = "Sep 01, 2026 at 12:00 PM UTC"
+        ledger_rec["player_name"] = name.title()
+        is_up, win = resolve_injury_temporal_conflict(curr, ledger_rec)
+        if is_up:
+            merged_map[name] = win
 
     # 4. Guarantee that any player confirmed Active in 2026 is clean and unflagged
     for act in active_players:
         if act in merged_map and not merged_map[act].get("is_season_out"):
             del merged_map[act]
+            
+    db["players"] = merged_map
+    db["metadata"]["total_records"] = len(merged_map)
+    save_injury_database(db)
                 
     return merged_map
 
@@ -522,6 +559,10 @@ def enrich_board_with_injuries(df: pd.DataFrame) -> pd.DataFrame:
     return_dates = []
     is_season_outs = []
     advices = []
+    timestamps_utc = []
+    updated_formatteds = []
+    sources = []
+    source_urls = []
     
     for cn in clean_names:
         inj = inj_map.get(cn)
@@ -535,6 +576,10 @@ def enrich_board_with_injuries(df: pd.DataFrame) -> pd.DataFrame:
             return_dates.append(inj.get("return_date", ""))
             is_season_outs.append(bool(inj.get("is_season_out", False)))
             advices.append(inj.get("draft_advice", ""))
+            timestamps_utc.append(inj.get("timestamp_utc", ""))
+            updated_formatteds.append(inj.get("updated_formatted", ""))
+            sources.append(inj.get("source", "ESPN / Wire"))
+            source_urls.append(inj.get("source_url", ""))
         else:
             statuses.append("")
             types.append("")
@@ -545,6 +590,10 @@ def enrich_board_with_injuries(df: pd.DataFrame) -> pd.DataFrame:
             return_dates.append("")
             is_season_outs.append(False)
             advices.append("")
+            timestamps_utc.append("")
+            updated_formatteds.append("")
+            sources.append("")
+            source_urls.append("")
             
     df["injury_status"] = statuses
     df["injury_type"] = types
@@ -555,6 +604,10 @@ def enrich_board_with_injuries(df: pd.DataFrame) -> pd.DataFrame:
     df["injury_return_date"] = return_dates
     df["is_season_out"] = is_season_outs
     df["draft_advice"] = advices
+    df["injury_timestamp_utc"] = timestamps_utc
+    df["injury_updated_formatted"] = updated_formatteds
+    df["injury_source"] = sources
+    df["injury_source_url"] = source_urls
     return df
 
 

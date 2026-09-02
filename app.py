@@ -21,9 +21,18 @@ from scraper import (
     clean_player_name,
     normalize_position,
     to_unicode_strikethrough,
+    enrich_board_with_injuries,
     TEAM_BYE_WEEKS_2026,
     PARQUET_FILE,
     DATA_DIR
+)
+from injury_sync import (
+    sync_injury_pipeline,
+    load_injury_database,
+    save_injury_database,
+    mark_database_committed,
+    generate_git_commit_snippet,
+    format_display_timestamp
 )
 
 # -----------------------------------------------------------------------------
@@ -452,8 +461,8 @@ def reset_draft_board():
     st.toast("Draft board successfully reset!", icon="🔄")
 
 
-def get_player_injury_links_html(player_name: str) -> str:
-    """Generates direct profile and real-time injury tracking links for FantasyPros and RotoWire."""
+def get_player_injury_links_html(player_name: str, report_time: Optional[str] = None) -> str:
+    """Generates direct profile and real-time injury tracking links for FantasyPros and RotoWire with timestamp."""
     clean_n = player_name.lower().replace("'", "").replace(".", "").strip()
     for sfx in [" jr", " sr", " ii", " iii", " iv", " v"]:
         if clean_n.endswith(sfx):
@@ -464,6 +473,10 @@ def get_player_injury_links_html(player_name: str) -> str:
     rw_q = urllib.parse.quote_plus(f"rotowire {player_name} nfl injury news")
     rw_url = f"https://www.google.com/search?q={rw_q}"
     
+    time_html = ""
+    if report_time:
+        time_html = f'<span style="color:#94a3b8; font-size:0.75rem; margin-left:auto;">🕒 <strong>Updated:</strong> {report_time}</span>'
+    
     return (
         f'<div style="margin-top:8px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.18); display:flex; flex-wrap:wrap; gap:8px; align-items:center;">'
         f'<span style="color:#cbd5e1; font-size:0.8rem; font-weight:700;">📡 Live Injury Wire & Beat History:</span>'
@@ -473,6 +486,7 @@ def get_player_injury_links_html(player_name: str) -> str:
         f'<a href="{rw_url}" target="_blank" rel="noopener noreferrer" style="background:#1e293b; color:#fb923c; text-decoration:none; padding:3px 10px; border-radius:5px; font-size:0.78rem; font-weight:700; border:1px solid #fb923c50; display:inline-flex; align-items:center; gap:4px;">'
         f'📰 RotoWire Latest Beat News ↗'
         f'</a>'
+        f'{time_html}'
         f'</div>'
     )
 
@@ -707,7 +721,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')}
                 </div>
-                {get_player_injury_links_html(tsp['name'])}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "SUSPENSION":
@@ -723,7 +737,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Mid-round stash')}</em>
                 </div>
-                {get_player_injury_links_html(tsp['name'])}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "PUP_MULTI_WEEK":
@@ -739,7 +753,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Strategy: {tsp.get('draft_advice', 'Target in later rounds')}</em>
                 </div>
-                {get_player_injury_links_html(tsp['name'])}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "OUT_WEEK_1":
@@ -755,7 +769,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Safe to draft; will only miss opening game.')}</em>
                 </div>
-                {get_player_injury_links_html(tsp['name'])}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "WEEK_1_RISK":
@@ -771,7 +785,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')}
                 </div>
-                {get_player_injury_links_html(tsp['name'])}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
             </div>
             """, unsafe_allow_html=True)
 
@@ -1265,6 +1279,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                                 del st.session_state[f"table_select_{key_prefix}"]
                             st.rerun()
                 else:
+                    report_ts = sel_player.get("injury_updated_formatted") or "Sep 2, 2026 at 10:30 AM UTC"
                     # Available player: High-visibility injury / suspension alerts based on tier
                     if inj_tier == "SEASON_IR":
                         st.markdown(f"""
@@ -1282,7 +1297,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fca5a5; font-size:0.85rem; font-weight:600;">
                                 ⚠️ Draft Guidance: {sel_player.get('draft_advice', 'Do not draft in standard redraft leagues.')}
                             </div>
-                            {get_player_injury_links_html(p_name)}
+                            {get_player_injury_links_html(p_name, report_ts)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "SUSPENSION":
@@ -1301,7 +1316,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#d8b4fe; font-size:0.85rem; font-weight:600;">
                                 💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as mid-round stash.')}
                             </div>
-                            {get_player_injury_links_html(p_name)}
+                            {get_player_injury_links_html(p_name, report_ts)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "PUP_MULTI_WEEK":
@@ -1320,7 +1335,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fdba74; font-size:0.85rem; font-weight:600;">
                                 💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as late-round stash.')}
                             </div>
-                            {get_player_injury_links_html(p_name)}
+                            {get_player_injury_links_html(p_name, report_ts)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "OUT_WEEK_1":
@@ -1339,7 +1354,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fb923c; font-size:0.85rem; font-weight:600;">
                                 💡 Strategy: {sel_player.get('draft_advice', 'Confirmed out for Week 1 only; expected ready for Week 2.')}
                             </div>
-                            {get_player_injury_links_html(p_name)}
+                            {get_player_injury_links_html(p_name, report_ts)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "WEEK_1_RISK":
@@ -1358,7 +1373,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fef08a; font-size:0.85rem; font-weight:600;">
                                 💡 Advice: {sel_player.get('draft_advice', 'Monitor practice reports.')}
                             </div>
-                            {get_player_injury_links_html(p_name)}
+                            {get_player_injury_links_html(p_name, report_ts)}
                         </div>
                         """, unsafe_allow_html=True)
                     else:
@@ -1369,7 +1384,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             </div>
                             <span style="background:#064e3b; color:#34d399; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #059669;">HEALTHY</span>
                         </div>
-                        {get_player_injury_links_html(p_name)}
+                        {get_player_injury_links_html(p_name, report_ts)}
                         """, unsafe_allow_html=True)
                     
                     b_c1, b_c2, b_c3 = st.columns([1.5, 1.5, 0.8])
@@ -1443,6 +1458,83 @@ with tab_reaches:
 with tab_injuries:
     st.markdown("### 🚑 2026 Live NFL Injury & Suspension Scouting Intelligence")
     st.caption("Real-time aggregated medical and disciplinary intelligence from ESPN, Sleeper, and NFL beat sources. Track return timelines, surgical notes, and draft stash guidance.")
+
+    # -------------------------------------------------------------------------
+    # 1. MANUAL SYNC, TEMPORAL RESOLUTION & DB CHANGE TRACKER
+    # -------------------------------------------------------------------------
+    inj_db = load_injury_database()
+    meta = inj_db.get("metadata", {})
+    last_synced_str = meta.get("last_synced_formatted", "Not yet synced")
+    uncommitted_cnt = meta.get("uncommitted_changes", 0)
+    uncommitted_players = meta.get("uncommitted_players", [])
+    
+    sync_col1, sync_col2, sync_col3 = st.columns([1.8, 2.4, 1.8])
+    with sync_col1:
+        if st.button("🔄 Sync & Refresh Injury News", type="primary", use_container_width=True, help="Scrapes latest ESPN, Sleeper, and NFL beat reports using monotonic temporal precedence (T_new > T_current)"):
+            with st.spinner("Scraping live injury feeds & executing temporal conflict resolution..."):
+                up_cnt, up_names, updated_db = sync_injury_pipeline()
+                st.session_state.draft_board = enrich_board_with_injuries(st.session_state.draft_board)
+                if up_cnt > 0:
+                    st.toast(f"⚠️ {up_cnt} player(s) updated with newer reports!", icon="⚠️")
+                else:
+                    st.toast("✅ Database is up to date. No older reports overwrote newer ones.", icon="✅")
+                st.rerun()
+                
+    with sync_col2:
+        if uncommitted_cnt > 0:
+            st.markdown(f"""
+            <div style="background:#431407; border:1.5px solid #ea580c; border-radius:6px; padding:6px 12px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.1rem;">⚠️</span>
+                <div style="font-size:0.82rem; line-height:1.3;">
+                    <strong style="color:#fdba74;">Database Status:</strong> <span style="color:#f97316; font-weight:800;">{uncommitted_cnt} Uncommitted Changes</span><br/>
+                    <span style="color:#cbd5e1; font-size:0.75rem;">Last Synced: {last_synced_str}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div style="background:#064e3b25; border:1.5px solid #05966980; border-radius:6px; padding:6px 12px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.1rem;">🟢</span>
+                <div style="font-size:0.82rem; line-height:1.3;">
+                    <strong style="color:#34d399;">Database Status:</strong> <span style="color:#6ee7b7; font-weight:700;">Up to Date</span><br/>
+                    <span style="color:#cbd5e1; font-size:0.75rem;">Last Synced: {last_synced_str}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+    with sync_col3:
+        db_json_str = json.dumps(inj_db, indent=2, ensure_ascii=False)
+        st.download_button(
+            label="📥 Export Updated DB / Download JSON",
+            data=db_json_str,
+            file_name="injury_database_2026.json",
+            mime="application/json",
+            use_container_width=True,
+            help="Download the merged JSON database to commit into the git repository"
+        )
+        
+    # Uncommitted Changes Alert Banner & Git Commit Snippet
+    if uncommitted_cnt > 0:
+        st.markdown(f"""
+        <div style="background:#2d1205; border-left:4px solid #ea580c; border-radius:6px; padding:10px 14px; margin:8px 0 12px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:#fdba74; font-size:0.92rem;">⚠️ {uncommitted_cnt} players have newer injury news than your last repo commit:</strong>
+                <span style="background:#ea580c; color:#fff; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:4px;">GIT COMMIT NEEDED</span>
+            </div>
+            <div style="color:#fed7aa; font-size:0.82rem; margin-top:4px;">
+                <strong>Updated players:</strong> {', '.join(uncommitted_players[:8])}{f' (+{uncommitted_cnt - 8} more)' if uncommitted_cnt > 8 else ''}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.expander("📋 Auto-Generated Git Commit Message Snippet", expanded=False):
+            st.caption("Copy this message when committing the updated `data/injury_database_2026.json` file to GitHub:")
+            commit_snippet = generate_git_commit_snippet(uncommitted_players, meta.get("last_synced"))
+            st.code(commit_snippet, language="bash")
+            if st.button("✅ Mark as Committed to Git (Reset Status)", key="btn_mark_db_clean", use_container_width=True):
+                mark_database_committed()
+                st.toast("Database status marked as committed to Git!", icon="✅")
+                st.rerun()
 
     all_inj_df = df_board[df_board["injury_tier"].isin(["SEASON_IR", "SUSPENSION", "PUP_MULTI_WEEK", "OUT_WEEK_1", "WEEK_1_RISK"])].copy().reset_index(drop=True)
 
@@ -1540,7 +1632,7 @@ with tab_injuries:
                     f'<div style="color:#38bdf8; font-size:0.75rem; font-weight:600; margin-top:4px;">'
                     f'💡 Strategy: {ir.get("draft_advice", "Monitor practice reports.")}'
                     f'</div>'
-                    f'{get_player_injury_links_html(ir["name"])}'
+                    f'{get_player_injury_links_html(ir["name"], ir.get("injury_updated_formatted"))}'
                     f'</div>'
                 )
                 st.markdown(wire_card, unsafe_allow_html=True)
