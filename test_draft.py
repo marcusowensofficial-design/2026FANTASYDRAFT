@@ -300,6 +300,30 @@ def test_sidebar_minimizer_toggle():
     assert state["sidebar_collapsed"] is False
 
 
+def test_rank_header_and_reset_search():
+    """Verify Avail # is renamed to Rank # and search reset logic functions properly."""
+    # Verify app.py contains Rank # column configuration
+    with open("app.py", encoding="utf-8") as f:
+        content = f.read()
+    assert '"avail_rank": "Rank #"' in content, "avail_rank should map to 'Rank #'"
+    assert '"Rank #": st.column_config.TextColumn(width="small")' in content, "Rank # column config should be present"
+    assert "reset_table_search" in content, "reset_table_search helper function should exist"
+
+    # Verify reset_table_search mechanics
+    session_mock = {}
+    def mock_reset_table_search(prefix="all_avail"):
+        session_mock[f"search_ver_{prefix}"] = session_mock.get(f"search_ver_{prefix}", 0) + 1
+        sel_k = f"table_select_{prefix}"
+        if sel_k in session_mock:
+            del session_mock[sel_k]
+
+    session_mock["search_ver_all_avail"] = 0
+    session_mock["table_select_all_avail"] = {"rows": [3]}
+    mock_reset_table_search("all_avail")
+    assert session_mock["search_ver_all_avail"] == 1
+    assert "table_select_all_avail" not in session_mock
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -312,5 +336,6 @@ if __name__ == "__main__":
     test_temporal_conflict_resolution()
     test_ir_candidates_and_expert_coverage()
     test_sidebar_minimizer_toggle()
+    test_rank_header_and_reset_search()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 

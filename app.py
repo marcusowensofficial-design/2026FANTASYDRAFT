@@ -1068,6 +1068,14 @@ tab_all, tab_drafted, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_st
 ])
 
 
+def reset_table_search(key_prefix: str = "all_avail"):
+    """Safely increments the search version counter to clear text inputs and deselect rows without StreamlitAPIException."""
+    st.session_state[f"search_ver_{key_prefix}"] = st.session_state.get(f"search_ver_{key_prefix}", 0) + 1
+    sel_k = f"table_select_{key_prefix}"
+    if sel_k in st.session_state:
+        del st.session_state[sel_k]
+
+
 def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_granular: bool = True):
     """
     Renders an ultra-clean, high-density, interactive draft board with full multi-expert rankings,
@@ -1080,14 +1088,32 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
 
     df_display = df_subset.copy().reset_index(drop=True)
 
+    search_ver = st.session_state.get(f"search_ver_{key_prefix}", 0)
+    search_key = f"search_input_{key_prefix}_{search_ver}"
+
     # In-table search & filtering bar
     f_c1, f_c2, f_c3, f_c4, f_c5 = st.columns([2.0, 1.1, 1.6, 1.4, 1.5])
     with f_c1:
-        tbl_search = st.text_input(
-            f"Filter table ({len(df_display)} players)",
-            key=f"search_{key_prefix}",
-            placeholder="Type player, team, or position..."
-        )
+        curr_q = st.session_state.get(search_key, "")
+        if curr_q:
+            s_c1, s_c2 = st.columns([3.0, 1.1])
+            with s_c1:
+                tbl_search = st.text_input(
+                    f"Filter table ({len(df_display)} players)",
+                    key=search_key,
+                    placeholder="Type player, team, or position..."
+                )
+            with s_c2:
+                st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+                if st.button("✖ Clear", key=f"btn_clr_filter_{key_prefix}", use_container_width=True, help="Clear search and return to all available"):
+                    reset_table_search(key_prefix)
+                    st.rerun()
+        else:
+            tbl_search = st.text_input(
+                f"Filter table ({len(df_display)} players)",
+                key=search_key,
+                placeholder="Type player, team, or position..."
+            )
     with f_c2:
         tier_filter = st.multiselect(
             "Filter Tiers",
@@ -1161,6 +1187,16 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
 
     if tier_filter:
         df_display = df_display[df_display["tier"].isin(tier_filter)].reset_index(drop=True)
+
+    # Dedicated active search alert bar with 1-click Return to Available
+    if tbl_search:
+        c_act_info, c_act_btn = st.columns([7.5, 2.5])
+        with c_act_info:
+            st.info(f"🔍 Currently filtered by **'{tbl_search}'** ({len(df_display)} matching player{'s' if len(df_display) != 1 else ''} found)")
+        with c_act_btn:
+            if st.button("🔙 Return to All Available", key=f"btn_ret_avail_{key_prefix}", type="primary", use_container_width=True, help="Clear search and return to full draft board"):
+                reset_table_search(key_prefix)
+                st.rerun()
 
     if df_display.empty:
         st.info("No players matching the active filters.")
@@ -1238,7 +1274,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                 display_cols.append(col)
 
     col_rename = {
-        "avail_rank": "Avail #",
+        "avail_rank": "Rank #",
         "player_display_name": "Player Name",
         "pos": "Pos",
         "team": "Team",
@@ -1300,7 +1336,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
         on_select="rerun",
         key=f"table_select_{key_prefix}",
         column_config={
-            "Avail #": st.column_config.TextColumn(width="small"),
+            "Rank #": st.column_config.TextColumn(width="small"),
             "Player Name": st.column_config.TextColumn(width="medium"),
             "Pos": st.column_config.TextColumn(width="small"),
             "Team": st.column_config.TextColumn(width="small"),
@@ -1364,13 +1400,15 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    u_c1, u_c2, u_c3 = st.columns([1.5, 2, 0.8])
+                    u_c1, u_c2, u_c3 = st.columns([1.5, 1.5, 0.8])
                     with u_c1:
                         if st.button(f"🔄 Undo Pick / Restore {p_name}", key=f"btn_undo_sel_{p_id}_{key_prefix}", type="primary", use_container_width=True):
                             restore_player(p_id)
                             st.rerun()
                     with u_c2:
-                        st.caption(f"Click above to undo this pick and return {p_name} back onto the active draft board as available.")
+                        if st.button("🔙 Return to Available", key=f"btn_return_undo_{p_id}_{key_prefix}", use_container_width=True, help="Clear search bar and return to all available players"):
+                            reset_table_search(key_prefix)
+                            st.rerun()
                     with u_c3:
                         if st.button("✖ Close", key=f"btn_close_undo_{p_id}_{key_prefix}", use_container_width=True, help="Dismiss card"):
                             if f"table_select_{key_prefix}" in st.session_state:
@@ -1485,7 +1523,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                         {get_player_injury_links_html(p_name, report_ts)}
                         """, unsafe_allow_html=True)
                     
-                    b_c1, b_c2, b_c3 = st.columns([1.5, 1.5, 0.8])
+                    b_c1, b_c2, b_c3, b_c4 = st.columns([1.5, 1.5, 1.4, 0.7])
                     with b_c1:
                         btn_label = f"🟩 Draft {p_name} (My Roster)"
                         if inj_tier == "SEASON_IR":
@@ -1498,6 +1536,10 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             execute_pick(p_id, drafted_by_user=False)
                             st.rerun()
                     with b_c3:
+                        if st.button("🔙 Return to Available", key=f"btn_return_sel_{p_id}_{key_prefix}", use_container_width=True, help="Clear search bar and return to all available players"):
+                            reset_table_search(key_prefix)
+                            st.rerun()
+                    with b_c4:
                         if st.button("✖ Close", key=f"btn_close_sel_{p_id}_{key_prefix}", use_container_width=True, help="Dismiss card"):
                             if f"table_select_{key_prefix}" in st.session_state:
                                 del st.session_state[f"table_select_{key_prefix}"]
