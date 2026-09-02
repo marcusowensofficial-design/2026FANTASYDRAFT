@@ -324,6 +324,64 @@ def test_rank_header_and_reset_search():
     assert "table_select_all_avail" not in session_mock
 
 
+def test_sleeper_temporal_precedence():
+    """Verify monotonic temporal precedence for sleeper reports (T_new > T_current)."""
+    from sleeper_sync import resolve_sleeper_temporal_precedence
+
+    current_rec = {
+        "name": "Brian Thomas Jr.",
+        "badge": "🚀 ROOKIE BREAKOUT",
+        "preseason_grade": "A",
+        "timestamp_utc": "2026-08-25T12:00:00Z"
+    }
+
+    # Stale report from earlier date
+    older_rec = {
+        "name": "Brian Thomas Jr.",
+        "badge": "OLD_BADGE",
+        "timestamp_utc": "2026-08-20T10:00:00Z"
+    }
+    merged, changed, reason = resolve_sleeper_temporal_precedence(current_rec, older_rec)
+    assert not changed, "Older report must not overwrite newer report"
+    assert merged["badge"] == "🚀 ROOKIE BREAKOUT"
+
+    # Newer report from later date
+    newer_rec = {
+        "name": "Brian Thomas Jr.",
+        "badge": "🚀 ROOKIE WR1 BREAKOUT",
+        "preseason_grade": "A+ (Dominant)",
+        "timestamp_utc": "2026-09-02T11:45:00Z"
+    }
+    merged2, changed2, reason2 = resolve_sleeper_temporal_precedence(current_rec, newer_rec)
+    assert changed2, "Newer report must overwrite older report"
+    assert merged2["badge"] == "🚀 ROOKIE WR1 BREAKOUT"
+    assert merged2["preseason_grade"] == "A+ (Dominant)"
+    assert merged2["timestamp_utc"] == "2026-09-02T11:45:00Z"
+
+
+def test_sleeper_database_and_enrichment():
+    """Verify all curated sleeper rookies are present on draft board with temporal stamps."""
+    import pandas as pd
+    from sleeper_sync import load_sleeper_database, CURATED_2026_SLEEPER_LEDGER
+
+    db = load_sleeper_database()
+    assert len(db["players"]) >= 26, f"Expected at least 26 players, got {len(db['players'])}"
+
+    df = pd.read_parquet("data/draft_board_2026.parquet")
+    assert "is_rookie" in df.columns
+    assert "sleeper_badge" in df.columns
+    assert "preseason_grade" in df.columns
+
+    # Verify key standout rookies exist and have high value differences
+    btj = df[df["name"] == "Brian Thomas Jr."].iloc[0]
+    assert btj["is_rookie"] is True or btj["is_rookie"] == 1
+    assert btj["value_diff"] >= 35, f"Brian Thomas Jr. value diff should be high, got {btj['value_diff']}"
+
+    cam = df[df["name"] == "Cam Ward"].iloc[0]
+    assert cam["is_rookie"] is True or cam["is_rookie"] == 1
+    assert cam["value_diff"] >= 100, f"Cam Ward value diff should be >= 100, got {cam['value_diff']}"
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -337,5 +395,7 @@ if __name__ == "__main__":
     test_ir_candidates_and_expert_coverage()
     test_sidebar_minimizer_toggle()
     test_rank_header_and_reset_search()
+    test_sleeper_temporal_precedence()
+    test_sleeper_database_and_enrichment()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 

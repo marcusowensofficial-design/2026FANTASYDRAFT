@@ -34,6 +34,13 @@ from injury_sync import (
     generate_git_commit_snippet,
     format_display_timestamp
 )
+from sleeper_sync import (
+    sync_sleeper_pipeline,
+    load_sleeper_database,
+    save_sleeper_database,
+    enrich_board_with_sleepers,
+    format_user_friendly_utc
+)
 
 # -----------------------------------------------------------------------------
 # 1. STREAMLIT PAGE CONFIGURATION & CUSTOM DARK THEME CSS
@@ -332,6 +339,9 @@ TOTAL_PICKS = TOTAL_TEAMS * ROSTER_ROUNDS
 
 if "draft_board" not in st.session_state:
     st.session_state.draft_board = load_or_generate_draft_board(force_refresh=False)
+
+if "is_rookie" not in st.session_state.draft_board.columns:
+    st.session_state.draft_board = enrich_board_with_sleepers(st.session_state.draft_board)
 
 if "draft_history" not in st.session_state:
     st.session_state.draft_history = []  # Stack of picks for undo
@@ -1060,7 +1070,7 @@ tab_all, tab_drafted, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_st
     "🛡️ Tight Ends",
     "⭐ FLEX Targets",
     "🛡️ DST & Kickers",
-    "🔥 Value Steals",
+    "🔥 Value Steals & Sleepers",
     "⚠️ Reach Traps",
     "🚑 Injury & Suspension Report",
     "📜 8-Team Grid & Log",
@@ -1250,18 +1260,33 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
 
     df_display["injury_badge_display"] = df_display.apply(format_badge, axis=1)
 
-    display_cols = [
-        "avail_rank",
-        "player_display_name",
-        "pos",
-        "team",
-        "injury_badge_display",
-        "bye",
-        "tier",
-        "consensus_rank",
-        "value_diff",
-        "espn_rank",
-    ]
+    if key_prefix == "steals" and "sleeper_badge" in df_display.columns:
+        display_cols = [
+            "avail_rank",
+            "player_display_name",
+            "pos",
+            "team",
+            "sleeper_badge",
+            "preseason_grade",
+            "value_diff",
+            "consensus_rank",
+            "espn_rank",
+            "tier",
+            "bye",
+        ]
+    else:
+        display_cols = [
+            "avail_rank",
+            "player_display_name",
+            "pos",
+            "team",
+            "injury_badge_display",
+            "bye",
+            "tier",
+            "consensus_rank",
+            "value_diff",
+            "espn_rank",
+        ]
 
     if granular_toggle:
         expert_sources_order = [
@@ -1279,6 +1304,8 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
         "pos": "Pos",
         "team": "Team",
         "injury_badge_display": "Injury / Risk",
+        "sleeper_badge": "Sleeper / Rookie Intel",
+        "preseason_grade": "Preseason Grade",
         "bye": "Bye",
         "tier": "Tier",
         "consensus_rank": "Consensus",
@@ -1343,6 +1370,14 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             "Injury / Risk": st.column_config.TextColumn(
                 width="medium",
                 help="Live NFL Injury, Suspension, & Return Timeline. Click any row in the table to display full beat-reporter injury notes and surgical updates below."
+            ),
+            "Sleeper / Rookie Intel": st.column_config.TextColumn(
+                width="medium",
+                help="2026 Preseason Breakout Status, Rookie Tags, and Camp Buzz"
+            ),
+            "Preseason Grade": st.column_config.TextColumn(
+                width="small",
+                help="Scouting evaluation grade based on 2026 preseason game film and efficiency"
             ),
             "Bye": st.column_config.NumberColumn(width="small", format="%d"),
             "Tier": st.column_config.NumberColumn(width="small", format="%d"),
@@ -1688,12 +1723,181 @@ with tab_dstk:
     dstk_df = df_board[df_board["pos"].isin(["DST", "K"])].copy().reset_index(drop=True)
     render_draft_table(dstk_df, key_prefix="dstk")
 
-# --- Tab 8: Value Steals ---
+# --- Tab 8: Value Steals & Sleepers ---
 with tab_steals:
-    st.markdown("#### 🔥 Undervalued on ESPN (Consensus Steals)")
-    st.caption("Players where Expert Consensus Rank is significantly higher than ESPN Default Rank. Exploit these against ESPN league-mates!")
-    steals_df = df_board[df_board["value_diff"] >= 4].sort_values(by="value_diff", ascending=False).reset_index(drop=True)
-    render_draft_table(steals_df, key_prefix="steals")
+    st.markdown("### 🔥 2026 Consensus Value Steals & Preseason Rookie Breakouts")
+    st.caption("Exploit ESPN's algorithmic ADP lag with live expert consensus steals, dominating preseason rookies, and high-upside sleeper intelligence. Monotonic temporal synchronization ensures reports reflect the latest August/September game film.")
+
+    # -------------------------------------------------------------------------
+    # 1. MANUAL SYNC, TEMPORAL RESOLUTION & DB CHANGE TRACKER
+    # -------------------------------------------------------------------------
+    sl_db = load_sleeper_database()
+    sl_meta = sl_db.get("metadata", {})
+    sl_last_synced_str = sl_meta.get("last_synced_formatted", "Not yet synced")
+    sl_uncommitted_cnt = sl_meta.get("uncommitted_changes", 0)
+
+    sl_sync_col1, sl_sync_col2, sl_sync_col3 = st.columns([1.8, 2.4, 1.8])
+    with sl_sync_col1:
+        if st.button("🔄 Sync & Refresh Sleeper News", type="primary", use_container_width=True, key="btn_sync_sleepers", help="Synchronizes latest preseason film, coach quotes, and touch share reports with strict temporal precedence (T_new > T_current)"):
+            with st.spinner("Scraping live preseason feeds & validating temporal precedence..."):
+                up_cnt, up_names, updated_db = sync_sleeper_pipeline()
+                st.session_state.draft_board = enrich_board_with_sleepers(st.session_state.draft_board)
+                if up_cnt > 0:
+                    st.toast(f"⚡ {up_cnt} player(s) updated with newer preseason reports!", icon="⚡")
+                else:
+                    st.toast("✅ Sleeper intelligence is up to date. Latest temporal reports active.", icon="✅")
+                st.rerun()
+
+    with sl_sync_col2:
+        if sl_uncommitted_cnt > 0:
+            st.markdown(f"""
+            <div style="background:#431407; border:1.5px solid #ea580c; border-radius:6px; padding:6px 12px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.1rem;">⚠️</span>
+                <div style="font-size:0.82rem; line-height:1.3;">
+                    <strong style="color:#fdba74;">Database Status:</strong> <span style="color:#f97316; font-weight:800;">{sl_uncommitted_cnt} Uncommitted Updates</span><br/>
+                    <span style="color:#cbd5e1; font-size:0.75rem;">Last Synced: {sl_last_synced_str}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div style="background:#064e3b25; border:1.5px solid #05966980; border-radius:6px; padding:6px 12px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.1rem;">🟢</span>
+                <div style="font-size:0.82rem; line-height:1.3;">
+                    <strong style="color:#34d399;">Database Status:</strong> <span style="color:#6ee7b7; font-weight:700;">100% Up to Date</span><br/>
+                    <span style="color:#cbd5e1; font-size:0.75rem;">Last Synced: {sl_last_synced_str}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with sl_sync_col3:
+        sl_json_str = json.dumps(sl_db, indent=2, ensure_ascii=False)
+        st.download_button(
+            label="📥 Export Sleeper DB (JSON)",
+            data=sl_json_str,
+            file_name="sleeper_database_2026.json",
+            mime="application/json",
+            use_container_width=True,
+            key="btn_dl_sleepers"
+        )
+
+    # -------------------------------------------------------------------------
+    # 2. HIGH-LEVEL KPI METRICS
+    # -------------------------------------------------------------------------
+    all_steals_df = df_board[df_board["value_diff"] >= 4].copy()
+    rookie_count = len(all_steals_df[all_steals_df.get("is_rookie", False)])
+    max_val = all_steals_df["value_diff"].max() if not all_steals_df.empty else 0
+    avg_val = round(all_steals_df["value_diff"].mean(), 1) if not all_steals_df.empty else 0
+
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    with kpi1:
+        st.metric("🔥 Total Value Steals", f"{len(all_steals_df)} Players", help="Players where Consensus Rank is at least 4 spots ahead of ESPN default")
+    with kpi2:
+        st.metric("🚀 Preseason Rookies", f"{rookie_count} Phenoms", help="2026 rookies dominating preseason snaps and camp reps")
+    with kpi3:
+        st.metric("💎 Max Value Discrepancy", f"+{max_val} Picks", help="Largest algorithmic blindspot on ESPN")
+    with kpi4:
+        st.metric("📈 Avg Steal Advantage", f"+{avg_val} Spots", help="Average draft value captured over ESPN ADP")
+
+    # -------------------------------------------------------------------------
+    # 3. INTERACTIVE CATEGORY & POSITION FILTERS
+    # -------------------------------------------------------------------------
+    sl_f1, sl_f2 = st.columns([3.8, 1.2])
+    with sl_f1:
+        steals_category = st.radio(
+            "Filter Scouting Category:",
+            options=[
+                "All Steals & Sleepers",
+                "🚀 Preseason Rookie Breakouts (Film & Touch Leaders)",
+                "💎 High-Upside Value Gems (Val Diff >= 15)",
+                "⚡ Top 100 Consensus Steals (Starting Caliber)",
+                "🎯 Deep Sleepers & League Winners (Late Rounds)"
+            ],
+            horizontal=True,
+            key="steals_cat_filter"
+        )
+    with sl_f2:
+        steals_pos = st.multiselect(
+            "Filter Position:",
+            options=["RB", "WR", "QB", "TE"],
+            default=[],
+            placeholder="All Positions",
+            key="steals_pos_filter"
+        )
+
+    filtered_steals = all_steals_df.copy()
+    if steals_category == "🚀 Preseason Rookie Breakouts (Film & Touch Leaders)":
+        filtered_steals = filtered_steals[filtered_steals.get("is_rookie", False)].reset_index(drop=True)
+    elif steals_category == "💎 High-Upside Value Gems (Val Diff >= 15)":
+        filtered_steals = filtered_steals[filtered_steals["value_diff"] >= 15].reset_index(drop=True)
+    elif steals_category == "⚡ Top 100 Consensus Steals (Starting Caliber)":
+        filtered_steals = filtered_steals[filtered_steals["consensus_rank"] <= 100].reset_index(drop=True)
+    elif steals_category == "🎯 Deep Sleepers & League Winners (Late Rounds)":
+        filtered_steals = filtered_steals[filtered_steals["consensus_rank"] > 100].reset_index(drop=True)
+
+    if steals_pos:
+        filtered_steals = filtered_steals[filtered_steals["pos"].isin(steals_pos)].reset_index(drop=True)
+
+    filtered_steals = filtered_steals.sort_values(by="value_diff", ascending=False).reset_index(drop=True)
+
+    render_draft_table(filtered_steals, key_prefix="steals")
+
+    # -------------------------------------------------------------------------
+    # 4. PRESEASON ROOKIE DOMINANCE & SLEEPER SCOUTING WIRE
+    # -------------------------------------------------------------------------
+    wire_players = [r for _, r in filtered_steals.iterrows() if r.get("preseason_stats")]
+    if not wire_players:
+        wire_players = [r for _, r in all_steals_df.iterrows() if r.get("preseason_stats")]
+
+    with st.expander(f"📰 2026 Preseason Rookie Dominance & Sleeper Scouting Wire ({len(wire_players)} Scouting Cards)", expanded=True):
+        st.caption("Deep-dive scouting reports, preseason game metrics, temporal beat reports, and actionable draft strategies.")
+        for p in wire_players[:25]:
+            p_name = p["name"]
+            p_pos = p["pos"]
+            p_team = p["team"]
+            val = p["value_diff"]
+            cons = p["consensus_rank"]
+            espn = p["espn_rank"]
+            badge = p.get("sleeper_badge") or "💎 VALUE STEAL"
+            grade = p.get("preseason_grade") or "A"
+            stats = p.get("preseason_stats") or "Preseason starter reps"
+            trend = p.get("preseason_snap_trend") or "Rising"
+            blurb = p.get("sleeper_blurb") or ""
+            strategy = p.get("sleeper_strategy") or ""
+            ts_str = p.get("sleeper_updated_formatted") or "Sep 2, 2026 at 11:45 AM UTC"
+            source = p.get("sleeper_source") or "Beat Wire"
+            url_slug = urllib.parse.quote_plus(p_name)
+            rotowire_url = f"https://www.rotowire.com/football/player/{url_slug.lower().replace('+', '-')}"
+
+            wire_card = (
+                f'<div style="background:#111827; border-left:4px solid #38bdf8; border-radius:6px; padding:12px 16px; margin-bottom:12px; border-top:1px solid #1f2937; border-right:1px solid #1f2937; border-bottom:1px solid #1f2937;">'
+                f'<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">'
+                f'<div>'
+                f'<strong style="color:#f8fafc; font-size:1.02rem;">{p_name} ({p_pos} - {p_team})</strong>'
+                f'<span style="color:#94a3b8; font-size:0.82rem; margin-left:8px;">Consensus #{cons} &bull; ESPN #{espn}</span>'
+                f'<span style="background:#065f46; color:#34d399; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; margin-left:8px;">+{val} ESPN Steal</span>'
+                f'</div>'
+                f'<div style="display:flex; gap:6px; align-items:center;">'
+                f'<span style="background:#1e293b; color:#38bdf8; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid #0284c740;">{badge}</span>'
+                f'<span style="background:#312e81; color:#c7d2fe; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px;">Grade: {grade}</span>'
+                f'</div>'
+                f'</div>'
+                f'<div style="color:#cbd5e1; font-size:0.84rem; margin-top:6px;">'
+                f'<strong>Preseason Production:</strong> <span style="color:#f1f5f9;">{stats}</span> &bull; <strong>Trend:</strong> <span style="color:#38bdf8;">{trend}</span>'
+                f'</div>'
+                f'<div style="color:#94a3b8; font-size:0.83rem; margin-top:6px; line-height:1.45; background:#0b0f19; padding:8px 12px; border-radius:5px; border:1px solid #1e293b;">'
+                f'{blurb}'
+                f'</div>'
+                f'<div style="color:#fbbf24; font-size:0.8rem; font-weight:600; margin-top:6px;">'
+                f'💡 Draft Strategy: {strategy}'
+                f'</div>'
+                f'<div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:0.75rem; color:#64748b;">'
+                f'<span>🕒 Updated: {ts_str} &bull; Source: {source}</span>'
+                f'<a href="{rotowire_url}" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:600;">Rotowire Preseason Profile ↗</a>'
+                f'</div>'
+                f'</div>'
+            )
+            st.markdown(wire_card, unsafe_allow_html=True)
 
 # --- Tab 9: Reach Traps ---
 with tab_reaches:

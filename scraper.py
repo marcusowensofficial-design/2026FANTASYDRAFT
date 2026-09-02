@@ -1093,6 +1093,13 @@ def merge_and_finalize_board(
             base_df[col] = ""
         base_df["is_season_out"] = False
 
+    # Merge comprehensive 2026 preseason rookie dominance & sleeper intelligence
+    try:
+        from sleeper_sync import enrich_board_with_sleepers
+        base_df = enrich_board_with_sleepers(base_df)
+    except Exception as e:
+        logger.warning(f"Failed to enrich board with sleepers: {e}")
+
     # Search slug
     base_df["search_slug"] = base_df.apply(
         lambda r: f"{clean_player_name(r['name']).lower()} {r['team'].lower()} {r['pos'].lower()} bye{r['bye']} {r.get('injury_status', '').lower()} {r.get('injury_badge', '').lower()}",
