@@ -381,11 +381,11 @@ def test_sleeper_database_and_enrichment():
     # Verify key standout rookies exist and have high value differences
     btj = df[df["name"] == "Brian Thomas Jr."].iloc[0]
     assert btj["is_rookie"] is True or btj["is_rookie"] == 1
-    assert btj["value_diff"] >= 35, f"Brian Thomas Jr. value diff should be high, got {btj['value_diff']}"
+    assert btj["value_diff"] >= 15, f"Brian Thomas Jr. value diff should be >= 15, got {btj['value_diff']}"
 
     cam = df[df["name"] == "Cam Ward"].iloc[0]
     assert cam["is_rookie"] is True or cam["is_rookie"] == 1
-    assert cam["value_diff"] >= 100, f"Cam Ward value diff should be >= 100, got {cam['value_diff']}"
+    assert cam["value_diff"] >= 50, f"Cam Ward value diff should be >= 50, got {cam['value_diff']}"
 
 
 def test_injury_trap_guarantee():
@@ -409,6 +409,30 @@ def test_injury_trap_guarantee():
         assert r["value_diff"] == -999, f"{r['name']} must have value_diff == -999"
 
 
+def test_espn_official_top300_guarantee():
+    """GUARANTEE: ESPN ranks strictly follow official Top 300 PDF and never show thousands."""
+    import pandas as pd
+    from scraper import parse_espn_pdf_top300
+
+    # 1. Verify PDF parse accuracy
+    pdf_df = parse_espn_pdf_top300()
+    assert pdf_df is not None
+    assert len(pdf_df) == 300, f"ESPN official PDF should contain exactly 300 players, got {len(pdf_df)}"
+    assert pdf_df["espn_rank"].min() == 1
+    assert pdf_df["espn_rank"].max() == 300
+
+    # 2. Verify draft board parquet has NO thousands
+    df = pd.read_parquet("data/draft_board_2026.parquet")
+    ranked_espn = df[df["espn_rank"].notna()]
+    assert len(ranked_espn) >= 300
+    assert ranked_espn["espn_rank"].max() <= 300, f"Max ESPN rank must be <= 300, got {ranked_espn['espn_rank'].max()}"
+    assert (ranked_espn["espn_rank"] >= 1000).sum() == 0, "No player should have ESPN rank >= 1000"
+
+    # 3. Verify realistic value differences (no bogus thousands)
+    healthy_steals = df[~df["is_season_out"] & (df["injury_tier"] != "SEASON_IR")]
+    assert healthy_steals["value_diff"].max() <= 150, f"Max value diff must be <= 150, got {healthy_steals['value_diff'].max()}"
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -425,4 +449,5 @@ if __name__ == "__main__":
     test_sleeper_temporal_precedence()
     test_sleeper_database_and_enrichment()
     test_injury_trap_guarantee()
+    test_espn_official_top300_guarantee()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")

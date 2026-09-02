@@ -81,7 +81,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
             "Thomas has completely taken over Jacksonville's training camp and preseason games. "
             "Trevor Lawrence targeted him on 38% of his dropbacks in Preseason Week 2 and 3, resulting in two 40+ yard "
             "receptions and a highlight-reel endzone fade. Head coach Doug Pederson confirmed Thomas will play every snap "
-            "as the primary perimeter X receiver. Massive draft steal at ESPN #114 vs consensus #76 (+38 value)."
+            "as the primary perimeter X receiver. Draft steal at ESPN #96 vs consensus #76 (+20 value)."
         ),
         "draft_strategy": "Target in Rounds 6-7 as an explosive WR2 with Top-15 overall upside.",
         "source": "The Athletic & Jacksonville Beat Wire",
@@ -94,7 +94,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "TEN",
         "is_rookie": True,
         "sleeper_tier": "ROOKIE_PHENOM",
-        "badge": "⚡ ROOKIE QB SLEEPER (+166)",
+        "badge": "⚡ ROOKIE QB SLEEPER (+67)",
         "preseason_grade": "A+ (Surging)",
         "preseason_stats": "24/31 (77.4%), 286 yds, 3 Pass TD, 42 Rush yds, 0 INT",
         "snap_trend": "Earned Starting QB Reps 📈",
@@ -102,8 +102,8 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "Ward put on a masterclass in the preseason, showing elite pocket poise, sudden arm angles, and electric scrambling. "
             "Tennessee offensive staff opened up the full playbook for Ward in Preseason Week 3, scoring on 4 consecutive drives. "
-            "Brian Callahan raved about Ward's pre-snap diagnostic speed and arm velocity. ESPN currently ranks Ward at #315 "
-            "despite expert consensus placing him at #149 (+166 value diff)."
+            "Brian Callahan raved about Ward's pre-snap diagnostic speed and arm velocity. ESPN ranks Ward at #222 "
+            "despite expert consensus placing him at #155 (+67 value diff)."
         ),
         "draft_strategy": "Elite late-round QB2 or Superflex target with Top-12 weekly rushing upside.",
         "source": "NFL Network Preseason Film & Tennessean Beat",
@@ -116,7 +116,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "NYG",
         "is_rookie": True,
         "sleeper_tier": "PRESEASON_DOMINATOR",
-        "badge": "🚀 SURGING ROOKIE RB (+186)",
+        "badge": "🚀 SURGING ROOKIE RB (+81)",
         "preseason_grade": "A (Electric)",
         "preseason_stats": "14 carries, 88 yds (6.3 YPC), 6 rec, 54 yds, 1 TD",
         "snap_trend": "Took 100% of 2-Minute & 3rd Down Reps 📈",
@@ -125,7 +125,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
             "The converted college wide receiver was unstoppable in preseason space. Tracy displayed exceptional lateral agility, "
             "contact balance, and natural pass-catching chops out of the backfield. Brian Daboll utilized him heavily in "
             "two-minute drill and third-down packages with Daniel Jones. Tracy is pushing Devin Singletary for a 50/50 touch split. "
-            "ESPN ranks Tracy at #346 vs consensus #160 (+186 value diff)."
+            "ESPN ranks Tracy at #246 vs consensus #165 (+81 value diff)."
         ),
         "draft_strategy": "Smash late-round target in Rounds 11-13; legitimate PPR flex value with RB2 upside.",
         "source": "New York Daily News & Giants Camp Insider",
@@ -138,16 +138,15 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "NYJ",
         "is_rookie": True,
         "sleeper_tier": "PRESEASON_DOMINATOR",
-        "badge": "⚡ GOAL-LINE TANK (+69)",
-        "preseason_grade": "A (Bulldozer)",
-        "preseason_stats": "18 carries, 106 yds (5.9 YPC), 4 rec, 32 yds, 2 TDs",
-        "snap_trend": "Clear #2 RB & Goal-Line Hammer 📈",
-        "depth_status": "Short-Yardage Vulture & Elite Handcuff",
+        "badge": "⚡ GOAL-LINE TANK",
+        "preseason_grade": "A- (Punishing)",
+        "preseason_stats": "18 carries, 97 yds (5.4 YPC), 2 TDs, 3 broken tackles",
+        "snap_trend": "Clear #2 Behind Breece Hall 📈",
+        "depth_status": "Direct Handcuff & Goal-Line Hammer",
         "camp_buzz_blurb": (
-            "At 20 years old and 240 pounds, Allen bullied NFL secondaries all August. He consistently churned out yards after contact "
-            "and surprisingly caught passes smoothly on screens and swing routes. The Jets coaching staff plans to use Allen as a "
-            "short-yardage battering ram alongside Breece Hall to preserve Hall's workload. Standalone flex value plus league-winning "
-            "upside if Hall misses any time. Ranked #230 on ESPN vs #161 consensus (+69 value)."
+            "At 235 pounds, Allen was a wrecking ball in short-yardage and goal-line packages. The Jets intend to use him as "
+            "their primary short-yardage hammer to keep Breece Hall fresh, giving Allen standalone touchdown value and RB1 "
+            "upside if Hall misses any time. Ranked #173 on ESPN."
         ),
         "draft_strategy": "Priority bench stash in Rounds 11-12; standalone TD ceiling and tier-1 handcuff.",
         "source": "SNY Jets Beat & PFF Rushing Metrics",
@@ -160,7 +159,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "LAC",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "💎 LEAGUE-WINNER SLEEPER (+110)",
+        "badge": "💎 LEAGUE-WINNER SLEEPER",
         "preseason_grade": "A (Pounding)",
         "preseason_stats": "19 carries, 118 yds (6.2 YPC), 3 rec, 27 yds, 1 TD",
         "snap_trend": "Rotating with 1st Team in Jim Harbaugh Offense 📈",
@@ -169,7 +168,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
             "Jim Harbaugh and Greg Roman are notorious for running the ball 30+ times per game, and Vidal was born for this system. "
             "He displayed elite low-center-of-gravity contact balance in preseason games, breaking 8 tackles on 19 carries. "
             "With veterans J.K. Dobbins and Gus Edwards both managing chronic soft-tissue and knee ailments, Vidal has a clear path "
-            "to 15+ carries weekly. ESPN has him buried at #307 vs consensus #197 (+110 value)."
+            "to 15+ carries weekly. ESPN ranks him at #215."
         ),
         "draft_strategy": "Must-draft target in the final 3 rounds. Highest upside late-round running back on the board.",
         "source": "The Athletic Chargers Beat & ESPN NFL Nation",
@@ -182,7 +181,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "LAR",
         "is_rookie": True,
         "sleeper_tier": "PRESEASON_DOMINATOR",
-        "badge": "🚀 PRESEASON REC LEADER (+686)",
+        "badge": "🚀 PRESEASON REC LEADER",
         "preseason_grade": "A+ (Target Monster)",
         "preseason_stats": "16 rec, 184 yds on 21 targets (Led NFL in preseason receptions)",
         "snap_trend": "Target Share Monster & Sean McVay Darling 📈",
@@ -191,7 +190,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
             "Whittington was the statistical star of the entire 2026 NFL preseason, leading all players in receptions and yards after catch. "
             "Sean McVay called him 'one of the most complete football players I've ever evaluated,' citing his physical run-blocking "
             "and tenacity over the middle. With Puka Nacua nursing a week-to-week groin strain and Cooper Kupp's recent injury history, "
-            "Whittington is lined up for immediate rotational snaps. ESPN lists him at #1115 vs consensus #429 (+686 value diff)."
+            "Whittington is lined up for immediate rotational snaps. Left unranked on ESPN's Top 300 cheatsheet."
         ),
         "draft_strategy": "Last-round flyer in 12-team leagues or priority waiver claim Week 1.",
         "source": "Rams Beat & NFL GameDay Live",
@@ -269,7 +268,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "SF",
         "is_rookie": True,
         "sleeper_tier": "DEEP_LEAGUE_WINNER",
-        "badge": "💎 4.33 SPEED SF SLEEPER (+1075)",
+        "badge": "💎 4.33 SPEED SF SLEEPER",
         "preseason_grade": "A- (Breakaway Speed)",
         "preseason_stats": "12 carries, 86 yds (7.2 YPC), 1 TD on 44-yard sprint",
         "snap_trend": "Consistently Gashing Defenses in Zone Scheme 📈",
@@ -278,7 +277,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
             "Guerendo boasts an absurd 4.33 40-yard dash at 221 pounds, making him an athletic anomaly in Kyle Shanahan's "
             "outside-zone scheme. In Preseason Week 3, he ripped off a 44-yard touchdown run where he reached 21.8 MPH. "
             "With Christian McCaffrey dealing with calf and Achilles soreness, Guerendo represents explosive insurance in "
-            "the NFL's most productive rushing offense. ESPN ranks him at #1393 vs consensus #318 (+1075 value)."
+            "the NFL's most productive rushing offense. Left unranked on ESPN's official Top 300 cheatsheet despite consensus #318 draft pedigree."
         ),
         "draft_strategy": "Must-own handcuff for McCaffrey managers; top-end final round dart throw.",
         "source": "San Francisco Chronicle & 49ers Camp Wire",
@@ -291,7 +290,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "CLE",
         "is_rookie": True,
         "sleeper_tier": "PRESEASON_DOMINATOR",
-        "badge": "🚀 DEPTH CHART RISER (+64)",
+        "badge": "🚀 DEPTH CHART RISER",
         "preseason_grade": "A (Agile)",
         "preseason_stats": "15 carries, 92 yds, 4 rec, 38 yds, 1 TD",
         "snap_trend": "Climbing Up Cleveland Backfield Depth Chart 📈",
@@ -299,7 +298,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "Sampson showed blazing quickness and jump-cut ability in Browns preseason action. He forced 7 missed tackles on just "
             "15 carries and was utilized as a slot receiver in empty backfield formations. Kevin Stefanski praised his versatility. "
-            "Consensus #142 vs ESPN #206 (+64 value diff)."
+            "Ranked #152 on ESPN."
         ),
         "draft_strategy": "Late-round PPR flyer with high weekly floor.",
         "source": "Cleveland Plain Dealer & Browns Insider",
@@ -312,15 +311,15 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "KC",
         "is_rookie": True,
         "sleeper_tier": "DEEP_LEAGUE_WINNER",
-        "badge": "💎 KC BACKFIELD SLEEPER (+172)",
+        "badge": "💎 KC BACKFIELD SLEEPER (+68)",
         "preseason_grade": "B+ (Sharp Vision)",
         "preseason_stats": "14 carries, 76 yds, 5 rec, 48 yds, 1 TD",
         "snap_trend": "Working with Patrick Mahomes in 1st-Team 2-Minute Drill 📈",
         "depth_status": "Third-Down / Passing Down Specialist",
         "camp_buzz_blurb": (
             "Johnson showed remarkable pass-protection awareness and soft hands catching passes out of the flat from Patrick Mahomes. "
-            "Andy Reid has a history of unearthing late-round running backs into fantasy starters. ESPN ranks him at #342 vs "
-            "consensus #170 (+172 value diff)."
+            "Andy Reid has a history of unearthing late-round running backs into fantasy starters. ESPN ranks him at #241 vs "
+            "consensus #173 (+68 value diff)."
         ),
         "draft_strategy": "Deep-league stash in PPR and Kansas City offense exposure.",
         "source": "Kansas City Star & Chiefs Beat",
@@ -333,7 +332,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "DEN",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "⚡ ROOKIE CONTESTED TARGET (+181)",
+        "badge": "⚡ ROOKIE CONTESTED TARGET (+69)",
         "preseason_grade": "B+ (Hands)",
         "preseason_stats": "8 rec, 114 yds, 1 TD on 10 targets in preseason action",
         "snap_trend": "Starting Snaps in 3-WR Sets 📈",
@@ -341,7 +340,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "Bryant emerged as Bo Nix's favorite safety valve on intermediate boundary routes. Sean Payton specifically praised Bryant's "
             "ability to win 50/50 contested balls in traffic. With Courtland Sutton drawing double coverage, Bryant has clear room "
-            "to produce. ESPN #371 vs consensus #190 (+181 value diff)."
+            "to produce. ESPN #263 vs consensus #194 (+69 value diff)."
         ),
         "draft_strategy": "Sneaky target in Round 14+ for Denver passing volume.",
         "source": "Denver Post & Broncos Insider",
@@ -354,14 +353,14 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "NO",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "💎 DEEP THREAT SLEEPER (+83)",
+        "badge": "💎 DEEP THREAT SLEEPER",
         "preseason_grade": "A- (Deep Ball)",
         "preseason_stats": "6 rec, 138 yds, 2 TDs (23.0 yards per catch)",
         "snap_trend": "Primary Field-Tilter in New Klint Kubiak Offense 📈",
         "depth_status": "Deep Threat WR3",
         "camp_buzz_blurb": (
             "Tyson was electrifying in August, hauling in deep touchdowns of 52 and 41 yards. Klint Kubiak's play-action system "
-            "generates wide open single coverage downfield, and Tyson is the primary beneficiary. Ranked #223 on ESPN vs #140 consensus."
+            "generates wide open single coverage downfield, and Tyson is the primary beneficiary. Ranked #170 on ESPN."
         ),
         "draft_strategy": "High-ceiling best-ball and redraft bench weapon.",
         "source": "New Orleans Times-Picayune & Saints Beat",
@@ -374,14 +373,14 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "DEN",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "💎 BO NIX COLLEGE CONNECTION (+748)",
+        "badge": "💎 BO NIX COLLEGE CONNECTION (+60)",
         "preseason_grade": "B+ (Field Tilter)",
         "preseason_stats": "7 rec, 96 yds, 1 TD; built-in chemistry with Bo Nix",
         "snap_trend": "Expanding Route Tree with Starting Unit 📈",
         "depth_status": "Rotational Z Receiver",
         "camp_buzz_blurb": (
             "Franklin's multi-year chemistry with quarterback Bo Nix at Oregon is showing up in NFL game speed. Nix trusts Franklin "
-            "on timing routes and scramble drill backyard plays. Ranked at #980 on ESPN vs #232 consensus (+748 value diff)."
+            "on timing routes and scramble drill backyard plays. Unranked on ESPN Top 300 vs #241 consensus (+60 value diff)."
         ),
         "draft_strategy": "Late-round flier with built-in quarterback trust.",
         "source": "Mile High Sports & Broncos Beat",
@@ -394,7 +393,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "BUF",
         "is_rookie": True,
         "sleeper_tier": "ROOKIE_PHENOM",
-        "badge": "🎯 HIGH-TOUCHDOWN ROOKIE (+101)",
+        "badge": "🎯 HIGH-TOUCHDOWN ROOKIE",
         "preseason_grade": "B+ (High-Point)",
         "preseason_stats": "8 rec, 102 yds, 1 TD on 12 targets with Josh Allen",
         "snap_trend": "Full-Time Outside X Receiver 📈",
@@ -402,7 +401,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "Coleman has solidified his position as Josh Allen's go-to boundary receiver in contested situations. "
             "With Stefon Diggs and Gabe Davis gone, Buffalo has 240+ vacated targets, and Coleman will absorb high-value endzone looks. "
-            "ESPN lists Coleman at #369 vs expert consensus #268 (+101 value diff)."
+            "ESPN lists Coleman at #254."
         ),
         "draft_strategy": "Draft for double-digit touchdown potential in Rounds 9-10.",
         "source": "Buffalo News & Bills Film Room",
@@ -415,14 +414,14 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "NYJ",
         "is_rookie": True,
         "sleeper_tier": "PRESEASON_DOMINATOR",
-        "badge": "🚀 ELITE SEPARATOR (+42)",
+        "badge": "🚀 ELITE SEPARATOR",
         "preseason_grade": "A- (Smooth)",
         "preseason_stats": "9 rec, 115 yds on 13 targets; 81% win rate vs press man",
         "snap_trend": "Locked into 3-WR Packages 📈",
         "depth_status": "Starting Perimeter Weapon",
         "camp_buzz_blurb": (
             "Mitchell displayed breathtaking route running in preseason joint practices, generating immediate separation against starting "
-            "cornerbacks. PFF charted him with an 81% win rate against press man coverage. ESPN #220 vs consensus #178 (+42 value)."
+            "cornerbacks. PFF charted him with an 81% win rate against press man coverage. ESPN #166."
         ),
         "draft_strategy": "High-upside WR4/WR5 with explosive weekly ceilings.",
         "source": "The Athletic & PFF Route Data",
@@ -435,7 +434,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "KC",
         "is_rookie": True,
         "sleeper_tier": "ROOKIE_PHENOM",
-        "badge": "🚀 EXPLOSIVE 4.21 SPEED (+29)",
+        "badge": "🚀 EXPLOSIVE 4.21 SPEED",
         "preseason_grade": "A (Lightning)",
         "preseason_stats": "5 rec, 98 yds, 1 TD, 1 carry for 22 yds",
         "snap_trend": "Designed Touches in Andy Reid Playbook 📈",
@@ -443,7 +442,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "The NFL combine record holder (4.21 40-yard dash) was weaponized all across the formation by Andy Reid. Kansas City ran "
             "end-arounds, tunnel screens, and deep posts for Worthy, creating massive stress on opposing safeties. "
-            "ESPN #151 vs consensus #122 (+29 value diff)."
+            "ESPN #123."
         ),
         "draft_strategy": "Target in Rounds 8-10 as a league-winning ceiling play.",
         "source": "Arrowhead Pride & Chiefs Beat Wire",
@@ -456,7 +455,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "LAC",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "💎 LATE-ROUND TE SLEEPER (+178)",
+        "badge": "💎 LATE-ROUND TE SLEEPER",
         "preseason_grade": "A- (Matchup Nightmare)",
         "preseason_stats": "8 rec, 108 yds, 1 TD on 10 targets in preseason action",
         "snap_trend": "Lining up in Slot & Boundary Iso 📈",
@@ -464,7 +463,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "Gadsden is built like a wide receiver in a tight end's frame (6-foot-5, 236 lbs). Justin Herbert locked onto him on third downs "
             "in preseason play, exploiting linebackers and safeties. Gadsden offers true mismatch potential in a Chargers offense with "
-            "vacated pass targets. Ranked #416 on ESPN vs #238 consensus (+178 value diff)."
+            "vacated pass targets. Ranked #291 on ESPN."
         ),
         "draft_strategy": "Top-tier late-round TE streamer with weekly top-6 potential.",
         "source": "Los Angeles Times & Chargers Camp Beat",
@@ -477,14 +476,14 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "NO",
         "is_rookie": True,
         "sleeper_tier": "DEEP_LEAGUE_WINNER",
-        "badge": "⚡ TD VULTURE SLEEPER (+1072)",
+        "badge": "⚡ TD VULTURE SLEEPER",
         "preseason_grade": "B+ (Heavy)",
         "preseason_stats": "16 carries, 78 yds, 2 TDs from 1-yard line",
         "snap_trend": "Primary Short-Yardage Hammer 📈",
         "depth_status": "Short-Yardage / Goal-Line Back",
         "camp_buzz_blurb": (
             "A bruising 227-pound runner, Estime converted 4 of 4 short-yardage opportunities in preseason action, punching in 2 touchdowns. "
-            "He rarely gets tackled for a loss and wears down defensive fronts in the second half. ESPN #1394 vs consensus #322 (+1072 value)."
+            "He rarely gets tackled for a loss and wears down defensive fronts in the second half. Left unranked on ESPN's Top 300 cheatsheet."
         ),
         "draft_strategy": "Last-round flier in deep standard scoring leagues.",
         "source": "New Orleans Beat & Film Room",
@@ -497,7 +496,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "TEN",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "💎 EXPLOSIVE ROOKIE RB (+152)",
+        "badge": "💎 EXPLOSIVE ROOKIE RB (+61)",
         "preseason_grade": "A- (Explosive)",
         "preseason_stats": "13 carries, 84 yds (6.5 YPC), 1 TD on 38-yd burst",
         "snap_trend": "Chunk Yardage Specialist 📈",
@@ -505,7 +504,7 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "camp_buzz_blurb": (
             "Singleton displayed violent acceleration through the line of scrimmage in preseason play, reaching 21.4 MPH on a "
             "38-yard touchdown run against starting defensive units. His home-run capability provides dynamic relief in Tennessee's "
-            "revamped backfield. ESPN #355 vs consensus #203 (+152 value diff)."
+            "revamped backfield. ESPN #267 vs consensus #206 (+61 value diff)."
         ),
         "draft_strategy": "Late-round bench flyer with week-winning ceiling.",
         "source": "Tennessean & Titans Camp Wire",
@@ -518,15 +517,14 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "GB",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "🎯 PACKERS ZONE FIT (+152)",
+        "badge": "🎯 PACKERS ZONE FIT",
         "preseason_grade": "B+ (Zone Fit)",
         "preseason_stats": "15 carries, 77 yds, 1 TD; 4.8 YPC after contact",
         "snap_trend": "One-Cut Zone Scheme Master 📈",
         "depth_status": "Early-Down Change-of-Pace Back",
         "camp_buzz_blurb": (
             "Johnson proved to be an ideal match for Matt LaFleur's outside-zone rushing attack, displaying patient one-cut vision "
-            "and physical leg churn. LaFleur commended his pass-protection pickup during two-minute drills. Ranked #402 on ESPN vs "
-            "#250 consensus (+152 value)."
+            "and physical leg churn. LaFleur commended his pass-protection pickup during two-minute drills. Ranked #266 on ESPN."
         ),
         "draft_strategy": "Deep sleeper target with direct path to touches.",
         "source": "Milwaukee Journal Sentinel & Packers Beat",
@@ -539,14 +537,14 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "team": "WAS",
         "is_rookie": True,
         "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "🎯 POWER RUSHER VALUE (+171)",
+        "badge": "🎯 POWER RUSHER VALUE",
         "preseason_grade": "B+ (Grinder)",
         "preseason_stats": "18 carries, 88 yds (4.9 YPC), 1 TD on goal-line plunge",
         "snap_trend": "Consistent Short-Yardage Efficiency 📈",
         "depth_status": "Interior Power Specialist",
         "camp_buzz_blurb": (
             "Allen was impossible to bring down on first contact during Washington's preseason games. Kliff Kingsbury utilized him "
-            "repeatedly in third-and-short and goal-line scenarios. Ranked #397 on ESPN vs #226 consensus (+171 value diff)."
+            "repeatedly in third-and-short and goal-line scenarios. Ranked #280 on ESPN."
         ),
         "draft_strategy": "Draft in final rounds for guaranteed touchdown upside.",
         "source": "Washington Post & Commanders Wire",

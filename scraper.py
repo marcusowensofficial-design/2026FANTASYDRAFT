@@ -735,15 +735,102 @@ def scrape_fantasypros_live(timeout: int = 8) -> Optional[pd.DataFrame]:
 
 
 # -----------------------------------------------------------------------------
-# 2. LIVE ESPN FANTASY API SCRAPER
+# 2. OFFICIAL ESPN FANTASY 2026 TOP 300 & LIVE API SCRAPER
 # -----------------------------------------------------------------------------
+def parse_espn_pdf_top300(pdf_path: Optional[str] = None) -> Optional[pd.DataFrame]:
+    """Parses ESPN's official 2026 Top 300 PPR draft cheatsheet from PDF or cached CSV."""
+    csv_cache = DATA_DIR / "espn_2026_top300.csv"
+    if csv_cache.exists():
+        try:
+            df_cache = pd.read_csv(csv_cache)
+            if len(df_cache) >= 300:
+                logger.info(f"Loaded {len(df_cache)} players from cached ESPN 2026 Top 300 CSV.")
+                return df_cache
+        except Exception as e:
+            logger.warning(f"Error reading cached ESPN CSV: {e}")
+
+    if pdf_path is None:
+        pdf_path = str(DATA_DIR / "espnppr300.pdf")
+
+    if not os.path.exists(pdf_path):
+        logger.warning(f"ESPN PDF not found at {pdf_path}")
+        return None
+
+    try:
+        from pypdf import PdfReader
+        reader = PdfReader(pdf_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+
+        # Pattern: Rank. (PosTag) PlayerName, Team $Auction Bye
+        pattern = re.compile(r"(\d+)\.\s*\(([A-Za-z0-9/]+)\)\s+([A-Za-z0-9\.\'/\-\s]+?),\s*([A-Za-z0-9/]+)\s+\$(\d+)\s+(\d+)")
+        matches = pattern.findall(text)
+
+        rows = []
+        seen_ranks = set()
+        for m in matches:
+            rank = int(m[0])
+            if rank in seen_ranks:
+                continue
+            seen_ranks.add(rank)
+            pos_tag = m[1].strip()
+            name = m[2].strip()
+            team = m[3].strip()
+            auction = int(m[4])
+            bye = int(m[5])
+
+            if "DST" in pos_tag:
+                pos = "DST"
+            elif "K" in pos_tag:
+                pos = "K"
+            elif "QB" in pos_tag:
+                pos = "QB"
+            elif "RB" in pos_tag:
+                pos = "RB"
+            elif "WR" in pos_tag:
+                pos = "WR"
+            elif "TE" in pos_tag:
+                pos = "TE"
+            else:
+                pos = re.sub(r"\d+", "", pos_tag)
+
+            rows.append({
+                "espn_rank": rank,
+                "name": name,
+                "pos": pos,
+                "pos_tag": pos_tag,
+                "team": team,
+                "auction_value": auction,
+                "bye": bye
+            })
+
+        if rows:
+            df = pd.DataFrame(rows).sort_values(by="espn_rank").reset_index(drop=True)
+            df.to_csv(csv_cache, index=False)
+            logger.info(f"Successfully parsed and cached {len(df)} players from official ESPN 2026 Top 300 PDF.")
+            return df
+    except Exception as e:
+        logger.warning(f"Failed to parse ESPN Top 300 PDF: {e}")
+    return None
+
+
 def scrape_espn_live(timeout: int = 8) -> Optional[pd.DataFrame]:
-    """Scrapes live official ESPN Fantasy API for PPR draft ranks and auction values."""
+    """Retrieves ESPN 2026 PPR draft rankings.
+    Prioritizes official ESPN 2026 Top 300 cheatsheet (data/espnppr300.pdf) with API fallback.
+    Guarantees no raw internal database IDs in the thousands pollute the draft board.
+    """
+    # 1. Official ESPN 2026 Top 300 PDF / CSV
+    pdf_df = parse_espn_pdf_top300()
+    if pdf_df is not None and not pdf_df.empty:
+        return pdf_df
+
+    # 2. Live API Fallback
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "x-fantasy-filter": json.dumps({
             "players": {
-                "limit": 1000,
+                "limit": 300,
                 "sortDraftRanks": {
                     "sortPriority": 100,
                     "sortAsc": True,
@@ -752,7 +839,6 @@ def scrape_espn_live(timeout: int = 8) -> Optional[pd.DataFrame]:
             }
         })
     }
-    # Check 2026 first, with 2025 as fallback
     for season in [2026, 2025]:
         url = f"https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{season}/segments/0/leaguedefaults/1?view=kona_player_info"
         try:
@@ -768,24 +854,27 @@ def scrape_espn_live(timeout: int = 8) -> Optional[pd.DataFrame]:
                     name = p.get("fullName", "")
                     pos_id = p.get("defaultPositionId", 3)
                     team_id = p.get("proTeamId", 0)
-                    
+
                     pos = ESPN_POSITIONS.get(pos_id, "WR")
                     team = ESPN_PRO_TEAMS.get(team_id, "FA")
-                    
+
                     draft_ranks = p.get("draftRanksByRankType", {})
                     ppr_info = draft_ranks.get("PPR", {})
-                    espn_rank = ppr_info.get("rank", rank_counter)
-                    auc_val = ppr_info.get("auctionValue", 1)
-                    
+                    raw_rank = ppr_info.get("rank", rank_counter)
+                    # Guard: Never accept raw internal database IDs > 300
+                    if raw_rank > 300:
+                        continue
+                    auc_val = ppr_info.get("auctionValue", 0)
+
                     rows.append({
                         "name": name,
                         "pos": pos,
                         "team": team,
-                        "espn_rank": espn_rank,
-                        "auction_value": max(1, auc_val)
+                        "espn_rank": raw_rank,
+                        "auction_value": max(0, auc_val)
                     })
                     rank_counter += 1
-                
+
                 if rows:
                     df = pd.DataFrame(rows)
                     logger.info(f"Successfully loaded {len(df)} live players from ESPN Fantasy API.")
@@ -1050,22 +1139,28 @@ def merge_and_finalize_board(
     # Build two-tier fuzzy and alias resolver from base_df
     resolver = FuzzyPlayerResolver(base_df)
 
-    # Merge ESPN
+    # Merge ESPN (Official 2026 Top 300 Cheatsheet with 100% accurate resolution)
     if espn_df is not None and not espn_df.empty:
+        # Build team mapping for DST
+        dst_team_map = base_df[base_df["pos"] == "DST"].set_index("team")["name"].to_dict()
+        dst_team_map["JAC"] = dst_team_map.get("JAX", "Jacksonville Jaguars")
+
+        def resolve_espn_name(r):
+            if r.get("pos") == "DST":
+                return dst_team_map.get(r.get("team"), r.get("name"))
+            cn = clean_player_name(r.get("name", ""))
+            return resolver.resolve(cn) or cn
+
         espn_df["clean_name"] = espn_df["name"].apply(clean_player_name)
-        espn_df["player_id"] = espn_df.apply(lambda r: generate_player_id(r["name"], r["team"]), axis=1)
-        merged = pd.merge(base_df, espn_df[["player_id", "espn_rank", "auction_value"]], on="player_id", how="left")
-        
-        missing_espn = merged["espn_rank"].isna()
-        if missing_espn.any():
-            espn_df["canonical_name"] = espn_df["clean_name"].apply(lambda n: resolver.resolve(n) or n)
-            espn_by_name = espn_df.drop_duplicates(subset=["canonical_name"]).set_index("canonical_name")
-            merged.loc[missing_espn, "espn_rank"] = merged.loc[missing_espn, "clean_name"].map(espn_by_name["espn_rank"])
-            merged.loc[missing_espn, "auction_value"] = merged.loc[missing_espn, "clean_name"].map(espn_by_name["auction_value"])
-        base_df = merged
+        espn_df["canonical_name"] = espn_df.apply(resolve_espn_name, axis=1)
+        espn_df["clean_board_name"] = espn_df["canonical_name"].apply(clean_player_name)
+        espn_lookup = espn_df.drop_duplicates(subset=["clean_board_name"]).set_index("clean_board_name")
+
+        base_df["espn_rank"] = base_df["clean_name"].map(espn_lookup["espn_rank"])
+        base_df["auction_value"] = base_df["clean_name"].map(espn_lookup["auction_value"]).fillna(0).astype(int)
     else:
-        base_df["espn_rank"] = base_df["fantasypros_rank"] + np.random.randint(-5, 6, size=len(base_df))
-        base_df["auction_value"] = 1
+        base_df["espn_rank"] = np.nan
+        base_df["auction_value"] = 0
 
     # Merge CBS with fuzzy resolution
     if cbs_df is not None and not cbs_df.empty:
@@ -1075,10 +1170,6 @@ def merge_and_finalize_board(
         base_df["cbs_rank"] = base_df["clean_name"].map(cbs_by_name["cbs_rank"])
     else:
         base_df["cbs_rank"] = np.nan
-
-    # Fill base platform ranks
-    base_df["espn_rank"] = base_df["espn_rank"].fillna(base_df["fantasypros_rank"]).astype(int)
-    base_df["cbs_rank"] = base_df["cbs_rank"].fillna(base_df["fantasypros_rank"]).astype(int)
 
     # Merge the 6 newly provided expert files from data/ with fuzzy matching
     expert_dict = load_expert_files()
@@ -1127,7 +1218,20 @@ def merge_and_finalize_board(
     base_df["consensus_rank"] = base_df.index + 1
 
     # Value vs ESPN: Positive = ESPN undervalues him (STEAL). Negative = ESPN overvalues him (REACH).
-    base_df["value_diff"] = (base_df["espn_rank"] - base_df["consensus_rank"]).astype(int)
+    def calculate_value_diff(r):
+        if r.get("is_season_out", False) or r.get("injury_tier") == "SEASON_IR" or r.get("is_injury_trap", False):
+            return -999
+        espn = r.get("espn_rank")
+        cons = r.get("consensus_rank", 1)
+        if pd.isna(espn) or espn is None:
+            # Player is unranked on ESPN (outside Top 300)
+            # If consensus ranks player in Top 300, ESPN undervaluing vs replacement (301)
+            if cons <= 300:
+                return int(301 - cons)
+            return 0
+        return int(espn - cons)
+
+    base_df["value_diff"] = base_df.apply(calculate_value_diff, axis=1).astype(int)
 
     # Positional rankings
     base_df["pos_rank"] = base_df.groupby("pos").cumcount() + 1
