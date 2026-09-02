@@ -246,6 +246,37 @@ st.markdown("""
     [data-testid="stTextInput"] input, [data-testid="stSelectbox"] div {
         font-size: 0.84rem !important;
     }
+
+    /* Mobile Responsive Enhancements (auto-detected on phones/tablets) */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 0.4rem !important;
+            padding-right: 0.4rem !important;
+            padding-top: 0.4rem !important;
+        }
+        .war-room-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 8px 12px !important;
+        }
+        .war-room-title {
+            font-size: 1.15rem !important;
+        }
+        .best-avail-bar {
+            gap: 8px !important;
+            font-size: 0.72rem !important;
+            padding: 4px 8px !important;
+        }
+        div.stButton > button {
+            padding: 0.35rem 0.5rem !important;
+            font-size: 0.82rem !important;
+        }
+        [data-testid="stTab"] {
+            font-size: 0.76rem !important;
+            padding: 3px 8px !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -254,7 +285,7 @@ st.markdown("""
 # 2. STATE INITIALIZATION & CONSTANTS
 # -----------------------------------------------------------------------------
 TOTAL_TEAMS = 8
-ROSTER_ROUNDS = 16  # 1 QB, 2 RB, 2 WR, 1 TE, 2 FLEX, 1 DST, 1 K, 6 Bench = 16
+ROSTER_ROUNDS = 16  # 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DST, 1 K, 7 Bench = 16
 TOTAL_PICKS = TOTAL_TEAMS * ROSTER_ROUNDS
 
 if "draft_board" not in st.session_state:
@@ -420,7 +451,10 @@ def reset_draft_board():
 
 
 def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
-    """Computes user's 8-team PPR starting lineup and bench slots."""
+    """
+    Computes user's 8-team PPR starting lineup (9 starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 D/ST, 1 K),
+    7 bench slots, and 1 dedicated IR stash slot for injured/suspended players.
+    """
     user_picks = [p for p in st.session_state.draft_history if p.get("is_user", False)]
     
     roster: Dict[str, List[Dict[str, Any]]] = {
@@ -431,10 +465,32 @@ def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
         "FLEX": [],
         "DST": [],
         "K": [],
-        "BENCH": []
+        "BENCH": [],
+        "IR": []
     }
+
+    df_b = st.session_state.draft_board
+    ir_eligible = []
+    active_pool = []
     
     for p in user_picks:
+        p_id = p["player_id"]
+        p_row = df_b[df_b["player_id"] == p_id]
+        inj_tier = p_row.iloc[0].get("injury_tier", "") if not p_row.empty else ""
+        is_ir = p_row.iloc[0].get("is_season_out", False) if not p_row.empty else False
+        
+        # Eligible for IR stash if player is on PUP, Season IR, Suspension, or Out
+        if inj_tier in ["PUP_MULTI_WEEK", "SEASON_IR", "SUSPENSION", "OUT_WEEK_1"] or is_ir:
+            p_copy = dict(p)
+            p_copy["injury_badge"] = p_row.iloc[0].get("injury_badge", "⚠️ IR")
+            p_copy["injury_tier"] = inj_tier
+            ir_eligible.append(p_copy)
+        else:
+            active_pool.append(p)
+            
+    # Step 1: Assign healthy/active players to 9 starting slots first
+    remaining_pool = []
+    for p in active_pool:
         pos = p["pos"]
         if pos == "QB" and len(roster["QB"]) < 1:
             roster["QB"].append(p)
@@ -444,15 +500,43 @@ def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
             roster["WR"].append(p)
         elif pos == "TE" and len(roster["TE"]) < 1:
             roster["TE"].append(p)
-        elif pos in ["RB", "WR", "TE"] and len(roster["FLEX"]) < 2:
+        elif pos in ["RB", "WR", "TE"] and len(roster["FLEX"]) < 1:
             roster["FLEX"].append(p)
         elif pos == "DST" and len(roster["DST"]) < 1:
             roster["DST"].append(p)
         elif pos == "K" and len(roster["K"]) < 1:
             roster["K"].append(p)
         else:
-            roster["BENCH"].append(p)
+            remaining_pool.append(p)
             
+    # Step 2: Dedicated 1 IR stash slot (first eligible stash player goes here)
+    if ir_eligible:
+        roster["IR"].append(ir_eligible[0])
+        for p in ir_eligible[1:]:
+            remaining_pool.append(p)
+            
+    # Step 3: Fill any remaining starting slot voids from remaining pool
+    final_bench = []
+    for p in remaining_pool:
+        pos = p["pos"]
+        if pos == "QB" and len(roster["QB"]) < 1:
+            roster["QB"].append(p)
+        elif pos == "RB" and len(roster["RB"]) < 2:
+            roster["RB"].append(p)
+        elif pos == "WR" and len(roster["WR"]) < 2:
+            roster["WR"].append(p)
+        elif pos == "TE" and len(roster["TE"]) < 1:
+            roster["TE"].append(p)
+        elif pos in ["RB", "WR", "TE"] and len(roster["FLEX"]) < 1:
+            roster["FLEX"].append(p)
+        elif pos == "DST" and len(roster["DST"]) < 1:
+            roster["DST"].append(p)
+        elif pos == "K" and len(roster["K"]) < 1:
+            roster["K"].append(p)
+        else:
+            final_bench.append(p)
+            
+    roster["BENCH"] = final_bench
     return roster
 
 
@@ -697,12 +781,12 @@ with st.sidebar:
         ("RB", 2),
         ("WR", 2),
         ("TE", 1),
-        ("FLEX", 2),
+        ("FLEX", 1),
         ("DST", 1),
         ("K", 1),
     ]
 
-    total_starters_needed = 10
+    total_starters_needed = 9
     total_starters_filled = 0
     all_user_byes = []
 
@@ -727,21 +811,68 @@ with st.sidebar:
                 </div>
                 """, unsafe_allow_html=True)
             else:
+                label = slot_name if count == 1 else f"{slot_name} {i+1}"
                 st.markdown(f"""
                 <div class="roster-card roster-card-empty">
-                    <span class="roster-slot-title">{slot_name} {i+1 if count > 1 else ''}</span>
+                    <span class="roster-slot-title">{label}</span>
                     <span style="font-size:0.8rem; font-style:italic;">Empty</span>
                 </div>
                 """, unsafe_allow_html=True)
 
-    # Bench Count
+    # Bench Slots (7 slots total as shown in ESPN image)
+    TOTAL_BENCH_SLOTS = 7
     bench_list = user_roster.get("BENCH", [])
-    st.markdown(f"**Bench ({len(bench_list)}/6 slots):**")
-    if bench_list:
-        bench_str = ", ".join([f"{b['name']} ({b['pos']})" for b in bench_list])
-        st.caption(bench_str)
+    st.markdown(f"**🪑 Bench ({len(bench_list)}/{TOTAL_BENCH_SLOTS} slots):**")
+    for i in range(TOTAL_BENCH_SLOTS):
+        if i < len(bench_list):
+            b = bench_list[i]
+            bye_w = TEAM_BYE_WEEKS_2026.get(b.get("team", ""), 0)
+            if bye_w > 0:
+                all_user_byes.append(bye_w)
+            st.markdown(f"""
+            <div class="roster-card">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="pos-badge pos-{b['pos']}">{b['pos']}</span>
+                    <span class="roster-player-name">{b['name']}</span>
+                </div>
+                <div style="font-size:0.75rem; color:#94a3b8; font-weight:700;">
+                    {b['team']} (Wk {bye_w})
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="roster-card roster-card-empty">
+                <span class="roster-slot-title">Bench {i+1}</span>
+                <span style="font-size:0.8rem; font-style:italic;">Empty</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # Dedicated 1 IR Slot (for injured/suspended stashes)
+    ir_list = user_roster.get("IR", [])
+    st.markdown(f"**🚑 IR / Stash ({len(ir_list)}/1 slot):**")
+    if ir_list:
+        ir_p = ir_list[0]
+        bye_w = TEAM_BYE_WEEKS_2026.get(ir_p.get("team", ""), 0)
+        badge = ir_p.get("injury_badge", "⚠️ IR")
+        st.markdown(f"""
+        <div class="roster-card" style="border:1px solid #ea580c; background:#2d1205;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="background:#ea580c; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px;">IR</span>
+                <span class="roster-player-name" style="color:#fdba74;">{ir_p['name']}</span>
+            </div>
+            <div style="font-size:0.72rem; color:#f97316; font-weight:700;">
+                {badge}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.caption("No bench reserves drafted yet.")
+        st.markdown(f"""
+        <div class="roster-card roster-card-empty" style="border: 1px dashed #64748b;">
+            <span class="roster-slot-title" style="color:#f59e0b;">IR</span>
+            <span style="font-size:0.8rem; font-style:italic; color:#94a3b8;">Empty (Stash Slot)</span>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Bye Week Conflict Check
     if all_user_byes:
