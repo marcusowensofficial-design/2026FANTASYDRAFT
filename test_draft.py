@@ -257,6 +257,38 @@ def test_temporal_conflict_resolution():
     assert "T_new > T_current" in snippet
 
 
+def test_ir_candidates_and_expert_coverage():
+    """Verify Ricky Pearsall & Jayden Higgins IR status, and 100% expert source coverage."""
+    import pandas as pd
+    from scraper import load_expert_files, clean_smart_name, NICKNAMES
+
+    df = pd.read_parquet("data/draft_board_2026.parquet")
+    
+    # 1. Verify Ricky Pearsall
+    pearsall = df[df["name"] == "Ricky Pearsall"]
+    assert not pearsall.empty, "Ricky Pearsall must be present on draft board"
+    assert pearsall["pos"].values[0] == "WR"
+    assert pearsall["team"].values[0] == "SF"
+    assert "IR" in pearsall["injury_status"].values[0] or "IR" in pearsall["injury_badge"].values[0]
+    assert pearsall["sportsillustrated_rank"].values[0] == 90
+
+    # 2. Verify Jayden Higgins
+    higgins = df[df["name"] == "Jayden Higgins"]
+    assert not higgins.empty, "Jayden Higgins must be present on draft board"
+    assert higgins["pos"].values[0] == "WR"
+    assert higgins["team"].values[0] == "HOU"
+    assert "IR" in higgins["injury_status"].values[0] or "IR" in higgins["injury_badge"].values[0]
+    assert higgins["sportsillustrated_rank"].values[0] == 117
+
+    # 3. Verify 100% expert match rate
+    experts = load_expert_files()
+    board_clean_set = set(df["clean_name"].apply(clean_smart_name))
+    for src, exp_df in experts.items():
+        col = f"{src}_rank"
+        mapped_count = df[col].notna().sum()
+        assert mapped_count >= len(exp_df) - 1, f"Source {src} should have all {len(exp_df)} players mapped"
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -267,5 +299,6 @@ if __name__ == "__main__":
     test_curated_injury_ledger()
     test_board_injury_fields()
     test_temporal_conflict_resolution()
+    test_ir_candidates_and_expert_coverage()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 

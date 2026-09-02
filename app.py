@@ -1026,7 +1026,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             "📊 Show All Expert Sources (9 Ranks)",
             value=st.session_state.get(f"toggle_granular_{key_prefix}", True),
             key=f"toggle_granular_{key_prefix}",
-            help="Checked by default. Displays all 9 expert ranking sources ordered from most reliable to mainstream."
+            help="Checked by default. Displays all 9 expert ranking sources ordered from most reliable to mainstream. Note: Outlets with published cutoff lists (Footballguys/NBC/SI Top 200, Draft Sharks Top 250, B/R Top 314) display None for players outside their evaluated range."
         )
     with f_c4:
         default_hide_ir = (key_prefix != "inj_report")
@@ -1242,14 +1242,14 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                 help="Positive = ESPN undervalues player (STEAL). Negative = ESPN overvalues player (REACH)."
             ),
             "ESPN": st.column_config.NumberColumn(width="small", format="%d", help="Official ESPN 2026 API Draft Rank"),
-            "Draft Sharks (#1)": st.column_config.NumberColumn(width="small", format="%d"),
-            "Footballguys (#2)": st.column_config.NumberColumn(width="small", format="%d"),
-            "FantasyPros (#3)": st.column_config.NumberColumn(width="small", format="%d"),
-            "RotoBaller (#4)": st.column_config.NumberColumn(width="small", format="%d"),
-            "CBS Sports (#5)": st.column_config.NumberColumn(width="small", format="%d"),
-            "NBC Sports (#6)": st.column_config.NumberColumn(width="small", format="%d"),
-            "Bleacher Report (#7)": st.column_config.NumberColumn(width="small", format="%d"),
-            "Sports Illustrated (#8)": st.column_config.NumberColumn(width="small", format="%d"),
+            "Draft Sharks (#1)": st.column_config.NumberColumn(width="small", format="%d", help="Draft Sharks (#1 Accuracy Champion). Published Top 250 (cells display None for players outside Top 250)."),
+            "Footballguys (#2)": st.column_config.NumberColumn(width="small", format="%d", help="Footballguys (#2 Accuracy Champion). Published Top 200 (cells display None for players outside Top 200)."),
+            "FantasyPros (#3)": st.column_config.NumberColumn(width="small", format="%d", help="FantasyPros 50+ Expert Consensus Rank (ECR)."),
+            "RotoBaller (#4)": st.column_config.NumberColumn(width="small", format="%d", help="RotoBaller Top 400 PPR Rankings."),
+            "CBS Sports (#5)": st.column_config.NumberColumn(width="small", format="%d", help="CBS Sports Fantasy Consensus (Eisenberg / Richard / Cummings)."),
+            "NBC Sports (#6)": st.column_config.NumberColumn(width="small", format="%d", help="NBC Sports / Rotoworld Top 200 (offensive skill positions; cells display None for players outside Top 200)."),
+            "Bleacher Report (#7)": st.column_config.NumberColumn(width="small", format="%d", help="Bleacher Report Top 314 PPR Rankings."),
+            "Sports Illustrated (#8)": st.column_config.NumberColumn(width="small", format="%d", help="Sports Illustrated / Michael Fabiano Top 200 (cells display None for players outside Top 200)."),
             "Best": st.column_config.NumberColumn(width="small", format="%d"),
             "Worst": st.column_config.NumberColumn(width="small", format="%d"),
             "Std Dev": st.column_config.NumberColumn(width="small", format="%.1f", help="Variance/disagreement among experts"),
