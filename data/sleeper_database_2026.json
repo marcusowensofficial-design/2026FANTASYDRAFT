@@ -1,9 +1,9 @@
 {
   "metadata": {
     "version": "2026.1",
-    "last_synced_utc": "2026-09-02T20:32:05Z",
-    "last_synced_formatted": "Sep 2, 2026 at 8:32 PM UTC",
-    "total_players": 26,
+    "last_synced_utc": "2026-09-02T21:31:59Z",
+    "last_synced_formatted": "Sep 2, 2026 at 9:31 PM UTC",
+    "total_players": 24,
     "uncommitted_changes": 0,
     "uncommitted_players": []
   },
@@ -169,42 +169,6 @@
       "source_url": "https://www.rotowire.com/football/player/jonathon-brooks-18030",
       "timestamp_utc": "2026-08-30T14:15:00Z",
       "updated_formatted": "Aug 30, 2026 at 2:15 PM UTC"
-    },
-    "trey benson": {
-      "name": "Trey Benson",
-      "pos": "RB",
-      "team": "ARI",
-      "is_rookie": true,
-      "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-      "badge": "💎 HIGH-CEILING HANDCUFF (+124)",
-      "preseason_grade": "B+ (Explosive)",
-      "preseason_stats": "17 carries, 93 yds (5.5 YPC), 2 rec, 18 yds",
-      "snap_trend": "Co-Starter Reps with 1st Team 📈",
-      "depth_status": "Direct Handcuff to James Conner",
-      "camp_buzz_blurb": "Benson showcased his 4.39 speed during the second half of preseason contests, flashing homerun breakaway ability. Starter James Conner has missed at least 3 games in every season of his NFL career. Benson is guaranteed standalone touches in Drew Petzing's run-heavy scheme, and becomes an instant top-15 RB if Conner misses time. ESPN has him at #438 vs consensus #314 (+124 value diff).",
-      "draft_strategy": "High-priority late-round stash in all formats.",
-      "source": "Arizona Republic & Cardinals Beat Wire",
-      "source_url": "https://www.rotowire.com/football/player/trey-benson-18062",
-      "timestamp_utc": "2026-08-30T11:00:00Z",
-      "updated_formatted": "Aug 30, 2026 at 11:00 AM UTC"
-    },
-    "jayden higgins": {
-      "name": "Jayden Higgins",
-      "pos": "WR",
-      "team": "HOU",
-      "is_rookie": true,
-      "sleeper_tier": "ROOKIE_PHENOM",
-      "badge": "⚡ MASSIVE VALUE STEAL (+1290)",
-      "preseason_grade": "A (Contested Beast)",
-      "preseason_stats": "9 rec, 128 yds, 2 TDs on 11 targets in preseason play",
-      "snap_trend": "Dominating Red-Zone Snaps with C.J. Stroud 📈",
-      "depth_status": "Rotational Perimeter & Red-Zone Target",
-      "camp_buzz_blurb": "Standing 6-foot-4 with a massive catch radius, Higgins was C.J. Stroud's favorite target in the red zone throughout August. He caught 2 contested touchdowns in preseason play, using his size to box out defensive backs. While currently rehabbing a minor knee strain, his consensus ranking sits at #119 across expert draft boards, whereas ESPN lists him at #1409 (+1290 value difference).",
-      "draft_strategy": "Target in Rounds 12-14 as a premier high-upside stash.",
-      "source": "Houston Chronicle & Texans Camp Beat",
-      "source_url": "https://www.rotowire.com/football/player/jayden-higgins-18221",
-      "timestamp_utc": "2026-08-29T19:45:00Z",
-      "updated_formatted": "Aug 29, 2026 at 7:45 PM UTC"
     },
     "isaac guerendo": {
       "name": "Isaac Guerendo",

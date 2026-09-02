@@ -711,8 +711,12 @@ df_board = st.session_state.draft_board
 available_df = df_board[~df_board["is_drafted"]].copy().reset_index(drop=True)
 available_df["avail_rank"] = available_df.index + 1
 
-# Exclude season-ending IR from BPA quick radar recommendations
-radar_avail_df = available_df[~available_df["is_season_out"]].reset_index(drop=True)
+# Exclude season-ending IR and algorithmic injury traps from BPA quick radar recommendations
+radar_avail_df = available_df[
+    (~available_df["is_season_out"]) & 
+    (available_df.get("injury_tier", "") != "SEASON_IR") & 
+    (~available_df.get("is_injury_trap", False))
+].reset_index(drop=True)
 
 top_overall = radar_avail_df.iloc[0] if not radar_avail_df.empty else None
 top_rb = radar_avail_df[radar_avail_df["pos"] == "RB"].iloc[0] if not radar_avail_df[radar_avail_df["pos"] == "RB"].empty else None
@@ -741,7 +745,8 @@ search_col1, search_col2, search_col3, search_col4, search_col5, search_col6 = s
 player_options = {}
 for _, row in available_df.iterrows():
     val_str = f"+{row['value_diff']}" if row['value_diff'] > 0 else f"{row['value_diff']}"
-    disp_n = f"{to_unicode_strikethrough(row['name'])} 🛑" if row.get("is_season_out") else row["name"]
+    is_season_out_player = row.get("is_season_out") or row.get("injury_tier") == "SEASON_IR" or row.get("is_injury_trap")
+    disp_n = f"🛑 [OUT FOR SEASON] {to_unicode_strikethrough(row['name'])}" if is_season_out_player else row["name"]
     badge_str = ""
     if row.get("injury_badge"):
         tl = row.get("injury_timeline", "")
@@ -1784,16 +1789,22 @@ with tab_steals:
     # -------------------------------------------------------------------------
     # 2. HIGH-LEVEL KPI METRICS
     # -------------------------------------------------------------------------
-    all_steals_df = df_board[df_board["value_diff"] >= 4].copy()
+    # GUARANTEE: Exclude players on season-ending IR or flagged as algorithmic injury traps
+    all_steals_df = df_board[
+        (df_board["value_diff"] >= 4) &
+        (~df_board.get("is_season_out", False)) &
+        (df_board.get("injury_tier", "") != "SEASON_IR") &
+        (~df_board.get("is_injury_trap", False))
+    ].copy()
     rookie_count = len(all_steals_df[all_steals_df.get("is_rookie", False)])
     max_val = all_steals_df["value_diff"].max() if not all_steals_df.empty else 0
     avg_val = round(all_steals_df["value_diff"].mean(), 1) if not all_steals_df.empty else 0
 
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     with kpi1:
-        st.metric("🔥 Total Value Steals", f"{len(all_steals_df)} Players", help="Players where Consensus Rank is at least 4 spots ahead of ESPN default")
+        st.metric("🔥 Total Value Steals", f"{len(all_steals_df)} Players", help="Healthy players where Consensus Rank is at least 4 spots ahead of ESPN default")
     with kpi2:
-        st.metric("🚀 Preseason Rookies", f"{rookie_count} Phenoms", help="2026 rookies dominating preseason snaps and camp reps")
+        st.metric("🚀 Preseason Rookies", f"{rookie_count} Phenoms", help="2026 healthy rookies dominating preseason snaps and camp reps")
     with kpi3:
         st.metric("💎 Max Value Discrepancy", f"+{max_val} Picks", help="Largest algorithmic blindspot on ESPN")
     with kpi4:
@@ -1845,9 +1856,21 @@ with tab_steals:
     # -------------------------------------------------------------------------
     # 4. PRESEASON ROOKIE DOMINANCE & SLEEPER SCOUTING WIRE
     # -------------------------------------------------------------------------
-    wire_players = [r for _, r in filtered_steals.iterrows() if r.get("preseason_stats")]
+    wire_players = [
+        r for _, r in filtered_steals.iterrows() 
+        if r.get("preseason_stats") 
+        and not r.get("is_season_out", False) 
+        and r.get("injury_tier", "") != "SEASON_IR" 
+        and not r.get("is_injury_trap", False)
+    ]
     if not wire_players:
-        wire_players = [r for _, r in all_steals_df.iterrows() if r.get("preseason_stats")]
+        wire_players = [
+            r for _, r in all_steals_df.iterrows() 
+            if r.get("preseason_stats") 
+            and not r.get("is_season_out", False) 
+            and r.get("injury_tier", "") != "SEASON_IR" 
+            and not r.get("is_injury_trap", False)
+        ]
 
     with st.expander(f"📰 2026 Preseason Rookie Dominance & Sleeper Scouting Wire ({len(wire_players)} Scouting Cards)", expanded=True):
         st.caption("Deep-dive scouting reports, preseason game metrics, temporal beat reports, and actionable draft strategies.")

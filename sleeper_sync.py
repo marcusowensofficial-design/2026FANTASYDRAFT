@@ -263,50 +263,6 @@ CURATED_2026_SLEEPER_LEDGER: Dict[str, Dict[str, Any]] = {
         "source_url": "https://www.rotowire.com/football/player/jonathon-brooks-18030",
         "timestamp_utc": "2026-08-30T14:15:00Z"
     },
-    "Trey Benson": {
-        "name": "Trey Benson",
-        "pos": "RB",
-        "team": "ARI",
-        "is_rookie": True,
-        "sleeper_tier": "HIGH_UPSIDE_SLEEPER",
-        "badge": "💎 HIGH-CEILING HANDCUFF (+124)",
-        "preseason_grade": "B+ (Explosive)",
-        "preseason_stats": "17 carries, 93 yds (5.5 YPC), 2 rec, 18 yds",
-        "snap_trend": "Co-Starter Reps with 1st Team 📈",
-        "depth_status": "Direct Handcuff to James Conner",
-        "camp_buzz_blurb": (
-            "Benson showcased his 4.39 speed during the second half of preseason contests, flashing homerun breakaway ability. "
-            "Starter James Conner has missed at least 3 games in every season of his NFL career. Benson is guaranteed standalone "
-            "touches in Drew Petzing's run-heavy scheme, and becomes an instant top-15 RB if Conner misses time. "
-            "ESPN has him at #438 vs consensus #314 (+124 value diff)."
-        ),
-        "draft_strategy": "High-priority late-round stash in all formats.",
-        "source": "Arizona Republic & Cardinals Beat Wire",
-        "source_url": "https://www.rotowire.com/football/player/trey-benson-18062",
-        "timestamp_utc": "2026-08-30T11:00:00Z"
-    },
-    "Jayden Higgins": {
-        "name": "Jayden Higgins",
-        "pos": "WR",
-        "team": "HOU",
-        "is_rookie": True,
-        "sleeper_tier": "ROOKIE_PHENOM",
-        "badge": "⚡ MASSIVE VALUE STEAL (+1290)",
-        "preseason_grade": "A (Contested Beast)",
-        "preseason_stats": "9 rec, 128 yds, 2 TDs on 11 targets in preseason play",
-        "snap_trend": "Dominating Red-Zone Snaps with C.J. Stroud 📈",
-        "depth_status": "Rotational Perimeter & Red-Zone Target",
-        "camp_buzz_blurb": (
-            "Standing 6-foot-4 with a massive catch radius, Higgins was C.J. Stroud's favorite target in the red zone throughout August. "
-            "He caught 2 contested touchdowns in preseason play, using his size to box out defensive backs. While currently rehabbing "
-            "a minor knee strain, his consensus ranking sits at #119 across expert draft boards, whereas ESPN lists him at #1409 "
-            "(+1290 value difference)."
-        ),
-        "draft_strategy": "Target in Rounds 12-14 as a premier high-upside stash.",
-        "source": "Houston Chronicle & Texans Camp Beat",
-        "source_url": "https://www.rotowire.com/football/player/jayden-higgins-18221",
-        "timestamp_utc": "2026-08-29T19:45:00Z"
-    },
     "Isaac Guerendo": {
         "name": "Isaac Guerendo",
         "pos": "RB",
@@ -786,6 +742,27 @@ def enrich_board_with_sleepers(df_board: pd.DataFrame) -> pd.DataFrame:
         name = row["name"]
         key = clean_name_key(name)
         s_data = players.get(key)
+
+        is_season_out = bool(row.get("is_season_out", False))
+        injury_tier = str(row.get("injury_tier", ""))
+        is_injury_trap = bool(row.get("is_injury_trap", False))
+        is_out_for_season = is_season_out or injury_tier == "SEASON_IR" or is_injury_trap
+
+        # GUARANTEE: Never recommend or badge season-ending injured players as sleepers/steals
+        if is_out_for_season:
+            is_rookie_list.append(s_data.get("is_rookie", False) if s_data else False)
+            is_sleeper_list.append(False)
+            sleeper_tier_list.append("INJURY_TRAP")
+            sleeper_badge_list.append("🛑 INJURY TRAP (OUT FOR SEASON)")
+            grade_list.append("F (Injured)")
+            stats_list.append("Out for Season")
+            snap_list.append("Season-Ending IR")
+            blurb_list.append(f"CRITICAL INJURY: Player suffered a season-ending injury ({row.get('injury_type', 'IR')}). DO NOT DRAFT.")
+            strat_list.append("DO NOT DRAFT. Player is out for the 2026 season.")
+            ts_list.append(s_data.get("timestamp_utc", "") if s_data else "2026-09-02T10:00:00Z")
+            ts_fmt_list.append(s_data.get("updated_formatted", "") if s_data else "Sep 2, 2026 at 10:00 AM UTC")
+            src_list.append(s_data.get("source", "Official NFL IR") if s_data else "Official NFL IR")
+            continue
 
         if s_data:
             is_rookie_list.append(s_data.get("is_rookie", False))

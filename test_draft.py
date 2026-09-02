@@ -269,7 +269,9 @@ def test_ir_candidates_and_expert_coverage():
     assert not pearsall.empty, "Ricky Pearsall must be present on draft board"
     assert pearsall["pos"].values[0] == "WR"
     assert pearsall["team"].values[0] == "SF"
+    assert pearsall["is_season_out"].values[0] is True or pearsall["is_season_out"].values[0] == 1
     assert "IR" in pearsall["injury_status"].values[0] or "IR" in pearsall["injury_badge"].values[0]
+    assert pearsall["value_diff"].values[0] == -999
     assert pearsall["sportsillustrated_rank"].values[0] == 90
 
     # 2. Verify Jayden Higgins
@@ -277,7 +279,9 @@ def test_ir_candidates_and_expert_coverage():
     assert not higgins.empty, "Jayden Higgins must be present on draft board"
     assert higgins["pos"].values[0] == "WR"
     assert higgins["team"].values[0] == "HOU"
+    assert higgins["is_season_out"].values[0] is True or higgins["is_season_out"].values[0] == 1
     assert "IR" in higgins["injury_status"].values[0] or "IR" in higgins["injury_badge"].values[0]
+    assert higgins["value_diff"].values[0] == -999
     assert higgins["sportsillustrated_rank"].values[0] == 117
 
     # 3. Verify 100% expert match rate
@@ -365,7 +369,9 @@ def test_sleeper_database_and_enrichment():
     from sleeper_sync import load_sleeper_database, CURATED_2026_SLEEPER_LEDGER
 
     db = load_sleeper_database()
-    assert len(db["players"]) >= 26, f"Expected at least 26 players, got {len(db['players'])}"
+    assert len(db["players"]) >= 24, f"Expected at least 24 players, got {len(db['players'])}"
+    assert "jayden higgins" not in db["players"], "Jayden Higgins must be excluded from sleeper db"
+    assert "trey benson" not in db["players"], "Trey Benson must be excluded from sleeper db"
 
     df = pd.read_parquet("data/draft_board_2026.parquet")
     assert "is_rookie" in df.columns
@@ -380,6 +386,27 @@ def test_sleeper_database_and_enrichment():
     cam = df[df["name"] == "Cam Ward"].iloc[0]
     assert cam["is_rookie"] is True or cam["is_rookie"] == 1
     assert cam["value_diff"] >= 100, f"Cam Ward value diff should be >= 100, got {cam['value_diff']}"
+
+
+def test_injury_trap_guarantee():
+    """GUARANTEE: Zero season-ending IR players have positive value diff or sleeper status."""
+    import pandas as pd
+    df = pd.read_parquet("data/draft_board_2026.parquet")
+    season_out = df[df["is_season_out"] | (df["injury_tier"] == "SEASON_IR") | (df["is_injury_trap"] == True)]
+    assert not season_out.empty, "There should be season-ending IR players tracked"
+
+    # Guarantee 1: None have value_diff >= 4
+    steals = season_out[season_out["value_diff"] >= 4]
+    assert steals.empty, f"No season-out player can have value_diff >= 4, found: {steals['name'].tolist()}"
+
+    # Guarantee 2: None have is_sleeper == True
+    sleepers = season_out[season_out["is_sleeper"] == True]
+    assert sleepers.empty, f"No season-out player can be marked as a sleeper, found: {sleepers['name'].tolist()}"
+
+    # Guarantee 3: All have is_injury_trap == True and value_diff == -999
+    for _, r in season_out.iterrows():
+        assert r["is_injury_trap"] is True or r["is_injury_trap"] == 1, f"{r['name']} must have is_injury_trap == True"
+        assert r["value_diff"] == -999, f"{r['name']} must have value_diff == -999"
 
 
 if __name__ == "__main__":
@@ -397,5 +424,5 @@ if __name__ == "__main__":
     test_rank_header_and_reset_search()
     test_sleeper_temporal_precedence()
     test_sleeper_database_and_enrichment()
+    test_injury_trap_guarantee()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
-

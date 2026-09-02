@@ -16,6 +16,7 @@ import glob
 import json
 import sqlite3
 import logging
+from datetime import datetime, timezone
 import unicodedata
 import difflib
 from pathlib import Path
@@ -322,25 +323,58 @@ CURATED_2026_INJURY_LEDGER = {
     },
     "ricky pearsall": {
         "status": "Injured Reserve",
-        "type": "Knee - PCL Sprain",
-        "tier": "PUP_MULTI_WEEK",
-        "badge": "⚠️ PUP / IR (PCL)",
-        "timeline": "Out min first 4 wks (Target Return: Wk 5 / Oct 12)",
-        "return_date": "2026-10-12",
-        "blurb": "Placed on Injured Reserve with PCL knee sprain. Eligible to return in Week 5. 49ers coaching staff targets October return. Prime late-round IR stash.",
-        "is_season_out": False,
-        "draft_advice": "High-upside late-round IR stash target. Draft in rounds 10-14 and stash immediately in your dedicated IR slot for second-half upside."
+        "type": "Knee - PCL Surgery",
+        "tier": "SEASON_IR",
+        "badge": "🛑 IR (Knee - PCL)",
+        "timeline": "Out for 2026 Season (PCL Surgery)",
+        "return_date": "2027-02-15",
+        "blurb": "Placed on season-ending injured reserve on August 1, 2026 to undergo surgery repairing an aggravated PCL. 6-12 month recovery timeline.",
+        "is_season_out": True,
+        "draft_advice": "DO NOT DRAFT in 2026 redraft leagues. Out for the entire 2026 season."
     },
     "jayden higgins": {
         "status": "Injured Reserve",
         "type": "Knee - Torn ACL / Surgery",
         "tier": "SEASON_IR",
         "badge": "🛑 IR (Knee - ACL)",
-        "timeline": "Out for 2026 Season",
+        "timeline": "Out for 2026 Season (Torn ACL)",
         "return_date": "2027-02-15",
-        "blurb": "Underwent knee ACL reconstruction surgery during preseason and placed on season-ending injured reserve by Texans.",
+        "blurb": "Suffered torn ACL during August preseason joint practice with Raiders; underwent reconstructive knee surgery and placed on season-ending injured reserve.",
         "is_season_out": True,
         "draft_advice": "DO NOT DRAFT in standard 2026 redraft leagues. Out for the entire 2026 season."
+    },
+    "calvin austin iii": {
+        "status": "Injured Reserve",
+        "type": "Knee - Torn ACL",
+        "tier": "SEASON_IR",
+        "badge": "🛑 IR (Knee - ACL)",
+        "timeline": "Out for 2026 Season",
+        "return_date": "2027-02-15",
+        "blurb": "Suffered torn right ACL in late August training camp practice; placed on season-ending injured reserve.",
+        "is_season_out": True,
+        "draft_advice": "DO NOT DRAFT in 2026 redraft leagues."
+    },
+    "calvin austin": {
+        "status": "Injured Reserve",
+        "type": "Knee - Torn ACL",
+        "tier": "SEASON_IR",
+        "badge": "🛑 IR (Knee - ACL)",
+        "timeline": "Out for 2026 Season",
+        "return_date": "2027-02-15",
+        "blurb": "Suffered torn right ACL in late August training camp practice; placed on season-ending injured reserve.",
+        "is_season_out": True,
+        "draft_advice": "DO NOT DRAFT in 2026 redraft leagues."
+    },
+    "graham mertz": {
+        "status": "Injured Reserve",
+        "type": "Knee - Torn ACL",
+        "tier": "SEASON_IR",
+        "badge": "🛑 IR (Knee - ACL)",
+        "timeline": "Out for 2026 Season",
+        "return_date": "2027-02-15",
+        "blurb": "Sustained torn ACL during preseason action; placed on season-ending injured reserve.",
+        "is_season_out": True,
+        "draft_advice": "DO NOT DRAFT in 2026 redraft leagues."
     }
 }
 
@@ -452,17 +486,24 @@ def fetch_sleeper_live_injuries(timeout: int = 5) -> Dict[str, dict]:
                 notes = p.get("injury_notes") or ""
                 
                 # Check tier
+                body_part_l = body_part.lower()
                 notes_l = notes.lower()
                 status_l = (status or "").lower()
                 inj_l = (inj_status or "").lower()
                 
-                if "season" in notes_l or "ir" in status_l or "ir" in inj_l:
-                    if "out for season" in notes_l or "acl" in notes_l:
+                # Definitive season-ending keyword indicators
+                is_season_severe = any(
+                    kw in notes_l or kw in body_part_l or kw in status_l or kw in inj_l
+                    for kw in ["out for season", "season-ending", "season ending", "acl", "achilles", "torn pcl", "pcl surgery", "patellar", "reconstruct"]
+                )
+                
+                if "season" in notes_l or "ir" in status_l or "ir" in inj_l or is_season_severe:
+                    if is_season_severe or "out for season" in notes_l:
                         tier = "SEASON_IR"
                         badge = f"🛑 IR ({body_part[:12]})"
                         timeline = "Out for 2026 Season"
                         is_season_out = True
-                        advice = "DO NOT DRAFT in standard redraft leagues."
+                        advice = "DO NOT DRAFT in standard redraft leagues. Out for the entire 2026 season."
                     else:
                         tier = "PUP_MULTI_WEEK"
                         badge = f"⚠️ IR ({body_part[:12]})"
@@ -541,19 +582,31 @@ def get_comprehensive_injury_map() -> Dict[str, dict]:
         if is_up:
             merged_map[name] = win
             
-    # 3. Verified 2026 Season IR / Discipline ledger
+    # 3. Verified 2026 Season IR / Discipline ledger (Authoritative ground truth)
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     for name, data in CURATED_2026_INJURY_LEDGER.items():
         if name in active_players and not data.get("is_season_out"):
             continue
         curr = merged_map.get(name)
         ledger_rec = data.copy()
         if not ledger_rec.get("timestamp_utc"):
-            ledger_rec["timestamp_utc"] = "2026-09-01T12:00:00Z"
-            ledger_rec["updated_formatted"] = "Sep 01, 2026 at 12:00 PM UTC"
+            ledger_rec["timestamp_utc"] = now_iso
+            ledger_rec["updated_formatted"] = format_display_timestamp(now_iso)
         ledger_rec["player_name"] = name.title()
-        is_up, win = resolve_injury_temporal_conflict(curr, ledger_rec)
-        if is_up:
-            merged_map[name] = win
+        
+        if data.get("is_season_out"):
+            # Authoritative medical ground truth: always enforce season-ending IR
+            if curr:
+                curr.update(ledger_rec)
+                curr["is_season_out"] = True
+                curr["tier"] = "SEASON_IR"
+                merged_map[name] = curr
+            else:
+                merged_map[name] = ledger_rec
+        else:
+            is_up, win = resolve_injury_temporal_conflict(curr, ledger_rec)
+            if is_up:
+                merged_map[name] = win
 
     # 4. Guarantee that any player confirmed Active in 2026 is clean and unflagged
     for act in active_players:
@@ -1092,6 +1145,17 @@ def merge_and_finalize_board(
         for col in ["injury_status", "injury_type", "injury_tier", "injury_badge", "injury_timeline", "injury_blurb", "injury_return_date", "draft_advice"]:
             base_df[col] = ""
         base_df["is_season_out"] = False
+
+    # -------------------------------------------------------------------------
+    # GUARANTEE: Algorithmic Injury Trap Protection
+    # If a player is OUT FOR SEASON (Torn ACL, Achilles, Season-Ending IR), ESPN ranking them at 1000+
+    # is accurate, while lagging expert consensus lists are stale.
+    # Under NO circumstances should a season-ending injured player have a positive value_diff!
+    # -------------------------------------------------------------------------
+    season_out_mask = base_df["is_season_out"] | (base_df.get("injury_tier", "") == "SEASON_IR")
+    base_df.loc[season_out_mask, "value_diff"] = -999
+    base_df.loc[season_out_mask, "is_injury_trap"] = True
+    base_df.loc[~season_out_mask, "is_injury_trap"] = False
 
     # Merge comprehensive 2026 preseason rookie dominance & sleeper intelligence
     try:

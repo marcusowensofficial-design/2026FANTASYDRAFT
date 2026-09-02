@@ -245,19 +245,34 @@ def sync_injury_pipeline(force_sample_update: bool = False) -> Tuple[int, List[s
                 if pname not in updated_players:
                     updated_players.append(pname)
 
-    # 3. Verified Curated Ledger
+    # 3. Verified Curated Ledger (Authoritative ground truth)
     for clean_name, inj_data in CURATED_2026_INJURY_LEDGER.items():
         if clean_name in active_players and not inj_data.get("is_season_out"):
             continue
         curr = existing_players.get(clean_name)
         ledger_record = inj_data.copy()
         if not ledger_record.get("timestamp_utc"):
-            ledger_record["timestamp_utc"] = "2026-09-01T12:00:00Z"
+            ledger_record["timestamp_utc"] = now_iso
+            ledger_record["updated_formatted"] = format_display_timestamp(now_iso)
         ledger_record["player_name"] = clean_name.title()
         
-        is_updated, winning_record = resolve_injury_temporal_conflict(curr, ledger_record)
-        if is_updated:
-            existing_players[clean_name] = winning_record
+        if inj_data.get("is_season_out"):
+            if curr:
+                curr.update(ledger_record)
+                curr["is_season_out"] = True
+                curr["tier"] = "SEASON_IR"
+                existing_players[clean_name] = curr
+            else:
+                existing_players[clean_name] = ledger_record
+            if clean_name.title() not in updated_players:
+                updated_players.append(clean_name.title())
+        else:
+            is_updated, winning_record = resolve_injury_temporal_conflict(curr, ledger_record)
+            if is_updated:
+                existing_players[clean_name] = winning_record
+                pname = winning_record.get("player_name") or clean_name.title()
+                if pname not in updated_players:
+                    updated_players.append(pname)
 
     # 4. Remove active players who have recovered
     for act in active_players:
