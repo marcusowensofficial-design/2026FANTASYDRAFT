@@ -447,11 +447,14 @@ df_board = st.session_state.draft_board
 available_df = df_board[~df_board["is_drafted"]].copy().reset_index(drop=True)
 available_df["avail_rank"] = available_df.index + 1
 
-top_overall = available_df.iloc[0] if not available_df.empty else None
-top_rb = available_df[available_df["pos"] == "RB"].iloc[0] if not available_df[available_df["pos"] == "RB"].empty else None
-top_wr = available_df[available_df["pos"] == "WR"].iloc[0] if not available_df[available_df["pos"] == "WR"].empty else None
-top_qb = available_df[available_df["pos"] == "QB"].iloc[0] if not available_df[available_df["pos"] == "QB"].empty else None
-top_te = available_df[available_df["pos"] == "TE"].iloc[0] if not available_df[available_df["pos"] == "TE"].empty else None
+# Exclude season-ending IR from BPA quick radar recommendations
+radar_avail_df = available_df[~available_df["is_season_out"]].reset_index(drop=True)
+
+top_overall = radar_avail_df.iloc[0] if not radar_avail_df.empty else None
+top_rb = radar_avail_df[radar_avail_df["pos"] == "RB"].iloc[0] if not radar_avail_df[radar_avail_df["pos"] == "RB"].empty else None
+top_wr = radar_avail_df[radar_avail_df["pos"] == "WR"].iloc[0] if not radar_avail_df[radar_avail_df["pos"] == "WR"].empty else None
+top_qb = radar_avail_df[radar_avail_df["pos"] == "QB"].iloc[0] if not radar_avail_df[radar_avail_df["pos"] == "QB"].empty else None
+top_te = radar_avail_df[radar_avail_df["pos"] == "TE"].iloc[0] if not radar_avail_df[radar_avail_df["pos"] == "TE"].empty else None
 
 st.markdown(f"""
 <div class="best-avail-bar">
@@ -475,7 +478,11 @@ player_options = {}
 for _, row in available_df.iterrows():
     val_str = f"+{row['value_diff']}" if row['value_diff'] > 0 else f"{row['value_diff']}"
     disp_n = f"{to_unicode_strikethrough(row['name'])} 🛑" if row.get("is_season_out") else row["name"]
-    badge_str = f" {row['injury_badge']}" if row.get("injury_badge") else ""
+    badge_str = ""
+    if row.get("injury_badge"):
+        tl = row.get("injury_timeline", "")
+        tl_str = f" [{tl}]" if tl else ""
+        badge_str = f" {row['injury_badge']}{tl_str}"
     lbl = f"#{row['consensus_rank']} {disp_n}{badge_str} ({row['pos']} - {row['team']}, Bye {row['bye']}) | Tier {row['tier']} | Val: {val_str}"
     player_options[row["player_id"]] = lbl
 
@@ -568,6 +575,21 @@ if selected_player_id:
                 </div>
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Strategy: {tsp.get('draft_advice', 'Target in later rounds')}</em>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        elif tsp.get("injury_tier") == "OUT_WEEK_1":
+            st.markdown(f"""
+            <div style="background:#431407; border:2px solid #ea580c; border-radius:8px; padding:8px 14px; margin-top:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#fdba74; font-weight:800; font-size:0.95rem;">🟠 OUT WEEK 1 (EXPECTED BACK WEEK 2) &bull; {tsp['name']} ({tsp['pos']} - {tsp['team']})</span>
+                    <span style="background:#ea580c; color:#fff; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:4px;">OUT WK 1 ONLY</span>
+                </div>
+                <div style="color:#fed7aa; font-size:0.85rem; margin-top:2px;">
+                    <strong>Timeline:</strong> {tsp.get('injury_timeline', 'Out Wk 1 • Expected back Wk 2')} &bull; <strong>Status:</strong> Ruled Out Week 1 &bull; <strong>Condition:</strong> {tsp.get('injury_type', 'Short-term')}
+                </div>
+                <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
+                    {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Safe to draft; will only miss opening game.')}</em>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -757,11 +779,12 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             help="Checked by default. Displays all 9 expert ranking sources ordered from most reliable to mainstream."
         )
     with f_c4:
+        default_hide_ir = (key_prefix != "inj_report")
         hide_ir_toggle = st.checkbox(
             "🚫 Hide Season IR",
-            value=False,
+            value=st.session_state.get(f"hide_ir_{key_prefix}", default_hide_ir),
             key=f"hide_ir_{key_prefix}",
-            help="Hides players on season-ending IR (with strikethrough names) while keeping active players and viable multi-week stashes."
+            help="Checked by default on draft boards. Hides players on season-ending IR (with strikethrough names) while keeping active players and viable multi-week stashes. Uncheck to view all players."
         )
     with f_c5:
         keep_drafted_toggle = st.checkbox(
@@ -770,6 +793,30 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             key=f"keep_drafted_{key_prefix}",
             help="When checked, drafted players remain visible in the table with full red strikethrough styling and 1-click undo. Uncheck to view only remaining available players."
         )
+
+    # Visual Injury Status Legend / Key (below filter controls)
+    st.markdown("""
+    <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 6px 14px; margin: 4px 0 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.77rem; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">
+        <span style="font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+            📋 Injury Key:
+        </span>
+        <span style="background: #1e1b4b; padding: 2px 8px; border-radius: 4px; border: 1px solid #3730a3;">
+            <strong style="color: #eab308;">🟡 Q</strong> <span style="color: #cbd5e1;">= Questionable / Day-to-Day (Could play Wk 1)</span>
+        </span>
+        <span style="background: #431407; padding: 2px 8px; border-radius: 4px; border: 1px solid #ea580c;">
+            <strong style="color: #fb923c;">🟠 OUT (W1)</strong> <span style="color: #fed7aa;">= Out Week 1 Only (Expected back Wk 2)</span>
+        </span>
+        <span style="background: #2d1a04; padding: 2px 8px; border-radius: 4px; border: 1px solid #d97706;">
+            <strong style="color: #f59e0b;">⚠️ PUP / IR</strong> <span style="color: #fde68a;">= Multi-Wk Stash (Out min first 4 wks, returns Wk 5+)</span>
+        </span>
+        <span style="background: #3b0764; padding: 2px 8px; border-radius: 4px; border: 1px solid #7e22ce;">
+            <strong style="color: #c084fc;">⛔ SUSP</strong> <span style="color: #e9d5ff;">= Suspended (Returns when reinstated)</span>
+        </span>
+        <span style="background: #450a0a; padding: 2px 8px; border-radius: 4px; border: 1px solid #991b1b;">
+            <strong style="color: #f87171;">🛑 IR (Season)</strong> <span style="color: #fecaca;">= Season-Ending (Do not draft)</span>
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Apply in-table filters
     if not keep_drafted_toggle and "is_drafted" in df_display.columns:
@@ -823,7 +870,22 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     def format_badge(r):
         if r.get("is_drafted"):
             return "🟩 MY ROSTER" if r.get("is_user") else f"🔴 DRAFTED (#{r.get('pick_number', '')})"
-        return r.get("injury_badge", "")
+        badge = r.get("injury_badge", "")
+        if not badge:
+            return ""
+        # On dedicated injury tab, display the full timeline alongside badge
+        if key_prefix == "inj_report":
+            timeline = r.get("injury_timeline", "")
+            if timeline:
+                tl_clean = (
+                    timeline.replace("Target Return: ~", "Back ~")
+                    .replace("Out minimum first 4 games", "Out min 4 wks")
+                    .replace("Suspended until ~", "Susp. to ~")
+                )
+                return f"{badge} • {tl_clean}"
+            return badge
+        # On all regular draft boards, show just the clean icon, tag, and specific injury (e.g. 🟡 Q (Knee), 🟠 OUT (Ankle))
+        return badge
 
     df_display["injury_badge_display"] = df_display.apply(format_badge, axis=1)
 
@@ -889,6 +951,8 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
 
     styled_view = sub_view.style.apply(style_drafted_rows, axis=1)
 
+    st.caption("💡 **Draft Room Tip:** Click any player row to immediately view their full beat-reporter injury notes, return timeline, and 1-click draft buttons below.")
+
     # Interactive Table with Direct Selection and Smooth Horizontal Scrolling
     selection = st.dataframe(
         styled_view,
@@ -904,8 +968,8 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             "Pos": st.column_config.TextColumn(width="small"),
             "Team": st.column_config.TextColumn(width="small"),
             "Injury / Risk": st.column_config.TextColumn(
-                width="small",
-                help="Live NFL Injury, Suspension, or Pick Status. Click row to see details, medical notes, or 1-click undo."
+                width="medium",
+                help="Live NFL Injury, Suspension, & Return Timeline. Click any row in the table to display full beat-reporter injury notes and surgical updates below."
             ),
             "Bye": st.column_config.NumberColumn(width="small", format="%d"),
             "Tier": st.column_config.NumberColumn(width="small", format="%d"),
@@ -1025,6 +1089,24 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
+                elif inj_tier == "OUT_WEEK_1":
+                    st.markdown(f"""
+                    <div style="background:#431407; border:2px solid #ea580c; border-radius:8px; padding:12px 16px; margin-top:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fdba74; font-size:1.05rem;">🟠 OUT WEEK 1 (EXPECTED BACK WEEK 2) &bull; {p_name} ({p_pos} - {p_team})</strong>
+                            <span style="background:#ea580c; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">OUT WK 1 ONLY</span>
+                        </div>
+                        <div style="margin-top:6px; color:#fed7aa; font-size:0.9rem;">
+                            <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out Wk 1 • Target Return: Week 2')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Short-term')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 2')}
+                        </div>
+                        <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
+                            {sel_player.get('injury_blurb', '')}
+                        </div>
+                        <div style="margin-top:4px; color:#fb923c; font-size:0.85rem; font-weight:600;">
+                            💡 Strategy: {sel_player.get('draft_advice', 'Confirmed out for Week 1 only; expected ready for Week 2.')}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 elif inj_tier == "WEEK_1_RISK":
                     st.markdown(f"""
                     <div style="background:#422006; border:2px solid #eab308; border-radius:8px; padding:12px 16px; margin-top:8px;">
@@ -1119,22 +1201,24 @@ with tab_injuries:
     st.markdown("### 🚑 2026 Live NFL Injury & Suspension Scouting Intelligence")
     st.caption("Real-time aggregated medical and disciplinary intelligence from ESPN, Sleeper, and NFL beat sources. Track return timelines, surgical notes, and draft stash guidance.")
 
-    all_inj_df = df_board[df_board["injury_tier"].isin(["SEASON_IR", "SUSPENSION", "PUP_MULTI_WEEK", "WEEK_1_RISK"])].copy().reset_index(drop=True)
+    all_inj_df = df_board[df_board["injury_tier"].isin(["SEASON_IR", "SUSPENSION", "PUP_MULTI_WEEK", "OUT_WEEK_1", "WEEK_1_RISK"])].copy().reset_index(drop=True)
 
     if all_inj_df.empty:
         st.success("No active players currently flagged with injuries or suspensions.")
     else:
         # KPI Overview
-        kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+        kpi1, kpi2, kpi3, kpi4, kpi5, kpi6 = st.columns(6)
         with kpi1:
             st.metric("Total Flagged", len(all_inj_df))
         with kpi2:
-            st.metric("🛑 Out for Season", len(all_inj_df[all_inj_df["injury_tier"] == "SEASON_IR"]))
+            st.metric("🛑 Season IR", len(all_inj_df[all_inj_df["injury_tier"] == "SEASON_IR"]))
         with kpi3:
             st.metric("⛔ Suspensions", len(all_inj_df[all_inj_df["injury_tier"] == "SUSPENSION"]))
         with kpi4:
-            st.metric("⚠️ PUP / Multi-Wk", len(all_inj_df[all_inj_df["injury_tier"] == "PUP_MULTI_WEEK"]))
+            st.metric("⚠️ PUP / 4+ Wks", len(all_inj_df[all_inj_df["injury_tier"] == "PUP_MULTI_WEEK"]))
         with kpi5:
+            st.metric("🟠 Out Wk 1 Only", len(all_inj_df[all_inj_df["injury_tier"] == "OUT_WEEK_1"]))
+        with kpi6:
             st.metric("🟡 Week 1 / Q", len(all_inj_df[all_inj_df["injury_tier"] == "WEEK_1_RISK"]))
 
         # Filter controls
@@ -1152,12 +1236,14 @@ with tab_injuries:
                     "🛑 Out for Season (IR)",
                     "⛔ Suspensions",
                     "⚠️ PUP / Multi-Week (Out 4+ Wks)",
+                    "🟠 Out Week 1 Only (Back W2)",
                     "🟡 Week 1 Risk / Questionable"
                 ],
                 default=[
                     "🛑 Out for Season (IR)",
                     "⛔ Suspensions",
                     "⚠️ PUP / Multi-Week (Out 4+ Wks)",
+                    "🟠 Out Week 1 Only (Back W2)",
                     "🟡 Week 1 Risk / Questionable"
                 ],
                 key="inj_tab_tier_filter"
@@ -1167,6 +1253,7 @@ with tab_injuries:
             "🛑 Out for Season (IR)": "SEASON_IR",
             "⛔ Suspensions": "SUSPENSION",
             "⚠️ PUP / Multi-Week (Out 4+ Wks)": "PUP_MULTI_WEEK",
+            "🟠 Out Week 1 Only (Back W2)": "OUT_WEEK_1",
             "🟡 Week 1 Risk / Questionable": "WEEK_1_RISK"
         }
         selected_tiers = [tier_name_map[t] for t in inj_tier_filter if t in tier_name_map]
@@ -1184,6 +1271,34 @@ with tab_injuries:
 
         filtered_inj_df["avail_rank"] = filtered_inj_df.index + 1
         render_draft_table(filtered_inj_df, key_prefix="inj_report")
+
+        # Detailed beat-reporter wire feed
+        with st.expander("📰 Live Beat-Reporter Wire & Scouting Medical Blurbs", expanded=False):
+            st.caption("Direct beat-reporter updates, practice participation, and return estimates from official NFL beat writers & ESPN wire.")
+            for _, ir in filtered_inj_df.iterrows():
+                tier_color = "#ef4444" if ir["injury_tier"] == "SEASON_IR" else ("#c084fc" if ir["injury_tier"] == "SUSPENSION" else ("#f97316" if ir["injury_tier"] == "PUP_MULTI_WEEK" else ("#ea580c" if ir["injury_tier"] == "OUT_WEEK_1" else "#eab308")))
+                st.markdown(f"""
+                <div style="background:#111827; border-left:4px solid {tier_color}; border-radius:6px; padding:10px 14px; margin-bottom:10px; border-top:1px solid #1f2937; border-right:1px solid #1f2937; border-bottom:1px solid #1f2937;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="color:#f8fafc; font-size:0.95rem;">{ir['name']} ({ir['pos']} - {ir['team']})</strong>
+                            <span style="color:#94a3b8; font-size:0.8rem; margin-left:8px;">Consensus #{ir['consensus_rank']} &bull; Bye {ir['bye']}</span>
+                        </div>
+                        <span style="background:#1e293b; color:{tier_color}; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid {tier_color}40;">
+                            {ir['injury_badge']}
+                        </span>
+                    </div>
+                    <div style="color:#cbd5e1; font-size:0.82rem; margin-top:4px;">
+                        <strong>Timeline:</strong> {ir.get('injury_timeline', 'TBD')} &bull; <strong>Diagnosis:</strong> {ir.get('injury_type', 'Undisclosed')}
+                    </div>
+                    <div style="color:#94a3b8; font-size:0.82rem; margin-top:4px; line-height:1.4; background:#0b0f19; padding:8px 10px; border-radius:5px; border:1px solid #1e293b;">
+                        {ir.get('injury_blurb', 'No detailed blurb available.')}
+                    </div>
+                    <div style="color:#38bdf8; font-size:0.75rem; font-weight:600; margin-top:4px;">
+                        💡 Strategy: {ir.get('draft_advice', 'Monitor practice reports.')}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # --- Tab 10: Crossed Off / Drafted Players ---
 with tab_crossed:

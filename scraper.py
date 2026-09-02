@@ -250,7 +250,7 @@ CURATED_2026_INJURY_LEDGER = {
         "status": "Injured Reserve",
         "type": "Knee - Torn ACL / Surgery",
         "tier": "SEASON_IR",
-        "badge": "🛑 IR (Season)",
+        "badge": "🛑 IR (Knee - ACL)",
         "timeline": "Out for 2026 Season",
         "return_date": "2027-02-15",
         "blurb": "Underwent knee surgery and reverted to the Cardinals' season-ending injured reserve list. Out for the entire 2026 season.",
@@ -261,7 +261,7 @@ CURATED_2026_INJURY_LEDGER = {
         "status": "Injured Reserve",
         "type": "Knee - Meniscus Surgery",
         "tier": "SEASON_IR",
-        "badge": "🛑 IR (Season)",
+        "badge": "🛑 IR (Meniscus)",
         "timeline": "Out for 2026 Season",
         "return_date": "2027-02-15",
         "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
@@ -272,7 +272,7 @@ CURATED_2026_INJURY_LEDGER = {
         "status": "Injured Reserve",
         "type": "Knee - Meniscus Surgery",
         "tier": "SEASON_IR",
-        "badge": "🛑 IR (Season)",
+        "badge": "🛑 IR (Meniscus)",
         "timeline": "Out for 2026 Season",
         "return_date": "2027-02-15",
         "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
@@ -283,7 +283,7 @@ CURATED_2026_INJURY_LEDGER = {
         "status": "Injured Reserve",
         "type": "Hamstring - Severe Tear",
         "tier": "SEASON_IR",
-        "badge": "🛑 IR (Season)",
+        "badge": "🛑 IR (Hamstring)",
         "timeline": "Out for 2026 Season",
         "return_date": "2027-02-15",
         "blurb": "Placed on season-ending injured reserve with severe hamstring tear.",
@@ -294,7 +294,7 @@ CURATED_2026_INJURY_LEDGER = {
         "status": "Injured Reserve",
         "type": "Hamstring / Knee Surgery",
         "tier": "SEASON_IR",
-        "badge": "🛑 IR (Season)",
+        "badge": "🛑 IR (Knee/Ham)",
         "timeline": "Out for 2026 Season",
         "return_date": "2027-02-15",
         "blurb": "Suffered season-ending training camp knee/hamstring injury. Placed on season-ending IR.",
@@ -305,7 +305,7 @@ CURATED_2026_INJURY_LEDGER = {
         "status": "Suspension",
         "type": "League Substance Policy",
         "tier": "SUSPENSION",
-        "badge": "⛔ SUSP (3 Wks)",
+        "badge": "⛔ SUSP (Substance)",
         "timeline": "Suspended Wks 1-3 (Eligible Wk 4 / Oct 4)",
         "return_date": "2026-10-04",
         "blurb": "Suspended 3 games by the NFL for violating league substance abuse policy.",
@@ -345,28 +345,34 @@ def fetch_espn_live_injuries(timeout: int = 6) -> tuple[Dict[str, dict], set]:
                     status_l = status.lower()
                     if "2027" in ret_date or "out for season" in comm_l or "season-ending" in comm_l or "torn acl" in comm_l:
                         tier = "SEASON_IR"
-                        badge = "🛑 IR (Season)"
+                        badge = f"🛑 IR ({inj_type[:12]})"
                         timeline = "Out for 2026 Season"
                         is_season_out = True
                         advice = "DO NOT DRAFT in standard 2026 redraft leagues."
                     elif "susp" in status_l or "susp" in comm_l:
                         tier = "SUSPENSION"
-                        badge = "⛔ SUSP (League)"
+                        badge = f"⛔ SUSP ({inj_type[:12]})"
                         timeline = f"Suspended until ~{ret_date or 'TBD'}"
                         is_season_out = False
                         advice = "Stash candidate if you can weather early missed games."
                     elif "pup" in status_l or "reserve" in status_l or ("2026-10" in ret_date or "2026-11" in ret_date):
                         tier = "PUP_MULTI_WEEK"
-                        badge = "⚠️ PUP (Out W1-4+)" if "pup" in status_l else "⚠️ IR (Out min 4 wks)"
+                        badge = f"⚠️ PUP ({inj_type[:12]})" if "pup" in status_l else f"⚠️ IR ({inj_type[:12]})"
                         timeline = f"Out minimum first 4 games (Eligible ~{ret_date or 'Week 5'})"
                         is_season_out = False
                         advice = "Target around Rounds 8-11 as a high-upside stash."
-                    elif status in ["Questionable", "Doubtful", "Out"]:
-                        tier = "WEEK_1_RISK"
-                        badge = f"🟡 Q ({inj_type[:10]})" if status == "Questionable" else "⚠️ OUT (Wk 1)"
-                        timeline = f"Target Return: ~{ret_date or 'Week 1-2'}"
+                    elif status in ["Out", "Doubtful"] or "out week 1" in comm_l or "ruled out" in comm_l:
+                        tier = "OUT_WEEK_1"
+                        badge = f"🟠 OUT ({inj_type[:12]})"
+                        timeline = f"Out Week 1 Only • Target Return: ~{ret_date or 'Week 2'}"
                         is_season_out = False
-                        advice = "Monitor practice participation reports leading to Week 1."
+                        advice = "Ruled out for Week 1 opener; expected back in Week 2."
+                    elif status == "Questionable" or "questionable" in comm_l or "day-to-day" in comm_l:
+                        tier = "WEEK_1_RISK"
+                        badge = f"🟡 Q ({inj_type[:12]})"
+                        timeline = f"Target Return: ~{ret_date or 'Week 1'}"
+                        is_season_out = False
+                        advice = "Questionable for Week 1 opener. Monitor practice reports."
                     else:
                         continue
                     
@@ -416,34 +422,40 @@ def fetch_sleeper_live_injuries(timeout: int = 5) -> Dict[str, dict]:
                 if "season" in notes_l or "ir" in status_l or "ir" in inj_l:
                     if "out for season" in notes_l or "acl" in notes_l:
                         tier = "SEASON_IR"
-                        badge = "🛑 IR (Season)"
+                        badge = f"🛑 IR ({body_part[:12]})"
                         timeline = "Out for 2026 Season"
                         is_season_out = True
                         advice = "DO NOT DRAFT in standard redraft leagues."
                     else:
                         tier = "PUP_MULTI_WEEK"
-                        badge = "⚠️ IR (Out min 4 wks)"
+                        badge = f"⚠️ IR ({body_part[:12]})"
                         timeline = "Out minimum first 4 weeks"
                         is_season_out = False
                         advice = "Stash candidate if you can weather the opening month."
                 elif "sus" in inj_l or "sus" in status_l or "susp" in notes_l:
                     tier = "SUSPENSION"
-                    badge = "⛔ SUSP (League)"
+                    badge = f"⛔ SUSP ({body_part[:12]})"
                     timeline = "Suspended early season"
                     is_season_out = False
                     advice = "Stash candidate for mid-season return."
                 elif "pup" in inj_l or "pup" in status_l:
                     tier = "PUP_MULTI_WEEK"
-                    badge = "⚠️ PUP (Out W1-4)"
+                    badge = f"⚠️ PUP ({body_part[:12]})"
                     timeline = "Out minimum first 4 games (PUP)"
                     is_season_out = False
                     advice = "Stash candidate in late rounds."
+                elif "out" in inj_l or "out" in status_l or "doubtful" in inj_l:
+                    tier = "OUT_WEEK_1"
+                    badge = f"🟠 OUT ({body_part[:12]})"
+                    timeline = "Out Week 1 Only (Target return: Week 2)"
+                    is_season_out = False
+                    advice = "Ruled out for Week 1; expected back for Week 2."
                 else:
                     tier = "WEEK_1_RISK"
-                    badge = f"🟡 Q ({body_part[:10]})"
+                    badge = f"🟡 Q ({body_part[:12]})"
                     timeline = "Target return: Week 1"
                     is_season_out = False
-                    advice = "Monitor Week 1 practice participation."
+                    advice = "Questionable for Week 1 opener. Monitor practice participation."
                 
                 results[clean_name] = {
                     "status": inj_status or status or "Questionable",
