@@ -433,6 +433,63 @@ def test_espn_official_top300_guarantee():
     assert healthy_steals["value_diff"].max() <= 150, f"Max value diff must be <= 150, got {healthy_steals['value_diff'].max()}"
 
 
+def test_expert_ranking_sort_guarantees():
+    """GUARANTEE: Sorting any expert ranking column starts at rank 1 (or 300) and NEVER starts at None."""
+    import pandas as pd
+
+    df = pd.read_parquet("data/draft_board_2026.parquet")
+
+    expert_cols = [
+        "espn_rank",
+        "draftsharks_rank",
+        "footballguys_rank",
+        "cbs_rank",
+        "fantasypros_rank",
+        "rotoballer_rank",
+        "nbcsports_rank",
+        "bleacherreport_rank",
+        "sportsillustrated_rank"
+    ]
+
+    for col in expert_cols:
+        assert col in df.columns, f"Column {col} must exist in draft board"
+
+        # 1. Ascending Sort (Lowest to High: 1 -> 300)
+        sorted_asc = df.sort_values(
+            by=[col, "consensus_rank"],
+            ascending=[True, True],
+            na_position="last"
+        ).reset_index(drop=True)
+
+        first_val = sorted_asc[col].iloc[0]
+        assert pd.notna(first_val), f"Ascending sort on {col} must NOT start with None/NaN"
+        assert first_val == 1.0, f"Ascending sort on {col} must start at rank 1, got {first_val}"
+
+        # Ensure all NaNs/Nones are at the bottom
+        first_nan_idx = sorted_asc[col].isna().idxmax() if sorted_asc[col].isna().any() else len(sorted_asc)
+        if sorted_asc[col].isna().any():
+            tail_vals = sorted_asc[col].iloc[first_nan_idx:]
+            assert tail_vals.isna().all(), f"All values after first NaN on {col} must be NaN (placed at bottom)"
+
+        # 2. Descending Sort (High to Lowest: 300 -> 1)
+        sorted_desc = df.sort_values(
+            by=[col, "consensus_rank"],
+            ascending=[False, True],
+            na_position="last"
+        ).reset_index(drop=True)
+
+        first_desc_val = sorted_desc[col].iloc[0]
+        max_ranked_val = df[col].dropna().max()
+        assert pd.notna(first_desc_val), f"Descending sort on {col} must NOT start with None/NaN"
+        assert first_desc_val == max_ranked_val, f"Descending sort on {col} must start at max rank ({max_ranked_val}), got {first_desc_val}"
+
+        # Ensure all NaNs/Nones are at the bottom
+        if sorted_desc[col].isna().any():
+            first_desc_nan_idx = sorted_desc[col].isna().idxmax()
+            tail_desc_vals = sorted_desc[col].iloc[first_desc_nan_idx:]
+            assert tail_desc_vals.isna().all(), f"All values after first NaN on {col} (descending) must be NaN (placed at bottom)"
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -450,4 +507,6 @@ if __name__ == "__main__":
     test_sleeper_database_and_enrichment()
     test_injury_trap_guarantee()
     test_espn_official_top300_guarantee()
+    test_expert_ranking_sort_guarantees()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
+

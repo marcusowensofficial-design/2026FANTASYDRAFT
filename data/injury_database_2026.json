@@ -3,7 +3,7 @@
     "last_synced": "2026-09-02T17:13:51Z",
     "last_synced_formatted": "Sep 02, 2026 at 05:13 PM UTC",
     "version": "2026.1",
-    "total_records": 1018,
+    "total_records": 1017,
     "uncommitted_changes": 0,
     "uncommitted_players": [],
     "last_committed_timestamp": "2026-09-02T17:14:17Z"
@@ -100,8 +100,8 @@
       "blurb": "Underwent knee surgery and reverted to the Cardinals' season-ending injured reserve list. Out for the entire 2026 season.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in standard 2026 redraft leagues. Retained on board for dynasty/informational reference.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/trey-benson.php"
     },
@@ -1135,14 +1135,14 @@
       "type": "Heel",
       "tier": "WEEK_1_RISK",
       "badge": "🟡 Q (Heel)",
-      "timeline": "Target return: Week 1",
-      "return_date": null,
-      "blurb": "Reported as Questionable (Heel).",
+      "timeline": "Target Return: ~2026-09-13",
+      "return_date": "2026-09-13",
+      "blurb": "Higgins (heel) didn't take part in practice Wednesday, Ben Baby of ESPN.com reports.",
       "is_season_out": false,
-      "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
-      "source": "Sleeper API",
+      "draft_advice": "Questionable for Week 1 opener. Monitor practice reports.",
+      "timestamp_utc": "2026-09-02T22:02:00Z",
+      "updated_formatted": "Sep 02, 2026 at 10:02 PM UTC",
+      "source": "ESPN Official Injury API",
       "source_url": "https://www.fantasypros.com/nfl/players/tee-higgins.php"
     },
     "jamarr chase": {
@@ -2372,8 +2372,8 @@
       "blurb": "Suffered torn ACL during August preseason joint practice with Raiders; underwent reconstructive knee surgery and placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in standard 2026 redraft leagues. Out for the entire 2026 season.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/jayden-higgins.php"
     },
@@ -3764,8 +3764,8 @@
       "blurb": "Suspended 3 games by the NFL for violating league substance abuse policy.",
       "is_season_out": false,
       "draft_advice": "Waiver watch candidate.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/jeshaun-jones.php"
     },
@@ -4084,8 +4084,8 @@
       "blurb": "Placed on season-ending injured reserve with severe hamstring tear.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/devin-neal.php"
     },
@@ -4276,8 +4276,8 @@
       "blurb": "Suffered torn right ACL in late August training camp practice; placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/calvin-austin.php"
     },
@@ -8436,8 +8436,8 @@
       "blurb": "Placed on season-ending injured reserve on August 1, 2026 to undergo surgery repairing an aggravated PCL. 6-12 month recovery timeline.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues. Out for the entire 2026 season.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/ricky-pearsall.php"
     },
@@ -13060,8 +13060,8 @@
       "blurb": "Sustained torn ACL during preseason action; placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/graham-mertz.php"
     },
@@ -14440,22 +14440,6 @@
       "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/raheem-blackshear.php"
-    },
-    "jedrick wills": {
-      "player_name": "Jedrick Wills",
-      "status": "Questionable",
-      "type": "Undisclosed",
-      "tier": "WEEK_1_RISK",
-      "badge": "🟡 Q (Undisclosed)",
-      "timeline": "Target return: Week 1",
-      "return_date": null,
-      "blurb": "Reported as Questionable (Undisclosed).",
-      "is_season_out": false,
-      "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
-      "source": "Sleeper API",
-      "source_url": "https://www.fantasypros.com/nfl/players/jedrick-wills.php"
     },
     "nick bellore": {
       "player_name": "Nick Bellore",
@@ -16227,8 +16211,8 @@
       "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "player_name": "J.J. Mccarthy"
     },
     "rondale moore": {
@@ -16241,8 +16225,8 @@
       "blurb": "Suffered season-ending training camp knee/hamstring injury. Placed on season-ending IR.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "player_name": "Rondale Moore"
     },
     "josh simmons": {
@@ -16271,8 +16255,8 @@
       "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "player_name": "Jj Mccarthy"
     },
     "calvin austin iii": {
@@ -16285,8 +16269,8 @@
       "blurb": "Suffered torn right ACL in late August training camp practice; placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-02T21:44:45Z",
-      "updated_formatted": "Sep 02, 2026 at 09:44 PM UTC",
+      "timestamp_utc": "2026-09-02T22:15:25Z",
+      "updated_formatted": "Sep 02, 2026 at 10:15 PM UTC",
       "player_name": "Calvin Austin Iii"
     }
   }

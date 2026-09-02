@@ -1084,11 +1084,17 @@ tab_all, tab_drafted, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_st
 
 
 def reset_table_search(key_prefix: str = "all_avail"):
-    """Safely increments the search version counter to clear text inputs and deselect rows without StreamlitAPIException."""
+    """Safely increments the search and sort version counters to clear text inputs and deselect rows without StreamlitAPIException."""
     st.session_state[f"search_ver_{key_prefix}"] = st.session_state.get(f"search_ver_{key_prefix}", 0) + 1
+    st.session_state[f"sort_ver_{key_prefix}"] = st.session_state.get(f"sort_ver_{key_prefix}", 0) + 1
     sel_k = f"table_select_{key_prefix}"
     if sel_k in st.session_state:
         del st.session_state[sel_k]
+
+
+def reset_table_sort(key_prefix: str = "all_avail"):
+    """Safely increments the sort version counter to reset sorting to default without StreamlitAPIException."""
+    st.session_state[f"sort_ver_{key_prefix}"] = st.session_state.get(f"sort_ver_{key_prefix}", 0) + 1
 
 
 def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_granular: bool = True):
@@ -1106,8 +1112,13 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     search_ver = st.session_state.get(f"search_ver_{key_prefix}", 0)
     search_key = f"search_input_{key_prefix}_{search_ver}"
 
-    # In-table search & filtering bar
-    f_c1, f_c2, f_c3, f_c4, f_c5 = st.columns([2.0, 1.1, 1.6, 1.4, 1.5])
+    sort_ver = st.session_state.get(f"sort_ver_{key_prefix}", 0)
+    sort_by_key = f"sort_by_{key_prefix}_{sort_ver}"
+    sort_dir_key = f"sort_dir_{key_prefix}_{sort_ver}"
+    hide_unranked_key = f"hide_unranked_{key_prefix}_{sort_ver}"
+
+    # In-table search, sorting & filtering bar
+    f_c1, f_c2, f_c3, f_c4 = st.columns([2.0, 1.0, 1.5, 1.5])
     with f_c1:
         curr_q = st.session_state.get(search_key, "")
         if curr_q:
@@ -1138,27 +1149,74 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             placeholder="All Tiers"
         )
     with f_c3:
+        sort_options = [
+            "Consensus (Default)",
+            "ESPN (Top 300)",
+            "Draft Sharks (#1)",
+            "Footballguys (#2)",
+            "FantasyPros (#3)",
+            "RotoBaller (#4)",
+            "CBS Sports (#5)",
+            "NBC Sports (#6)",
+            "Bleacher Report (#7)",
+            "Sports Illustrated (#8)",
+            "Value Steals (ESPN Diff)",
+            "Auction Value ($)"
+        ]
+        sort_by = st.selectbox(
+            "Sort by Ranking",
+            options=sort_options,
+            index=0,
+            key=sort_by_key,
+            help="Choose an expert ranking source to sort by. Guarantees ranks start cleanly at 1 or 300, never at None."
+        )
+    with f_c4:
+        sort_dir_options = [
+            "Lowest to High (1 → 300)",
+            "High to Lowest (300 → 1)"
+        ]
+        sort_direction = st.selectbox(
+            "Sort Order",
+            options=sort_dir_options,
+            index=0,
+            key=sort_dir_key,
+            help="Sort from lowest rank to highest (e.g. 1, 2, 3...) or highest to lowest (e.g. 300, 299, 298...)."
+        )
+
+    # Secondary display & filtering toggles row
+    t_c1, t_c2, t_c3, t_c4 = st.columns([1.5, 1.1, 1.2, 1.6])
+    with t_c1:
         granular_toggle = st.checkbox(
             "📊 Show All Expert Sources (9 Ranks)",
             value=st.session_state.get(f"toggle_granular_{key_prefix}", True),
             key=f"toggle_granular_{key_prefix}",
-            help="Checked by default. Displays all 9 expert ranking sources ordered from most reliable to mainstream. Note: Outlets with published cutoff lists (Footballguys/NBC/SI Top 200, Draft Sharks Top 250, B/R Top 314) display None for players outside their evaluated range."
+            help="Checked by default. Displays all 9 expert ranking sources ordered from most reliable to mainstream."
         )
-    with f_c4:
+    with t_c2:
         default_hide_ir = (key_prefix != "inj_report")
         hide_ir_toggle = st.checkbox(
             "🚫 Hide Season IR",
             value=st.session_state.get(f"hide_ir_{key_prefix}", default_hide_ir),
             key=f"hide_ir_{key_prefix}",
-            help="Checked by default on draft boards. Hides players on season-ending IR (with strikethrough names) while keeping active players and viable multi-week stashes. Uncheck to view all players."
+            help="Checked by default on draft boards. Hides players on season-ending IR while keeping active players."
         )
-    with f_c5:
+    with t_c3:
         keep_drafted_toggle = st.checkbox(
-            "🔴 Keep Drafted (Redded Out)",
+            "🔴 Keep Drafted",
             value=True,
             key=f"keep_drafted_{key_prefix}",
-            help="When checked, drafted players remain visible in the table with full red strikethrough styling and 1-click undo. Uncheck to view only remaining available players."
+            help="When checked, drafted players remain visible in the table with full red strikethrough styling and 1-click undo."
         )
+    with t_c4:
+        hide_unranked = False
+        if sort_by != "Consensus (Default)" and sort_by not in ["Value Steals (ESPN Diff)", "Auction Value ($)"]:
+            short_name = sort_by.split(" ")[0]
+            hide_unranked = st.checkbox(
+                f"🎯 Only Ranked on {short_name}",
+                value=st.session_state.get(f"hide_unranked_{key_prefix}", False),
+                key=hide_unranked_key,
+                help=f"Filter the board to only players evaluated and ranked by {sort_by}, hiding unranked players entirely."
+            )
 
     # Visual Injury Status Legend / Key (below filter controls)
     st.markdown("""
@@ -1203,9 +1261,65 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     if tier_filter:
         df_display = df_display[df_display["tier"].isin(tier_filter)].reset_index(drop=True)
 
+    # Dictionary mapping user-friendly names to dataframe columns
+    SORT_COL_MAP = {
+        "Consensus (Default)": "consensus_rank",
+        "ESPN (Top 300)": "espn_rank",
+        "Draft Sharks (#1)": "draftsharks_rank",
+        "Footballguys (#2)": "footballguys_rank",
+        "FantasyPros (#3)": "fantasypros_rank",
+        "RotoBaller (#4)": "rotoballer_rank",
+        "CBS Sports (#5)": "cbs_rank",
+        "NBC Sports (#6)": "nbcsports_rank",
+        "Bleacher Report (#7)": "bleacherreport_rank",
+        "Sports Illustrated (#8)": "sportsillustrated_rank",
+        "Value Steals (ESPN Diff)": "value_diff",
+        "Auction Value ($)": "auction_value"
+    }
+
+    sort_col = SORT_COL_MAP.get(sort_by, "consensus_rank")
+    is_ascending = (sort_direction == "Lowest to High (1 → 300)")
+
+    # If user wants to see only players ranked by that specific expert
+    if hide_unranked and sort_col in df_display.columns:
+        df_display = df_display[df_display[sort_col].notna()].reset_index(drop=True)
+
+    # GUARANTEE: na_position='last' ensures that:
+    # 1. Lowest to High (1 -> 300): Starts cleanly at 1, 2, 3, 4 ... up to 300!
+    # 2. High to Lowest (300 -> 1): Starts cleanly at 300, 299, 298 ... down to 1!
+    # 3. In BOTH directions, unranked players (NaN / None) are placed at the BOTTOM, NEVER at the top!
+    if sort_col in df_display.columns:
+        if sort_by == "Value Steals (ESPN Diff)":
+            df_display = df_display.sort_values(
+                by=[sort_col, "consensus_rank"],
+                ascending=[not is_ascending if sort_direction == "Lowest to High (1 → 300)" else is_ascending, True],
+                na_position="last"
+            ).reset_index(drop=True)
+        else:
+            df_display = df_display.sort_values(
+                by=[sort_col, "consensus_rank"],
+                ascending=[is_ascending, True],
+                na_position="last"
+            ).reset_index(drop=True)
+
+    # Active sort banner with 1-click Reset to Consensus
+    if sort_by != "Consensus (Default)" or sort_direction != "Lowest to High (1 → 300)":
+        non_null_ranks = df_display[sort_col].dropna()
+        if not non_null_ranks.empty:
+            start_rank_val = int(non_null_ranks.iloc[0])
+        else:
+            start_rank_val = "1" if is_ascending else "300"
+        c_sort_info, c_sort_btn = st.columns([7.8, 2.2])
+        with c_sort_info:
+            st.info(f"📊 Table sorted by **{sort_by}** &bull; **{sort_direction}** (Starts at rank **#{start_rank_val}**, unranked players placed at bottom)")
+        with c_sort_btn:
+            if st.button("🔄 Reset to Consensus", key=f"btn_reset_sort_{key_prefix}_{sort_ver}", use_container_width=True, help="Reset sorting back to Consensus Median Rank #1-300"):
+                reset_table_sort(key_prefix)
+                st.rerun()
+
     # Dedicated active search alert bar with 1-click Return to Available
     if tbl_search:
-        c_act_info, c_act_btn = st.columns([7.5, 2.5])
+        c_act_info, c_act_btn = st.columns([7.8, 2.2])
         with c_act_info:
             st.info(f"🔍 Currently filtered by **'{tbl_search}'** ({len(df_display)} matching player{'s' if len(df_display) != 1 else ''} found)")
         with c_act_btn:
