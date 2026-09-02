@@ -976,8 +976,9 @@ with st.sidebar:
 # -----------------------------------------------------------------------------
 # 8. MAIN VIEW TABS & MULTI-EXPERT DRAFT BOARD
 # -----------------------------------------------------------------------------
-tab_all, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_reaches, tab_injuries, tab_crossed, tab_grid, tab_depth = st.tabs([
+tab_all, tab_drafted, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_reaches, tab_injuries, tab_grid, tab_depth = st.tabs([
     "⚡ All Available",
+    "❌ Drafted Players",
     "🏃 Running Backs",
     "🎯 Wide Receivers",
     "🏈 Quarterbacks",
@@ -987,7 +988,6 @@ tab_all, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_rea
     "🔥 Value Steals",
     "⚠️ Reach Traps",
     "🚑 Injury & Suspension Report",
-    "❌ Crossed Off / Drafted",
     "📜 8-Team Grid & Log",
     "📋 2026 Depth Chart Cheat Sheet"
 ])
@@ -1433,7 +1433,115 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
 with tab_all:
     render_draft_table(df_board, key_prefix="all_avail")
 
-# --- Tab 2: Running Backs ---
+# --- Tab 2: Drafted Players ---
+with tab_drafted:
+    st.markdown("### ❌ Drafted Players")
+    st.caption("Review all players removed from the board. Click **'🔄 Restore to Board'** next to any player to immediately return them to the available queue at their original rank.")
+
+    drafted_df = df_board[df_board["is_drafted"]].copy()
+
+    if drafted_df.empty:
+        st.info("No players have been drafted or crossed off yet. When players are selected, they will appear here with instant restore buttons.")
+    else:
+        # Summary metrics
+        user_drafted_count = len([h for h in st.session_state.draft_history if h.get("is_user", False)])
+        opp_drafted_count = len([h for h in st.session_state.draft_history if not h.get("is_user", False)])
+
+        mc1, mc2, mc3 = st.columns(3)
+        with mc1:
+            st.metric("Total Removed", len(drafted_df))
+        with mc2:
+            st.metric("On My Roster", user_drafted_count)
+        with mc3:
+            st.metric("Taken by Opponents / Crossed Off", opp_drafted_count)
+
+        # Filters for crossed off view
+        c_f1, c_f2, c_f3 = st.columns([3, 1.5, 1.5])
+        with c_f1:
+            search_crossed = st.text_input(
+                "Filter removed players",
+                placeholder="Search by player name, team, or position...",
+                key="search_crossed_off"
+            )
+        with c_f2:
+            pos_crossed = st.multiselect(
+                "Position",
+                options=["QB", "RB", "WR", "TE", "DST", "K"],
+                default=[],
+                placeholder="All Positions",
+                key="pos_crossed_off"
+            )
+        with c_f3:
+            drafter_filter = st.selectbox(
+                "Drafted By",
+                options=["All Removed", "My Roster Only", "Opponents Only"],
+                key="drafter_crossed_off"
+            )
+
+        # Apply filters to history
+        filtered_history = list(reversed(st.session_state.draft_history))
+
+        if search_crossed:
+            s_low = search_crossed.lower().strip()
+            filtered_history = [
+                h for h in filtered_history
+                if s_low in h["name"].lower() or s_low in h["team"].lower() or s_low in h["pos"].lower()
+            ]
+
+        if pos_crossed:
+            filtered_history = [h for h in filtered_history if h["pos"] in pos_crossed]
+
+        if drafter_filter == "My Roster Only":
+            filtered_history = [h for h in filtered_history if h.get("is_user", False)]
+        elif drafter_filter == "Opponents Only":
+            filtered_history = [h for h in filtered_history if not h.get("is_user", False)]
+
+        if not filtered_history:
+            st.info("No removed players match the selected filters.")
+        else:
+            st.markdown("---")
+            # Render list of removed players with reverse/restore button next to each
+            for p in filtered_history:
+                pid = p["player_id"]
+                is_u = p.get("is_user", False)
+                
+                # Fetch fresh consensus rank
+                p_match = df_board[df_board["player_id"] == pid]
+                c_rank = p_match["consensus_rank"].values[0] if not p_match.empty else "?"
+                p_tier = p_match["tier"].values[0] if not p_match.empty else "?"
+                p_bye = p_match["bye"].values[0] if not p_match.empty else "?"
+
+                card_c1, card_c2, card_c3, card_c4, card_c5 = st.columns([1.2, 3.5, 2, 2.5, 2])
+                
+                with card_c1:
+                    st.markdown(f"**Pick #{p['pick_number']}**<br><span style='color:#94a3b8; font-size:0.75rem;'>Rd {p.get('draft_round', 1)}</span>", unsafe_allow_html=True)
+
+                with card_c2:
+                    st.markdown(f"""
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="pos-badge pos-{p['pos']}">{p['pos']}</span>
+                        <strong style="font-size:0.95rem; text-decoration: line-through; opacity:0.85;">{p['name']}</strong>
+                        <span style="color:#94a3b8; font-size:0.8rem;">{p['team']} (Wk {p_bye})</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with card_c3:
+                    st.markdown(f"<span style='color:#94a3b8;'>Consensus:</span> <strong>#{c_rank}</strong> &bull; <span style='color:#94a3b8;'>Tier:</span> <strong>{p_tier}</strong>", unsafe_allow_html=True)
+
+                with card_c4:
+                    if is_u:
+                        st.markdown("<span style='background:#064e3b; color:#34d399; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;'>🟩 My Roster</span>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<span style='background:#1e293b; color:#94a3b8; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;'>⬛ {p['drafted_by']}</span>", unsafe_allow_html=True)
+
+                with card_c5:
+                    if st.button(f"🔄 Restore to Board", key=f"restore_btn_{pid}_{p['pick_number']}", use_container_width=True):
+                        restore_player(pid)
+                        st.rerun()
+
+                st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 4px 0 8px 0;'></div>", unsafe_allow_html=True)
+
+# --- Tab 3: Running Backs ---
 with tab_rb:
     rb_df = df_board[df_board["pos"] == "RB"].copy().reset_index(drop=True)
     render_draft_table(rb_df, key_prefix="rb")
@@ -1660,113 +1768,7 @@ with tab_injuries:
                 )
                 st.markdown(wire_card, unsafe_allow_html=True)
 
-# --- Tab 10: Crossed Off / Drafted Players ---
-with tab_crossed:
-    st.markdown("### ❌ Crossed Off & Drafted Players")
-    st.caption("Review all players removed from the board. Click **'🔄 Restore to Board'** next to any player to immediately return them to the available queue at their original rank.")
 
-    drafted_df = df_board[df_board["is_drafted"]].copy()
-
-    if drafted_df.empty:
-        st.info("No players have been drafted or crossed off yet. When players are selected, they will appear here with instant restore buttons.")
-    else:
-        # Summary metrics
-        user_drafted_count = len([h for h in st.session_state.draft_history if h.get("is_user", False)])
-        opp_drafted_count = len([h for h in st.session_state.draft_history if not h.get("is_user", False)])
-
-        mc1, mc2, mc3 = st.columns(3)
-        with mc1:
-            st.metric("Total Removed", len(drafted_df))
-        with mc2:
-            st.metric("On My Roster", user_drafted_count)
-        with mc3:
-            st.metric("Taken by Opponents / Crossed Off", opp_drafted_count)
-
-        # Filters for crossed off view
-        c_f1, c_f2, c_f3 = st.columns([3, 1.5, 1.5])
-        with c_f1:
-            search_crossed = st.text_input(
-                "Filter removed players",
-                placeholder="Search by player name, team, or position...",
-                key="search_crossed_off"
-            )
-        with c_f2:
-            pos_crossed = st.multiselect(
-                "Position",
-                options=["QB", "RB", "WR", "TE", "DST", "K"],
-                default=[],
-                placeholder="All Positions",
-                key="pos_crossed_off"
-            )
-        with c_f3:
-            drafter_filter = st.selectbox(
-                "Drafted By",
-                options=["All Removed", "My Roster Only", "Opponents Only"],
-                key="drafter_crossed_off"
-            )
-
-        # Apply filters to history
-        filtered_history = list(reversed(st.session_state.draft_history))
-
-        if search_crossed:
-            s_low = search_crossed.lower().strip()
-            filtered_history = [
-                h for h in filtered_history
-                if s_low in h["name"].lower() or s_low in h["team"].lower() or s_low in h["pos"].lower()
-            ]
-
-        if pos_crossed:
-            filtered_history = [h for h in filtered_history if h["pos"] in pos_crossed]
-
-        if drafter_filter == "My Roster Only":
-            filtered_history = [h for h in filtered_history if h.get("is_user", False)]
-        elif drafter_filter == "Opponents Only":
-            filtered_history = [h for h in filtered_history if not h.get("is_user", False)]
-
-        if not filtered_history:
-            st.info("No removed players match the selected filters.")
-        else:
-            st.markdown("---")
-            # Render list of removed players with reverse/restore button next to each
-            for p in filtered_history:
-                pid = p["player_id"]
-                is_u = p.get("is_user", False)
-                
-                # Fetch fresh consensus rank
-                p_match = df_board[df_board["player_id"] == pid]
-                c_rank = p_match["consensus_rank"].values[0] if not p_match.empty else "?"
-                p_tier = p_match["tier"].values[0] if not p_match.empty else "?"
-                p_bye = p_match["bye"].values[0] if not p_match.empty else "?"
-
-                card_c1, card_c2, card_c3, card_c4, card_c5 = st.columns([1.2, 3.5, 2, 2.5, 2])
-                
-                with card_c1:
-                    st.markdown(f"**Pick #{p['pick_number']}**<br><span style='color:#94a3b8; font-size:0.75rem;'>Rd {p.get('draft_round', 1)}</span>", unsafe_allow_html=True)
-
-                with card_c2:
-                    st.markdown(f"""
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="pos-badge pos-{p['pos']}">{p['pos']}</span>
-                        <strong style="font-size:0.95rem; text-decoration: line-through; opacity:0.85;">{p['name']}</strong>
-                        <span style="color:#94a3b8; font-size:0.8rem;">{p['team']} (Wk {p_bye})</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                with card_c3:
-                    st.markdown(f"<span style='color:#94a3b8;'>Consensus:</span> <strong>#{c_rank}</strong> &bull; <span style='color:#94a3b8;'>Tier:</span> <strong>{p_tier}</strong>", unsafe_allow_html=True)
-
-                with card_c4:
-                    if is_u:
-                        st.markdown("<span style='background:#064e3b; color:#34d399; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;'>🟩 My Roster</span>", unsafe_allow_html=True)
-                    else:
-                        st.markdown(f"<span style='background:#1e293b; color:#94a3b8; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;'>⬛ {p['drafted_by']}</span>", unsafe_allow_html=True)
-
-                with card_c5:
-                    if st.button(f"🔄 Restore to Board", key=f"restore_btn_{pid}_{p['pick_number']}", use_container_width=True):
-                        restore_player(pid)
-                        st.rerun()
-
-                st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 4px 0 8px 0;'></div>", unsafe_allow_html=True)
 
 # --- Tab 11: 8-Team Draft Grid & Log ---
 with tab_grid:
