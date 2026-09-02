@@ -55,6 +55,29 @@ st.markdown("""
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
         text-rendering: optimizeLegibility !important;
+        background-color: #0a0d14 !important;
+        color: #f8fafc !important;
+    }
+
+    /* Force dark background on all Streamlit layout wrappers */
+    .stApp, 
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stHeader"], 
+    [data-testid="stToolbar"],
+    section.main {
+        background-color: #0a0d14 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebarContent"],
+    section[data-testid="stSidebar"] {
+        background-color: #111827 !important;
+        border-right: 1px solid #1e293b !important;
+    }
+
+    header[data-testid="stHeader"] {
+        background-color: transparent !important;
     }
 
     /* Custom sleek dark scrollbars for Chrome / WebKit */
