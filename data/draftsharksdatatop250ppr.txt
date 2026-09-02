@@ -1,0 +1,1785 @@
+
+RK
+Games
+ADP
+Bye
+SOS
+Injury
+Risk
+Floor
+Proj
+Consensus
+Proj
+DS
+Proj
+Ceiling
+Proj
+3D Value
+Tier 1
+1
+DET logo
+Jahmyr Gibbs
+DET
+RB1
+
+17	1.01	6	0.9%	54%	294	351	359	412	100
+2
+LAR logo
+Puka Nacua
+LAR
+WR1
+
+17	1.04	11	-3.1%	51%	270	330	356	398	99
+3
+CIN logo
+Ja'Marr Chase
+CIN
+WR2
+
+17	1.03	6	4%	37%	291	327	339	400	96
+4
+ATL logo
+Bijan Robinson
+ATL
+RB2
+
+17	1.02	11	-3.2%	25%	294	342	346	405	95
+5
+SF logo
+Christian McCaffrey
+SF
+RB3
+
+17	1.05	8	0.7%	78%	275	316	331	410	89
+Tier 2
+6
+SEA logo
+Jaxon Smith-Njigba
+SEA
+WR3
+
+17	1.06	11	-0.1%	39%	287	304	315	375	84
+7
+DET logo
+Amon-Ra St. Brown
+DET
+WR4
+
+17	1.08	6	-1%	37%	288	299	316	358	82
+8
+DAL logo
+CeeDee Lamb
+DAL
+WR5
+
+17	1.10	14	-0.7%	44%	262	270	301	362	75
+9
+MIN logo
+Justin Jefferson
+MIN
+WR6
+
+17	1.11	6	4.9%	36%	248	263	292	379	74
+10
+IND logo
+Jonathan Taylor
+IND
+RB4
+
+17	1.07	13	1.7%	37%	254	297	299	365	70
+11
+BUF logo
+James Cook
+BUF
+RB5
+
+17	1.09	7	-4.2%	36%	254	267	296	364	69
+12
+KC logo
+Kenneth Walker III
+KC
+RB6
+
+17	2.06	5	0.6%	34%	232	247	279	363	62
+Tier 3
+13
+ATL logo
+Drake London
+ATL
+WR7
+
+17	2.08	11	0.4%	73%	249	262	273	331	61
+14
+NE logo
+A.J. Brown
+NE
+WR8
+
+17	2.07	11	-2.5%	61%	228	257	272	345	61
+15
+PHI logo
+Saquon Barkley
+PHI
+RB7
+
+17	2.02	10	4.4%	35%	235	254	270	367	60
+16
+LVR logo
+Ashton Jeanty
+LVR
+RB8
+
+16	2.04	13	-3.1%	39%	209	246	270	367	59
+17
+MIA logo
+De'Von Achane
+MIA
+RB9
+
+17	1.12	6	0.8%	68%	234	276	272	350	58
+Draft War Room video 
+Get our award-winning rankings in the live-draft sync Draft War Room
+Dominate Your Draft
+18
+HOU logo
+Nico Collins
+HOU
+WR9
+
+17	2.11	8	4.4%	49%	234	252	269	334	58
+19
+CIN logo
+Chase Brown
+CIN
+RB10
+
+17	2.01	6	-4%	45%	227	263	267	355	56
+20
+DAL logo
+George Pickens
+DAL
+WR10
+
+17	2.10	14	-0.7%	36%	228	248	263	333	56
+21
+KC logo
+Rashee Rice
+KC
+WR11
+
+17	3.04	5	-2.6%	74%	209	243	268	332	55
+22
+LAC logo
+Omarion Hampton
+LAC
+RB11
+
+17	2.03	7	0.6%	73%	223	248	260	361	55
+23
+LVR logo
+Brock Bowers
+LVR
+TE1
+
+17	2.09	13	-1%	81%	236	246	259	311	53
+24
+BUF logo
+Josh Allen
+BUF
+QB1
+
+17	2.12	7	-3.4%	33%	304	358	376	440	52
+25
+BAL logo
+Derrick Henry
+BAL
+RB12
+
+17	2.05	13	-0.1%	33%	223	252	263	334	51
+26
+ARI logo
+Trey McBride
+ARI
+TE2
+
+17	3.01	14	-3.6%	46%	236	243	254	304	51
+Tier 4
+27
+NO logo
+Chris Olave
+NO
+WR13
+
+17	3.02	8	0.9%	75%	215	243	256	308	49
+28
+NYG logo
+Malik Nabers
+NYG
+WR12
+
+16	3.03	8	3.7%	39%	192	235	243	341	49
+29
+BAL logo
+Zay Flowers
+BAL
+WR14
+
+17	3.10	13	-0.3%	36%	225	238	253	296	47
+30
+PHI logo
+DeVonta Smith
+PHI
+WR15
+
+17	3.08	10	6.6%	50%	223	234	243	306	45
+31
+NYJ logo
+Breece Hall
+NYJ
+RB13
+
+17	3.09	13	-2.5%	43%	212	235	250	317	44
+32
+CIN logo
+Tee Higgins
+CIN
+WR16
+
+17	4.03	6	4%	66%	217	227	244	302	44
+33
+NYJ logo
+Garrett Wilson
+NYJ
+WR17
+
+17	4.02	13	-1%	38%	219	228	244	300	44
+34
+CHI logo
+Colston Loveland
+CHI
+TE3
+
+17	4.06	10	-3.6%	60%	197	221	241	289	44
+35
+ARI logo
+Jeremiyah Love
+ARI
+RB14
+
+17	3.05	14	0.1%	34%	208	237	240	340	44
+36
+DAL logo
+Javonte Williams
+DAL
+RB15
+
+17	3.07	14	2.9%	43%	209	229	243	308	40
+37
+DEN logo
+Jaylen Waddle
+DEN
+WR18
+
+17	4.08	10	-2.5%	37%	199	219	235	300	39
+38
+IND logo
+Tyler Warren
+IND
+TE4
+
+17	5.04	13	1.5%	36%	184	203	224	267	37
+39
+LAR logo
+Kyren Williams
+LAR
+RB17
+
+17	3.06	11	6.4%	52%	205	225	233	303	36
+40
+NO logo
+Travis Etienne
+NO
+RB16
+
+17	3.11	8	1.8%	45%	210	222	228	314	36
+Tier 5
+41
+GB logo
+Christian Watson
+GB
+WR19
+
+17	6.01	11	1.3%	25%	188	197	229	294	36
+42
+BAL logo
+Lamar Jackson
+BAL
+QB2
+
+17	4.07	13	1.1%	42%	299	324	340	438	35
+43
+LAR logo
+Davante Adams
+LAR
+WR20
+
+17	5.03	11	-3.1%	49%	189	211	230	290	35
+44
+CHI logo
+Luther Burden III
+CHI
+WR21
+
+17	5.02	10	-2.5%	54%	189	206	222	300	35
+45
+CAR logo
+Tetairoa McMillan
+CAR
+WR22
+
+17	4.01	5	-1.3%	37%	199	220	223	290	34
+46
+TB logo
+Emeka Egbuka
+TB
+WR24
+
+17	3.12	10	2.6%	42%	188	214	222	297	34
+47
+LAC logo
+Ladd McConkey
+LAC
+WR23
+
+17	4.05	7	-2.6%	42%	194	219	221	296	34
+48
+NE logo
+Drake Maye
+NE
+QB3
+
+17	5.07	11	-2.8%	35%	294	315	338	425	31
+49
+CHI logo
+D'Andre Swift
+CHI
+RB18
+
+17	4.09	10	-3.6%	42%	191	210	224	299	31
+50
+WAS logo
+Terry McLaurin
+WAS
+WR25
+
+17	5.05	7	-2.4%	37%	191	212	217	288	31
+51
+SF logo
+Mike Evans
+SF
+WR26
+
+17	6.03	8	-3.2%	65%	174	196	217	295	31
+52
+CIN logo
+Joe Burrow
+CIN
+QB5
+
+17	5.09	6	3.2%	34%	290	309	337	421	30
+53
+WAS logo
+Jayden Daniels
+WAS
+QB4
+
+17	6.04	7	-0.4%	41%	287	313	334	434	30
+54
+PHI logo
+Jalen Hurts
+PHI
+QB6
+
+17	6.07	10	8.8%	33%	288	311	331	430	29
+55
+NYG logo
+Cameron Skattebo
+NYG
+RB19
+
+17	4.04	8	2.2%	72%	176	217	214	302	29
+56
+TB logo
+Bucky Irving
+TB
+RB20
+
+17	5.01	10	-2.2%	63%	184	206	211	298	29
+57
+HOU logo
+David Montgomery
+HOU
+RB21
+
+17	4.12	8	2%	85%	178	196	207	295	28
+58
+CHI logo
+Rome Odunze
+CHI
+WR27
+
+17	5.11	10	-2.5%	36%	181	198	206	297	28
+59
+JAC logo
+Trevor Lawrence
+JAC
+QB7
+
+17	8.04	7	4.5%	34%	280	303	329	415	27
+60
+LAC logo
+Justin Herbert
+LAC
+QB8
+
+17	8.01	7	-2.8%	36%	281	297	326	418	27
+61
+DET logo
+Jameson Williams
+DET
+WR28
+
+17	5.06	6	-1%	36%	185	207	210	280	27
+62
+BUF logo
+D.J. Moore
+BUF
+WR29
+
+17	4.11	7	0.7%	54%	176	197	209	283	27
+63
+NE logo
+Rhamondre Stevenson
+NE
+RB22
+
+17	6.05	11	-1.9%	64%	174	179	207	290	27
+64
+CLE logo
+Quinshon Judkins
+CLE
+RB23
+
+17	4.10	11	0.6%	48%	182	204	202	293	27
+65
+GB logo
+Tucker Kraft
+GB
+TE5
+
+17	6.09	11	-3.3%	39%	167	182	197	258	27
+66
+CLE logo
+Harold Fannin Jr.
+CLE
+TE6
+
+17	6.10	11	3.4%	57%	174	185	197	250	27
+67
+DET logo
+Sam LaPorta
+DET
+TE7
+
+17	7.07	6	-2%	60%	172	190	196	254	27
+68
+SF logo
+Brock Purdy
+SF
+QB9
+
+17	10.06	8	-4%	36%	278	297	327	416	26
+69
+CHI logo
+Caleb Williams
+CHI
+QB10
+
+17	7.04	10	-3.5%	20%	278	302	324	421	26
+Tier 6
+70
+MIN logo
+Kyler Murray
+MIN
+QB11
+
+17	12.03	6	4%	33%	273	283	325	419	26
+71
+DAL logo
+Dak Prescott
+DAL
+QB12
+
+17	7.09	14	0.5%	34%	283	300	325	413	26
+72
+JAC logo
+Parker Washington
+JAC
+WR30
+
+17	6.02	7	4%	0%	176	188	211	275	26
+73
+NYG logo
+Jaxson Dart
+NYG
+QB13
+
+17	9.01	8	4.8%	36%	277	298	319	417	25
+74
+PIT logo
+Jaylen Warren
+PIT
+RB24
+
+17	6.06	9	-2.1%	66%	161	187	201	275	25
+75
+NE logo
+TreVeyon Henderson
+NE
+RB25
+
+17	5.10	11	-1.9%	64%	155	181	184	304	25
+76
+SEA logo
+Jadarian Price
+SEA
+RB27
+
+17	5.12	11	5.6%	29%	146	180	183	298	24
+77
+JAC logo
+Bhayshul Tuten
+JAC
+RB26
+
+17	5.08	7	0.9%	43%	157	183	182	303	24
+78
+DEN logo
+Bo Nix
+DEN
+QB14
+
+17	10.04	10	-3.7%	28%	281	291	312	412	23
+79
+KC logo
+Patrick Mahomes
+KC
+QB15
+
+17	10.03	5	-3.2%	37%	278	295	309	417	23
+80
+PIT logo
+D.K. Metcalf
+PIT
+WR31
+
+17	7.03	9	-2.6%	36%	174	188	207	263	23
+81
+TEN logo
+Carnell Tate
+TEN
+WR32
+
+17	6.08	9	5%	40%	168	174	200	280	23
+82
+ATL logo
+Kyle Pitts
+ATL
+TE8
+
+17	6.12	11	4.8%	53%	171	179	186	247	23
+83
+PIT logo
+Rico Dowdle
+PIT
+RB29
+
+17	7.10	9	-2.1%	27%	156	174	182	278	23
+84
+CAR logo
+Jonathon Brooks
+CAR
+RB28
+
+17	7.08	5	-6%	35%	144	167	176	302	23
+85
+ARI logo
+Marvin Harrison Jr.
+ARI
+WR33
+
+17	6.11	14	-0.8%	55%	173	181	196	277	22
+86
+SF logo
+George Kittle
+SF
+TE9
+
+17	8.06	8	-3.6%	44%	141	182	186	260	22
+87
+GB logo
+Jayden Reed
+GB
+WR34
+
+17	10.01	11	1.3%	36%	167	181	201	266	21
+Tier 7
+88
+PIT logo
+Michael Pittman Jr.
+PIT
+WR35
+
+17	8.08	9	-2.6%	60%	173	179	202	258	21
+89
+DEN logo
+Courtland Sutton
+DEN
+WR36
+
+17	7.01	10	-2.5%	43%	171	184	199	264	21
+90
+TEN logo
+Tony Pollard
+TEN
+RB30
+
+17	7.02	9	2.9%	35%	151	170	175	270	21
+91
+GB logo
+MarShawn Lloyd
+GB
+RB31
+
+17	11.03	11	-2.2%	72%	141	156	168	289	21
+92
+DET logo
+Jared Goff
+DET
+QB16
+
+17	11.02	6	-0.9%	23%	278	279	303	402	20
+93
+DEN logo
+J.K. Dobbins
+DEN
+RB32
+
+17	8.05	10	0.1%	39%	145	160	171	269	20
+94
+LAR logo
+Matthew Stafford
+LAR
+QB17
+
+17	9.05	11	-0%	39%	278	283	299	403	19
+95
+GB logo
+Jordan Love
+GB
+QB18
+
+17	12.12	11	-0.3%	82%	277	277	298	403	19
+96
+NO logo
+Tyler Shough
+NO
+QB19
+
+17	13.04	8	0.5%	17%	273	274	296	406	19
+97
+MIN logo
+Jordan Addison
+MIN
+WR38
+
+17	9.08	6	4.9%	37%	162	167	196	266	19
+98
+LAC logo
+Quentin Johnston
+LAC
+WR39
+
+17	8.11	7	-2.6%	56%	158	170	193	272	19
+99
+TB logo
+Chris Godwin
+TB
+WR40
+
+17	8.02	10	2.6%	40%	154	175	190	279	19
+100
+JAC logo
+Brian Thomas Jr.
+JAC
+WR37
+
+17	7.06	7	4%	35%	164	178	189	280	19
+101
+DEN logo
+RJ Harvey
+DEN
+RB33
+
+17	7.12	10	0.1%	36%	137	154	165	272	19
+102
+WAS logo
+Jacory Croskey-Merritt
+WAS
+RB34
+
+17	9.12	7	4.2%	30%	132	140	163	272	19
+103
+MIN logo
+Jordan Mason
+MIN
+RB35
+
+17	9.04	6	-0.1%	39%	132	146	162	268	19
+104
+TB logo
+Baker Mayfield
+TB
+QB20
+
+17	11.11	10	-0.8%	37%	277	278	291	405	18
+105
+JAC logo
+Jakobi Meyers
+JAC
+WR41
+
+17	10.08	7	4%	37%	161	168	194	261	18
+Tier 8
+106
+CAR logo
+Chuba Hubbard
+CAR
+RB36
+
+17	8.03	5	-6%	36%	128	152	152	275	18
+107
+IND logo
+Josh Downs
+IND
+WR43
+
+17	9.10	13	-0.8%	61%	158	167	190	266	17
+108
+WAS logo
+Stefon Diggs
+WAS
+WR42
+
+17	9.07	7	-2.4%	31%	155	167	186	276	17
+109
+TEN logo
+Tyjae Spears
+TEN
+RB37
+
+17	12.10	9	2.9%	37%	130	137	158	256	17
+110
+TB logo
+Kenneth Gainwell
+TB
+RB38
+
+17	9.02	10	-2.2%	31%	134	157	151	263	17
+111
+KC logo
+Travis Kelce
+KC
+TE10
+
+17	9.06	5	1.9%	42%	158	174	183	220	16
+112
+CHI logo
+Kyle Monangai
+CHI
+RB39
+
+17	9.03	10	-3.6%	0%	132	144	148	263	16
+113
+LAR logo
+Blake Corum
+LAR
+RB40
+
+17	8.09	11	6.4%	33%	130	137	141	272	16
+114
+KC logo
+Xavier Worthy
+KC
+WR44
+
+17	11.07	5	-2.6%	35%	150	156	183	267	15
+115
+WAS logo
+Rachaad White
+WAS
+RB41
+
+17	10.02	7	4.2%	39%	124	145	146	259	15
+116
+HOU logo
+Woody Marks
+HOU
+RB42
+
+17	11.09	8	2%	0%	124	117	138	263	15
+117
+MIA logo
+Malik Willis
+MIA
+QB21
+
+17	14.04	6	-2%	15%	264	264	275	410	14
+118
+NE logo
+Romeo Doubs
+NE
+WR45
+
+17	11.04	11	-2.5%	37%	155	163	180	265	14
+119
+DAL logo
+Brandon Aubrey
+DAL
+K1
+
+17	8.12	14	-3.5%	8%	157	175	177	191	14
+Tier 9
+120
+IND logo
+Daniel Jones
+IND
+QB22
+
+17	15.12	13	1.6%	36%	261	265	277	405	14
+121
+MIN logo
+Aaron Jones
+MIN
+RB43
+
+17	10.10	6	-0.1%	65%	114	150	143	247	14
+122
+CLE logo
+KC Concepcion
+CLE
+WR46
+
+17	11.01	11	4.3%	29%	148	151	180	265	13
+123
+ARI logo
+Michael Wilson
+ARI
+WR47
+
+17	7.11	14	-0.8%	42%	150	171	178	265	13
+124
+GB logo
+Josh Jacobs
+GB
+RB44
+
+9	0	11	-2.2%	67%	36	112	148	200	13
+125
+SEA logo
+Zach Charbonnet
+SEA
+RB45
+
+10	12.11	11	5.6%	37%	71	136	134	213	13
+126
+TEN logo
+Wan'Dale Robinson
+TEN
+WR48
+
+17	8.10	9	5%	36%	154	169	177	258	12
+127
+PHI logo
+Makai Lemon
+PHI
+WR49
+
+17	9.09	10	6.6%	33%	145	147	169	280	12
+128
+IND logo
+Alec Pierce
+IND
+WR51
+
+16	8.07	13	-0.8%	67%	137	180	171	262	11
+129
+GB logo
+Matthew Golden
+GB
+WR50
+
+17	10.12	11	1.3%	37%	150	164	167	277	11
+Tier 10
+130
+CLE logo
+Dylan Sampson
+CLE
+RB46
+
+17	14.01	11	0.6%	34%	110	99	126	233	11
+131
+TEN logo
+Cameron Ward
+TEN
+QB23
+
+17	17.09	9	6.3%	39%	253	232	264	404	10
+132
+LAC logo
+Cameron Dicker
+LAC
+K2
+
+17	11.10	7	-3.1%	9%	151	160	170	182	10
+133
+LAC logo
+Keaton Mitchell
+LAC
+RB47
+
+17	13.06	7	0.6%	33%	100	88	116	254	10
+134
+HOU logo
+Houston Texans
+HOU
+DEF1
+
+17	28.07	8	-4%	0%	110	110	125	140	9
+135
+JAC logo
+Chris Rodriguez
+JAC
+RB48
+
+17	11.08	7	0.9%	27%	98	104	107	252	9
+136
+HOU logo
+C.J. Stroud
+HOU
+QB24
+
+17	16.05	8	4.4%	29%	265	262	270	389	8
+137
+BUF logo
+Khalil Shakir
+BUF
+WR52
+
+17	12.07	7	0.7%	35%	152	160	173	239	8
+138
+SF logo
+Deebo Samuel
+SF
+WR53
+
+17	12.02	8	-3.2%	51%	135	156	164	265	8
+139
+BUF logo
+Dalton Kincaid
+BUF
+TE11
+
+17	10.07	7	-1.4%	62%	142	158	162	223	8
+Tier 11
+140
+NO logo
+Jordyn Tyson
+NO
+WR54
+
+13	11.05	8	0.9%	45%	109	136	171	225	7
+141
+PHI logo
+Dallas Goedert
+PHI
+TE12
+
+17	10.11	10	7.1%	83%	144	160	164	208	7
+142
+DEN logo
+Denver Broncos
+DEN
+DEF2
+
+17	31.09	10	6.2%	0%	105	106	122	136	7
+143
+ARI logo
+Tyler Allgeier
+ARI
+RB50
+
+17	12.01	14	0.1%	23%	88	91	107	222	7
+144
+LVR logo
+Mike Washington Jr.
+LVR
+RB49
+
+17	13.01	13	-3.1%	21%	84	94	100	250	7
+145
+DAL logo
+Jake Ferguson
+DAL
+TE13
+
+17	10.05	14	-2.5%	55%	148	164	165	199	6
+146
+HOU logo
+Ka'imi Fairbairn
+HOU
+K3
+
+17	11.12	8	0.6%	0%	147	166	158	177	6
+147
+SF logo
+De'Zhaun Stribling
+SF
+WR55
+
+17	10.09	8	-3.2%	0%	136	147	153	277	6
+148
+SEA logo
+Seattle Seahawks
+SEA
+DEF3
+
+17	12.09	11	-4.2%	0%	102	109	120	132	6
+149
+ATL logo
+Brian Robinson Jr.
+ATL
+RB51
+
+17	14.05	11	-3.2%	36%	86	83	103	217	6
+150
+SEA logo
+Sam Darnold
+SEA
+QB27
+
+17	15.10	11	0.4%	29%	258	258	261	391	5
+151
+ARI logo
+Jacoby Brissett
+ARI
+QB25
+
+13	19.10	14	-1.2%	10%	194	257	247	358	5
+152
+CAR logo
+Bryce Young
+CAR
+QB26
+
+17	17.08	5	-0.8%	32%	244	252	247	395	5
+153
+BAL logo
+Mark Andrews
+BAL
+TE14
+
+17	11.06	13	3.6%	36%	140	159	159	212	5
+154
+NO logo
+Alvin Kamara
+NO
+RB52
+
+16	13.09	8	1.8%	39%	77	102	109	226	5
+Tier 12
+155
+NYG logo
+Tyrone Tracy Jr.
+NYG
+RB54
+
+17	13.07	8	2.2%	34%	68	72	96	226	5
+156
+DEN logo
+Jonah Coleman
+DEN
+RB53
+
+17	13.05	10	0.1%	0%	75	54	84	248	5
+157
+PIT logo
+Aaron Rodgers
+PIT
+QB28
+
+17	19.06	9	-2.1%	53%	253	219	258	384	4
+158
+SEA logo
+Rashid Shaheed
+SEA
+WR56
+
+17	12.06	11	-0.1%	38%	137	139	159	253	4
+159
+NYG logo
+Isaiah Likely
+NYG
+TE15
+
+17	9.11	8	3.2%	73%	143	159	157	208	4
+160
+SF logo
+Eddy Pineiro
+SF
+K5
+
+17	16.10	8	2%	0%	145	145	153	174	4
+161
+CHI logo
+Cairo Santos
+CHI
+K6
+
+17	19.11	10	-1.1%	0%	144	147	153	176	4
+162
+JAC logo
+Cam Little
+JAC
+K4
+
+17	13.02	7	-0.7%	0%	145	148	151	180	4
+163
+CIN logo
+Evan McPherson
+CIN
+K7
+
+17	17.05	6	0.7%	0%	145	149	151	177	4
+164
+BAL logo
+Baltimore Ravens
+BAL
+DEF4
+
+17	18.03	13	13.1%	0%	106	98	114	134	4
+165
+PIT logo
+Pittsburgh Steelers
+PIT
+DEF5
+
+17	17.07	9	12.2%	0%	104	102	112	134	4
+166
+NYJ logo
+Geno Smith
+NYJ
+QB29
+
+16	44.05	13	-4.4%	36%	214	235	241	387	3
+167
+LVR logo
+Fernando Mendoza
+LVR
+QB30
+
+13	18.01	13	-6.2%	23%	178	241	240	356	3
+168
+JAC logo
+Brenton Strange
+JAC
+TE16
+
+17	13.11	7	2.5%	48%	137	152	159	202	3
+169
+NO logo
+Juwan Johnson
+NO
+TE17
+
+17	13.03	8	-0.1%	45%	137	150	159	200	3
+170
+SEA logo
+Jason Myers
+SEA
+K8
+
+17	12.08	11	1%	0%	147	164	150	176	3
+171
+NE logo
+New England Patriots
+NE
+DEF6
+
+17	18.08	11	0.2%	0%	99	95	114	129	3
+172
+MIN logo
+Minnesota Vikings
+MIN
+DEF7
+
+17	15.05	6	-12.4%	0%	101	104	111	134	3
+173
+LAR logo
+Los Angeles Rams
+LAR
+DEF8
+
+17	12.05	11	-5%	0%	101	106	107	138	3
+174
+BAL logo
+Justice Hill
+BAL
+RB55
+
+17	33.04	13	-0.1%	32%	86	94	96	192	3
+Tier 13
+175
+CAR logo
+Jalen Coker
+CAR
+WR57
+
+17	12.04	5	-1.3%	18%	136	155	150	257	2
+176
+LAR logo
+Harrison Mevis
+LAR
+K9
+
+17	14.06	11	0.7%	0%	145	158	150	175	2
+177
+IND logo
+Keenan Allen
+IND
+WR60
+
+17	14.11	13	-0.8%	49%	126	119	150	259	2
+178
+DET logo
+Jake Bates
+DET
+K10
+
+17	13.12	6	4.2%	8%	146	154	149	175	2
+179
+TB logo
+Jalen McMillan
+TB
+WR58
+
+17	15.11	10	2.6%	39%	127	125	149	261	2
+180
+CLE logo
+Denzel Boston
+CLE
+WR59
+
+17	14.03	11	4.3%	42%	130	135	148	261	2
+181
+PHI logo
+Philadelphia Eagles
+PHI
+DEF9
+
+17	19.05	10	-14.5%	0%	101	97	106	138	2
+182
+KC logo
+Emmett Johnson
+KC
+RB56
+
+17	16.07	5	0.6%	18%	70	46	81	219	2
+183
+GB logo
+Trey Smack
+GB
+K11
+
+17	18.12	11	0.6%	0%	140	145	149	175	1
+184
+MIN logo
+Will Reichard
+MIN
+K12
+
+17	17.04	6	1%	0%	145	142	148	174	1
+185
+JAC logo
+Jacksonville Jaguars
+JAC
+DEF11
+
+17	14.12	7	-2.7%	0%	99	94	107	132	1
+186
+LAC logo
+Los Angeles Chargers
+LAC
+DEF10
+
+17	15.07	7	0.4%	0%	100	94	106	136	1
+187
+DET logo
+Detroit Lions
+DET
+DEF12
+
+17	16.12	6	10.7%	0%	99	102	106	134	1
+188
+DET logo
+Isiah Pacheco
+DET
+RB59
+
+13	13.10	6	0.9%	36%	49	112	87	162	1
+189
+DAL logo
+Malik Davis
+DAL
+RB57
+
+17	40.05	14	2.9%	0%	62	70	75	218	1
+190
+NYG logo
+Najee Harris
+NYG
+RB58
+
+17	20.03	8	2.2%	39%	58	59	73	222	1
+191
+NYJ logo
+Braelon Allen
+NYJ
+RB60
+
+17	16.06	13	-2.5%	42%	68	78	71	214	1
+192
+DEN logo
+Wil Lutz
+DEN
+K13
+
+17	21.10	10	-3.5%	0%	145	146	148	171	0
+193
+NYG logo
+New York Giants
+NYG
+DEF13
+
+17	26.08	8	-7.9%	0%	98	85	107	131	0
+194
+GB logo
+Christopher Brooks
+GB
+RB61
+
+17	50.12	11	-2.2%	0%	64	74	73	208	0
+Tier 14
+195
+KC logo
+Harrison Butker
+KC
+K14
+
+17	16.04	5	0.1%	0%	145	143	148	170	0
+196
+BUF logo
+Buffalo Bills
+BUF
+DEF14
+
+17	22.09	7	0.4%	0%	98	97	106	131	0
+197
+KC logo
+Kansas City Chiefs
+KC
+DEF15
+
+17	22.05	5	2.1%	0%	96	85	106	132	0
+198
+ARI logo
+James Conner
+ARI
+RB62
+
+13	20.02	14	0.1%	34%	50	68	85	150	0
+199
+TEN logo
+Nicholas Singleton
+TEN
+RB63
+
+17	18.10	9	2.9%	19%	56	30	65	223	0
+200
+NE logo
+Hunter Henry
+NE
+TE18
+
+17	13.08	11	-3.5%	47%	133	147	150	198	-1
+201
+LVR logo
+Tre Tucker
+LVR
+WR61
+
+17	14.08	13	-5%	0%	127	131	149	241	-1
+202
+BAL logo
+Tyler Loop
+BAL
+K15
+
+17	15.06	13	-1.6%	0%	135	150	147	176	-1
+203
+NYJ logo
+Adonai Mitchell
+NYJ
+WR62
+
+17	17.11	13	-1%	28%	122	109	142	256	-1
+204
+SEA logo
+George Holani
+SEA
+RB64
+
+17	41.03	11	5.6%	0%	66	37	83	189	-1
+205
+WAS logo
+Kaytron Allen
+WAS
+RB65
+
+17	20.01	7	4.2%	24%	55	29	65	204	-1
+206
+PHI logo
+Tank Bigsby
+PHI
+RB66
+
+17	14.02	10	4.4%	22%	57	75	60	210	-1
+207
+CHI logo
+Chicago Bears
+CHI
+DEF16
+
+17	22.03	10	-4.8%	0%	95	97	105	131	-2
+208
+GB logo
+Green Bay Packers
+GB
+DEF17
+
+17	22.07	11	-2.2%	0%	95	86	103	131	-2
+209
+CIN logo
+Samaje Perine
+CIN
+RB68
+
+17	37.05	6	-4%	36%	73	86	86	168	-2
+210
+NYJ logo
+Isaiah Davis
+NYJ
+RB69
+
+17	43.08	13	-2.5%	0%	68	49	74	173	-2
+211
+TB logo
+Sean Tucker
+TB
+RB70
+
+17	20.05	10	-2.2%	20%	54	40	67	192	-2
+212
+SF logo
+Kaelon Black
+SF
+RB67
+
+17	15.09	8	0.7%	0%	57	72	63	204	-2
+213
+NE logo
+Andres Borregales
+NE
+K16
+
+17	18.11	11	0.2%	0%	142	137	146	168	-3
+Tier 15
+214
+HOU logo
+Dalton Schultz
+HOU
+TE19
+
+17	15.03	8	0.5%	57%	137	142	152	188	-3
+215
+CLE logo
+Cleveland Browns
+CLE
+DEF18
+
+17	25.09	11	8%	0%	95	87	103	129	-3
+216
+TB logo
+Tampa Bay Buccaneers
+TB
+DEF19
+
+17	24.02	10	5.5%	0%	97	87	102	129	-3
+217
+BUF logo
+Ty Johnson
+BUF
+RB73
+
+17	35.11	7	-4.2%	29%	70	73	82	152	-3
+218
+JAC logo
+LeQuint Allen
+JAC
+RB74
+
+17	39.11	7	0.9%	21%	65	38	70	162	-3
+219
+LAC logo
+Kimani Vidal
+LAC
+RB71
+
+17	19.09	7	0.6%	0%	60	48	66	178	-3
+220
+NO logo
+Kendre Miller
+NO
+RB75
+
+17	23.11	8	1.8%	33%	46	25	53	208	-3
+221
+BUF logo
+Ray Davis
+BUF
+RB72
+
+17	17.03	7	-4.2%	24%	46	45	50	214	-3
+222
+TB logo
+Chase McLaughlin
+TB
+K17
+
+17	20.04	10	5%	0%	140	143	145	168	-4
+223
+PIT logo
+Chris Boswell
+PIT
+K18
+
+17	17.06	9	-2.9%	0%	141	139	144	168	-4
+224
+WAS logo
+Chigoziem Okonkwo
+WAS
+TE21
+
+17	15.01	7	-3%	22%	131	133	141	196	-4
+225
+NYJ logo
+Kenyon Sadiq
+NYJ
+TE20
+
+17	14.10	13	-1.5%	24%	126	127	140	204	-4
+226
+LAR logo
+Terrance Ferguson
+LAR
+TE22
+
+17	16.03	11	-2.2%	0%	116	123	129	210	-4
+227
+SF logo
+San Francisco 49ers
+SF
+DEF20
+
+17	19.12	8	1.7%	0%	95	82	102	126	-4
+228
+MIN logo
+T.J. Hockenson
+MIN
+TE23
+
+17	14.07	6	2%	51%	132	139	147	188	-5
+229
+TEN logo
+Calvin Ridley
+TEN
+WR63
+
+17	19.07	9	5%	48%	112	115	140	245	-5
+230
+CLE logo
+Jerry Jeudy
+CLE
+WR65
+
+17	15.04	11	4.3%	32%	116	123	136	245	-5
+231
+NYJ logo
+Omar Cooper Jr.
+NYJ
+WR64
+
+17	17.02	13	-1%	38%	112	89	131	263	-5
+232
+NYG logo
+Devin Singletary
+NYG
+RB76
+
+17	35.01	8	2.2%	29%	50	14	54	168	-5
+233
+IND logo
+Seth McGowan
+IND
+RB77
+
+17	52.10	13	1.7%	0%	45	33	53	173	-5
+234
+PHI logo
+Jake Elliott
+PHI
+K19
+
+17	21.01	10	-0.9%	0%	139	136	144	164	-6
+235
+LVR logo
+Jalen Nailor
+LVR
+WR66
+
+17	15.02	13	-5%	0%	116	125	136	242	-6
+236
+MIN logo
+Jauan Jennings
+MIN
+WR67
+
+17	16.11	6	4.9%	33%	114	119	130	251	-6
+237
+IND logo
+Indianapolis Colts
+IND
+DEF21
+
+17	22.10	13	10.2%	0%	94	85	99	128	-6
+238
+KC logo
+Brashard Smith
+KC
+RB78
+
+17	25.03	5	0.6%	22%	53	38	64	142	-6
+239
+UNS logo
+Trey Benson
+UNS
+RB80
+
+17	25.11	18	-	25%	39	0	56	162	-6
+240
+SEA logo
+Emanuel Wilson
+SEA
+RB81
+
+17	22.11	11	5.6%	0%	43	45	54	160	-6
+241
+MIA logo
+Jaylen Wright
+MIA
+RB79
+
+17	21.05	6	0.8%	23%	42	47	50	174	-6
+242
+MIA logo
+Ollie Gordon II
+MIA
+RB83
+
+17	50.07	6	0.8%	0%	41	27	46	173	-6
+243
+MIN logo
+Demond Claiborne
+MIN
+RB84
+
+17	19.08	6	-0.1%	0%	39	18	46	174	-6
+244
+GB logo
+Kaleb Johnson
+GB
+RB82
+
+17	22.12	11	-2.2%	19%	33	27	39	196	-6
+245
+BUF logo
+Tyler Bass
+BUF
+K20
+
+17	24.01	7	-1.6%	0%	138	141	143	164	-7
+246
+DEN logo
+Pat Bryant
+DEN
+WR68
+
+17	20.11	10	-2.5%	65%	109	86	124	258	-7
+247
+TEN logo
+Tennessee Titans
+TEN
+DEF22
+
+17	27.06	9	-0.2%	0%	93	81	97	128	-7
+248
+NO logo
+New Orleans Saints
+NO
+DEF23
+
+17	38.05	8	13.3%	0%	93	93	97	129	-7
+249
+BAL logo
+Adam Randall
+BAL
+RB85
+
+13	44.12	13	-0.1%	0%	28	62	56	123	-7
+250
+SF logo
+Jordan James
+SF
+RB86
+
+17	38.04	8	0.7%	0%	38	59	43	175	-7
