@@ -37,6 +37,32 @@ st.set_page_config(
 # Injected CSS for ultra-dense, responsive dark UI
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    html, body, [class*="css"], .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        text-rendering: optimizeLegibility !important;
+    }
+
+    /* Custom sleek dark scrollbars for Chrome / WebKit */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #0a0d14;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+        border: 1px solid #0f172a;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #334155;
+    }
+
     /* Dark cyber-athletic palette */
     :root {
         --bg-primary: #0a0d14;
@@ -195,6 +221,30 @@ st.markdown("""
     [data-testid="stMetricLabel"] {
         font-size: 0.72rem !important;
         color: #94a3b8 !important;
+    }
+
+    /* Clean tab headers */
+    [data-testid="stTab"] {
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        padding: 4px 12px !important;
+    }
+    [data-testid="stTab"][aria-selected="true"] {
+        color: #38bdf8 !important;
+        border-bottom-color: #38bdf8 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Checkbox labels */
+    [data-testid="stCheckbox"] label span {
+        font-size: 0.8rem !important;
+        color: #cbd5e1 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Form input fields & selects */
+    [data-testid="stTextInput"] input, [data-testid="stSelectbox"] div {
+        font-size: 0.84rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -951,7 +1001,10 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
 
     styled_view = sub_view.style.apply(style_drafted_rows, axis=1)
 
-    st.caption("💡 **Draft Room Tip:** Click any player row to immediately view their full beat-reporter injury notes, return timeline, and 1-click draft buttons below.")
+    # Container placed ABOVE the table to ensure selected player card renders above the table
+    selected_card_container = st.container()
+
+    st.caption("💡 **Draft Room Tip:** Click any player's checkbox or row to immediately view their full beat-reporter injury notes, return timeline, and 1-click draft buttons above the table.")
 
     # Interactive Table with Direct Selection and Smooth Horizontal Scrolling
     selection = st.dataframe(
@@ -995,157 +1048,168 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
         }
     )
 
-    # If row clicked, show instant draft banner or undo banner with comprehensive alerts
+    # If row clicked, show instant draft banner or undo banner with comprehensive alerts ABOVE the table
     selected_rows = selection.selection.rows if selection and hasattr(selection, "selection") else []
     if selected_rows:
-        sel_idx = selected_rows[0]
-        if sel_idx < len(df_display):
-            sel_player = df_display.iloc[sel_idx]
-            p_id = sel_player["player_id"]
-            p_name = sel_player["name"]
-            p_pos = sel_player["pos"]
-            p_team = sel_player["team"]
-            p_val = sel_player["value_diff"]
-            inj_tier = sel_player.get("injury_tier", "")
-            is_drafted = sel_player.get("is_drafted", False)
-            
-            # If drafted, display red drafted banner with 1-click Undo button
-            if is_drafted:
-                drafted_by_label = "Your Roster" if sel_player.get("is_user") else sel_player.get("drafted_by", "Opponent")
-                pick_num = sel_player.get("pick_number", "?")
-                draft_round = sel_player.get("draft_round", "?")
-                st.markdown(f"""
-                <div style="background:#450a0a; border:2px solid #ef4444; border-radius:8px; padding:12px 16px; margin-top:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="color:#f87171; font-size:1.05rem;">🔴 DRAFTED: {p_name} ({p_pos} - {p_team}) &bull; Taken at Pick #{pick_num} by {drafted_by_label}</strong>
-                        <span style="background:#ef4444; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">OFF THE BOARD</span>
-                    </div>
-                    <div style="margin-top:6px; color:#fecaca; font-size:0.9rem;">
-                        <strong>Round:</strong> {draft_round} &bull; <strong>Consensus:</strong> #{sel_player['consensus_rank']} &bull; <strong>Value Spread:</strong> {'+' if p_val > 0 else ''}{p_val}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+        with selected_card_container:
+            sel_idx = selected_rows[0]
+            if sel_idx < len(df_display):
+                sel_player = df_display.iloc[sel_idx]
+                p_id = sel_player["player_id"]
+                p_name = sel_player["name"]
+                p_pos = sel_player["pos"]
+                p_team = sel_player["team"]
+                p_val = sel_player["value_diff"]
+                inj_tier = sel_player.get("injury_tier", "")
+                is_drafted = sel_player.get("is_drafted", False)
                 
-                u_c1, u_c2 = st.columns([1, 2])
-                with u_c1:
-                    if st.button(f"🔄 Undo Pick / Restore {p_name} to Available", key=f"btn_undo_sel_{p_id}_{key_prefix}", type="primary", use_container_width=True):
-                        restore_player(p_id)
-                        st.rerun()
-                with u_c2:
-                    st.caption(f"Click above to undo this pick and return {p_name} back onto the active draft board as available.")
-            else:
-                # Available player: High-visibility injury / suspension alerts based on tier
-                if inj_tier == "SEASON_IR":
+                # If drafted, display red drafted banner with 1-click Undo button
+                if is_drafted:
+                    drafted_by_label = "Your Roster" if sel_player.get("is_user") else sel_player.get("drafted_by", "Opponent")
+                    pick_num = sel_player.get("pick_number", "?")
+                    draft_round = sel_player.get("draft_round", "?")
                     st.markdown(f"""
                     <div style="background:#450a0a; border:2px solid #ef4444; border-radius:8px; padding:12px 16px; margin-top:8px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#f87171; font-size:1.05rem;">🛑 INJURY WARNING: OUT FOR SEASON (IR) &bull; {p_name} ({p_pos} - {p_team})</strong>
-                            <span style="background:#ef4444; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">DO NOT DRAFT</span>
+                            <strong style="color:#f87171; font-size:1.05rem;">🔴 DRAFTED: {p_name} ({p_pos} - {p_team}) &bull; Taken at Pick #{pick_num} by {drafted_by_label}</strong>
+                            <span style="background:#ef4444; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">OFF THE BOARD</span>
                         </div>
                         <div style="margin-top:6px; color:#fecaca; font-size:0.9rem;">
-                            <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out for Season')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Season-Ending')} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
-                        </div>
-                        <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
-                            {sel_player.get('injury_blurb', '')}
-                        </div>
-                        <div style="margin-top:4px; color:#fca5a5; font-size:0.85rem; font-weight:600;">
-                            ⚠️ Draft Guidance: {sel_player.get('draft_advice', 'Do not draft in standard redraft leagues.')}
+                            <strong>Round:</strong> {draft_round} &bull; <strong>Consensus:</strong> #{sel_player['consensus_rank']} &bull; <strong>Value Spread:</strong> {'+' if p_val > 0 else ''}{p_val}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
-                elif inj_tier == "SUSPENSION":
-                    st.markdown(f"""
-                    <div style="background:#3b0764; border:2px solid #c084fc; border-radius:8px; padding:12px 16px; margin-top:8px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#e9d5ff; font-size:1.05rem;">⛔ LEAGUE SUSPENSION ALERT &bull; {p_name} ({p_pos} - {p_team})</strong>
-                            <span style="background:#a855f7; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">MULTI-GAME SUSPENSION</span>
-                        </div>
-                        <div style="margin-top:6px; color:#f3e8ff; font-size:0.9rem;">
-                            <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Suspended')} &bull; <strong>Reason:</strong> {sel_player.get('injury_type', 'League Policy')} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
-                        </div>
-                        <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
-                            {sel_player.get('injury_blurb', '')}
-                        </div>
-                        <div style="margin-top:4px; color:#d8b4fe; font-size:0.85rem; font-weight:600;">
-                            💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as mid-round stash.')}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                elif inj_tier == "PUP_MULTI_WEEK":
-                    st.markdown(f"""
-                    <div style="background:#431407; border:2px solid #f97316; border-radius:8px; padding:12px 16px; margin-top:8px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fed7aa; font-size:1.05rem;">⚠️ RESERVE / PUP ALERT (OUT FIRST 4+ WEEKS) &bull; {p_name} ({p_pos} - {p_team})</strong>
-                            <span style="background:#f97316; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">MULTI-WEEK STASH</span>
-                        </div>
-                        <div style="margin-top:6px; color:#ffedd5; font-size:0.9rem;">
-                            <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out minimum 4 weeks')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'PUP List')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 5')}
-                        </div>
-                        <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
-                            {sel_player.get('injury_blurb', '')}
-                        </div>
-                        <div style="margin-top:4px; color:#fdba74; font-size:0.85rem; font-weight:600;">
-                            💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as late-round stash.')}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                elif inj_tier == "OUT_WEEK_1":
-                    st.markdown(f"""
-                    <div style="background:#431407; border:2px solid #ea580c; border-radius:8px; padding:12px 16px; margin-top:8px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fdba74; font-size:1.05rem;">🟠 OUT WEEK 1 (EXPECTED BACK WEEK 2) &bull; {p_name} ({p_pos} - {p_team})</strong>
-                            <span style="background:#ea580c; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">OUT WK 1 ONLY</span>
-                        </div>
-                        <div style="margin-top:6px; color:#fed7aa; font-size:0.9rem;">
-                            <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out Wk 1 • Target Return: Week 2')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Short-term')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 2')}
-                        </div>
-                        <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
-                            {sel_player.get('injury_blurb', '')}
-                        </div>
-                        <div style="margin-top:4px; color:#fb923c; font-size:0.85rem; font-weight:600;">
-                            💡 Strategy: {sel_player.get('draft_advice', 'Confirmed out for Week 1 only; expected ready for Week 2.')}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                elif inj_tier == "WEEK_1_RISK":
-                    st.markdown(f"""
-                    <div style="background:#422006; border:2px solid #eab308; border-radius:8px; padding:12px 16px; margin-top:8px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fef08a; font-size:1.05rem;">🟡 WEEK 1 MONITORING / QUESTIONABLE &bull; {p_name} ({p_pos} - {p_team})</strong>
-                            <span style="background:#eab308; color:#000; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">DAY-TO-DAY</span>
-                        </div>
-                        <div style="margin-top:6px; color:#fef9c3; font-size:0.9rem;">
-                            <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Week 1')} &bull; <strong>Status:</strong> {sel_player.get('injury_type', 'Questionable')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 1')}
-                        </div>
-                        <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
-                            {sel_player.get('injury_blurb', '')}
-                        </div>
-                        <div style="margin-top:4px; color:#fef08a; font-size:0.85rem; font-weight:600;">
-                            💡 Advice: {sel_player.get('draft_advice', 'Monitor practice reports.')}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    
+                    u_c1, u_c2, u_c3 = st.columns([1.5, 2, 0.8])
+                    with u_c1:
+                        if st.button(f"🔄 Undo Pick / Restore {p_name}", key=f"btn_undo_sel_{p_id}_{key_prefix}", type="primary", use_container_width=True):
+                            restore_player(p_id)
+                            st.rerun()
+                    with u_c2:
+                        st.caption(f"Click above to undo this pick and return {p_name} back onto the active draft board as available.")
+                    with u_c3:
+                        if st.button("✖ Close", key=f"btn_close_undo_{p_id}_{key_prefix}", use_container_width=True, help="Dismiss card"):
+                            if f"table_select_{key_prefix}" in st.session_state:
+                                del st.session_state[f"table_select_{key_prefix}"]
+                            st.rerun()
                 else:
-                    st.markdown(f"""
-                    <div style="background:#1e293b; border:1px solid #38bdf8; border-radius:8px; padding:10px 16px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong>Selected:</strong> {p_name} ({p_pos} - {p_team}) | <strong>Consensus #{sel_player['consensus_rank']}</strong> | <strong>Value Diff: {'+' if p_val > 0 else ''}{p_val}</strong>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                b_c1, b_c2 = st.columns([1, 1])
-                with b_c1:
-                    btn_label = f"🟩 Draft {p_name} (My Roster)"
+                    # Available player: High-visibility injury / suspension alerts based on tier
                     if inj_tier == "SEASON_IR":
-                        btn_label += " ⚠️[IR RISK]"
-                    if st.button(btn_label, key=f"btn_user_{p_id}_{key_prefix}", type="primary", use_container_width=True):
-                        execute_pick(p_id, drafted_by_user=True)
-                        st.rerun()
-                with b_c2:
-                    if st.button(f"⬛ Cross Off {p_name} (Other Team)", key=f"btn_opp_{p_id}_{key_prefix}", use_container_width=True):
-                        execute_pick(p_id, drafted_by_user=False)
-                        st.rerun()
+                        st.markdown(f"""
+                        <div style="background:#450a0a; border:2px solid #ef4444; border-radius:8px; padding:12px 16px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#f87171; font-size:1.05rem;">🛑 INJURY WARNING: OUT FOR SEASON (IR) &bull; {p_name} ({p_pos} - {p_team})</strong>
+                                <span style="background:#ef4444; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">DO NOT DRAFT</span>
+                            </div>
+                            <div style="margin-top:6px; color:#fecaca; font-size:0.9rem;">
+                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out for Season')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Season-Ending')} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
+                            </div>
+                            <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
+                                {sel_player.get('injury_blurb', '')}
+                            </div>
+                            <div style="margin-top:4px; color:#fca5a5; font-size:0.85rem; font-weight:600;">
+                                ⚠️ Draft Guidance: {sel_player.get('draft_advice', 'Do not draft in standard redraft leagues.')}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif inj_tier == "SUSPENSION":
+                        st.markdown(f"""
+                        <div style="background:#3b0764; border:2px solid #c084fc; border-radius:8px; padding:12px 16px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#e9d5ff; font-size:1.05rem;">⛔ LEAGUE SUSPENSION ALERT &bull; {p_name} ({p_pos} - {p_team})</strong>
+                                <span style="background:#a855f7; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">MULTI-GAME SUSPENSION</span>
+                            </div>
+                            <div style="margin-top:6px; color:#f3e8ff; font-size:0.9rem;">
+                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Suspended')} &bull; <strong>Reason:</strong> {sel_player.get('injury_type', 'League Policy')} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
+                            </div>
+                            <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
+                                {sel_player.get('injury_blurb', '')}
+                            </div>
+                            <div style="margin-top:4px; color:#d8b4fe; font-size:0.85rem; font-weight:600;">
+                                💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as mid-round stash.')}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif inj_tier == "PUP_MULTI_WEEK":
+                        st.markdown(f"""
+                        <div style="background:#431407; border:2px solid #f97316; border-radius:8px; padding:12px 16px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#fed7aa; font-size:1.05rem;">⚠️ RESERVE / PUP ALERT (OUT FIRST 4+ WEEKS) &bull; {p_name} ({p_pos} - {p_team})</strong>
+                                <span style="background:#f97316; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">MULTI-WEEK STASH</span>
+                            </div>
+                            <div style="margin-top:6px; color:#ffedd5; font-size:0.9rem;">
+                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out minimum 4 weeks')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'PUP List')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 5')}
+                            </div>
+                            <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
+                                {sel_player.get('injury_blurb', '')}
+                            </div>
+                            <div style="margin-top:4px; color:#fdba74; font-size:0.85rem; font-weight:600;">
+                                💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as late-round stash.')}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif inj_tier == "OUT_WEEK_1":
+                        st.markdown(f"""
+                        <div style="background:#431407; border:2px solid #ea580c; border-radius:8px; padding:12px 16px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#fdba74; font-size:1.05rem;">🟠 OUT WEEK 1 (EXPECTED BACK WEEK 2) &bull; {p_name} ({p_pos} - {p_team})</strong>
+                                <span style="background:#ea580c; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">OUT WK 1 ONLY</span>
+                            </div>
+                            <div style="margin-top:6px; color:#fed7aa; font-size:0.9rem;">
+                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out Wk 1 • Target Return: Week 2')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Short-term')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 2')}
+                            </div>
+                            <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
+                                {sel_player.get('injury_blurb', '')}
+                            </div>
+                            <div style="margin-top:4px; color:#fb923c; font-size:0.85rem; font-weight:600;">
+                                💡 Strategy: {sel_player.get('draft_advice', 'Confirmed out for Week 1 only; expected ready for Week 2.')}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif inj_tier == "WEEK_1_RISK":
+                        st.markdown(f"""
+                        <div style="background:#422006; border:2px solid #eab308; border-radius:8px; padding:12px 16px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#fef08a; font-size:1.05rem;">🟡 WEEK 1 MONITORING / QUESTIONABLE &bull; {p_name} ({p_pos} - {p_team})</strong>
+                                <span style="background:#eab308; color:#000; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">DAY-TO-DAY</span>
+                            </div>
+                            <div style="margin-top:6px; color:#fef9c3; font-size:0.9rem;">
+                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Week 1')} &bull; <strong>Status:</strong> {sel_player.get('injury_type', 'Questionable')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 1')}
+                            </div>
+                            <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
+                                {sel_player.get('injury_blurb', '')}
+                            </div>
+                            <div style="margin-top:4px; color:#fef08a; font-size:0.85rem; font-weight:600;">
+                                💡 Advice: {sel_player.get('draft_advice', 'Monitor practice reports.')}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div style="background:#1e293b; border:1px solid #38bdf8; border-radius:8px; padding:10px 16px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong>Selected:</strong> {p_name} ({p_pos} - {p_team}) | <strong>Consensus #{sel_player['consensus_rank']}</strong> | <strong>Value Diff: {'+' if p_val > 0 else ''}{p_val}</strong>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    b_c1, b_c2, b_c3 = st.columns([1.5, 1.5, 0.8])
+                    with b_c1:
+                        btn_label = f"🟩 Draft {p_name} (My Roster)"
+                        if inj_tier == "SEASON_IR":
+                            btn_label += " ⚠️[IR RISK]"
+                        if st.button(btn_label, key=f"btn_user_{p_id}_{key_prefix}", type="primary", use_container_width=True):
+                            execute_pick(p_id, drafted_by_user=True)
+                            st.rerun()
+                    with b_c2:
+                        if st.button(f"⬛ Cross Off {p_name} (Other)", key=f"btn_opp_{p_id}_{key_prefix}", use_container_width=True):
+                            execute_pick(p_id, drafted_by_user=False)
+                            st.rerun()
+                    with b_c3:
+                        if st.button("✖ Close", key=f"btn_close_sel_{p_id}_{key_prefix}", use_container_width=True, help="Dismiss card"):
+                            if f"table_select_{key_prefix}" in st.session_state:
+                                del st.session_state[f"table_select_{key_prefix}"]
+                            st.rerun()
 
 
 # --- Tab 1: All Available ---
