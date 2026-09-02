@@ -7,6 +7,8 @@ and zero horizontal scrolling.
 
 import time
 import json
+import re
+import urllib.parse
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 
@@ -450,6 +452,31 @@ def reset_draft_board():
     st.toast("Draft board successfully reset!", icon="🔄")
 
 
+def get_player_injury_links_html(player_name: str) -> str:
+    """Generates direct profile and real-time injury tracking links for FantasyPros and RotoWire."""
+    clean_n = player_name.lower().replace("'", "").replace(".", "").strip()
+    for sfx in [" jr", " sr", " ii", " iii", " iv", " v"]:
+        if clean_n.endswith(sfx):
+            clean_n = clean_n[:-len(sfx)].strip()
+    slug = "-".join([w for w in re.split(r'[^a-z0-9]+', clean_n) if w])
+    
+    fp_url = f"https://www.fantasypros.com/nfl/players/{slug}.php"
+    rw_q = urllib.parse.quote_plus(f"rotowire {player_name} nfl injury news")
+    rw_url = f"https://www.google.com/search?q={rw_q}"
+    
+    return (
+        f'<div style="margin-top:8px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.18); display:flex; flex-wrap:wrap; gap:8px; align-items:center;">'
+        f'<span style="color:#cbd5e1; font-size:0.8rem; font-weight:700;">📡 Live Injury Wire & Beat History:</span>'
+        f'<a href="{fp_url}" target="_blank" rel="noopener noreferrer" style="background:#1e293b; color:#38bdf8; text-decoration:none; padding:3px 10px; border-radius:5px; font-size:0.78rem; font-weight:700; border:1px solid #38bdf850; display:inline-flex; align-items:center; gap:4px;">'
+        f'⚡ FantasyPros Live Profile ↗'
+        f'</a>'
+        f'<a href="{rw_url}" target="_blank" rel="noopener noreferrer" style="background:#1e293b; color:#fb923c; text-decoration:none; padding:3px 10px; border-radius:5px; font-size:0.78rem; font-weight:700; border:1px solid #fb923c50; display:inline-flex; align-items:center; gap:4px;">'
+        f'📰 RotoWire Latest Beat News ↗'
+        f'</a>'
+        f'</div>'
+    )
+
+
 def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
     """
     Computes user's 8-team PPR starting lineup (9 starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 D/ST, 1 K),
@@ -680,6 +707,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')}
                 </div>
+                {get_player_injury_links_html(tsp['name'])}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "SUSPENSION":
@@ -695,6 +723,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Mid-round stash')}</em>
                 </div>
+                {get_player_injury_links_html(tsp['name'])}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "PUP_MULTI_WEEK":
@@ -710,6 +739,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Strategy: {tsp.get('draft_advice', 'Target in later rounds')}</em>
                 </div>
+                {get_player_injury_links_html(tsp['name'])}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "OUT_WEEK_1":
@@ -725,6 +755,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Safe to draft; will only miss opening game.')}</em>
                 </div>
+                {get_player_injury_links_html(tsp['name'])}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "WEEK_1_RISK":
@@ -740,6 +771,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')}
                 </div>
+                {get_player_injury_links_html(tsp['name'])}
             </div>
             """, unsafe_allow_html=True)
 
@@ -1135,7 +1167,16 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     # Container placed ABOVE the table to ensure selected player card renders above the table
     selected_card_container = st.container()
 
-    st.caption("💡 **Draft Room Tip:** Click any player's checkbox or row to immediately view their full beat-reporter injury notes, return timeline, and 1-click draft buttons above the table.")
+    # Prominent, high-visibility draft room tip banner
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #1e1b4b 0%, #0f172a 100%); border: 1.5px solid #6366f1; border-radius: 8px; padding: 10px 16px; margin: 8px 0 10px 0; display: flex; align-items: center; gap: 12px; box-shadow: 0 3px 12px rgba(99, 102, 241, 0.22);">
+        <span style="font-size: 1.4rem; line-height: 1;">💡</span>
+        <div style="font-size: 0.92rem; color: #f1f5f9; line-height: 1.45;">
+            <strong style="color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.5px;">Crucial Draft Room Feature:</strong>
+            Click any player's <span style="background:#3730a3; padding:1px 6px; border-radius:4px; font-weight:700; color:#fff;">checkbox or row</span> in the table to immediately open their <strong>full beat-reporter injury notes, return timeline, live medical profile links, and 1-click draft buttons</strong> above the table.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Interactive Table with Direct Selection and Smooth Horizontal Scrolling
     selection = st.dataframe(
@@ -1241,6 +1282,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fca5a5; font-size:0.85rem; font-weight:600;">
                                 ⚠️ Draft Guidance: {sel_player.get('draft_advice', 'Do not draft in standard redraft leagues.')}
                             </div>
+                            {get_player_injury_links_html(p_name)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "SUSPENSION":
@@ -1259,6 +1301,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#d8b4fe; font-size:0.85rem; font-weight:600;">
                                 💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as mid-round stash.')}
                             </div>
+                            {get_player_injury_links_html(p_name)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "PUP_MULTI_WEEK":
@@ -1277,6 +1320,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fdba74; font-size:0.85rem; font-weight:600;">
                                 💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as late-round stash.')}
                             </div>
+                            {get_player_injury_links_html(p_name)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "OUT_WEEK_1":
@@ -1295,6 +1339,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fb923c; font-size:0.85rem; font-weight:600;">
                                 💡 Strategy: {sel_player.get('draft_advice', 'Confirmed out for Week 1 only; expected ready for Week 2.')}
                             </div>
+                            {get_player_injury_links_html(p_name)}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "WEEK_1_RISK":
@@ -1313,15 +1358,18 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fef08a; font-size:0.85rem; font-weight:600;">
                                 💡 Advice: {sel_player.get('draft_advice', 'Monitor practice reports.')}
                             </div>
+                            {get_player_injury_links_html(p_name)}
                         </div>
                         """, unsafe_allow_html=True)
                     else:
                         st.markdown(f"""
                         <div style="background:#1e293b; border:1px solid #38bdf8; border-radius:8px; padding:10px 16px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <strong>Selected:</strong> {p_name} ({p_pos} - {p_team}) | <strong>Consensus #{sel_player['consensus_rank']}</strong> | <strong>Value Diff: {'+' if p_val > 0 else ''}{p_val}</strong>
+                                <strong style="color:#f8fafc; font-size:1.05rem;">🟩 ACTIVE &bull; {p_name} ({p_pos} - {p_team})</strong> | <strong>Consensus #{sel_player['consensus_rank']}</strong> | <strong>Value Diff: {'+' if p_val > 0 else ''}{p_val}</strong>
                             </div>
+                            <span style="background:#064e3b; color:#34d399; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #059669;">HEALTHY</span>
                         </div>
+                        {get_player_injury_links_html(p_name)}
                         """, unsafe_allow_html=True)
                     
                     b_c1, b_c2, b_c3 = st.columns([1.5, 1.5, 0.8])
@@ -1472,28 +1520,30 @@ with tab_injuries:
             st.caption("Direct beat-reporter updates, practice participation, and return estimates from official NFL beat writers & ESPN wire.")
             for _, ir in filtered_inj_df.iterrows():
                 tier_color = "#ef4444" if ir["injury_tier"] == "SEASON_IR" else ("#c084fc" if ir["injury_tier"] == "SUSPENSION" else ("#f97316" if ir["injury_tier"] == "PUP_MULTI_WEEK" else ("#ea580c" if ir["injury_tier"] == "OUT_WEEK_1" else "#eab308")))
-                st.markdown(f"""
-                <div style="background:#111827; border-left:4px solid {tier_color}; border-radius:6px; padding:10px 14px; margin-bottom:10px; border-top:1px solid #1f2937; border-right:1px solid #1f2937; border-bottom:1px solid #1f2937;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong style="color:#f8fafc; font-size:0.95rem;">{ir['name']} ({ir['pos']} - {ir['team']})</strong>
-                            <span style="color:#94a3b8; font-size:0.8rem; margin-left:8px;">Consensus #{ir['consensus_rank']} &bull; Bye {ir['bye']}</span>
-                        </div>
-                        <span style="background:#1e293b; color:{tier_color}; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid {tier_color}40;">
-                            {ir['injury_badge']}
-                        </span>
-                    </div>
-                    <div style="color:#cbd5e1; font-size:0.82rem; margin-top:4px;">
-                        <strong>Timeline:</strong> {ir.get('injury_timeline', 'TBD')} &bull; <strong>Diagnosis:</strong> {ir.get('injury_type', 'Undisclosed')}
-                    </div>
-                    <div style="color:#94a3b8; font-size:0.82rem; margin-top:4px; line-height:1.4; background:#0b0f19; padding:8px 10px; border-radius:5px; border:1px solid #1e293b;">
-                        {ir.get('injury_blurb', 'No detailed blurb available.')}
-                    </div>
-                    <div style="color:#38bdf8; font-size:0.75rem; font-weight:600; margin-top:4px;">
-                        💡 Strategy: {ir.get('draft_advice', 'Monitor practice reports.')}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                wire_card = (
+                    f'<div style="background:#111827; border-left:4px solid {tier_color}; border-radius:6px; padding:10px 14px; margin-bottom:10px; border-top:1px solid #1f2937; border-right:1px solid #1f2937; border-bottom:1px solid #1f2937;">'
+                    f'<div style="display:flex; justify-content:space-between; align-items:center;">'
+                    f'<div>'
+                    f'<strong style="color:#f8fafc; font-size:0.95rem;">{ir["name"]} ({ir["pos"]} - {ir["team"]})</strong>'
+                    f'<span style="color:#94a3b8; font-size:0.8rem; margin-left:8px;">Consensus #{ir["consensus_rank"]} &bull; Bye {ir["bye"]}</span>'
+                    f'</div>'
+                    f'<span style="background:#1e293b; color:{tier_color}; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid {tier_color}40;">'
+                    f'{ir["injury_badge"]}'
+                    f'</span>'
+                    f'</div>'
+                    f'<div style="color:#cbd5e1; font-size:0.82rem; margin-top:4px;">'
+                    f'<strong>Timeline:</strong> {ir.get("injury_timeline", "TBD")} &bull; <strong>Diagnosis:</strong> {ir.get("injury_type", "Undisclosed")}'
+                    f'</div>'
+                    f'<div style="color:#94a3b8; font-size:0.82rem; margin-top:4px; line-height:1.4; background:#0b0f19; padding:8px 10px; border-radius:5px; border:1px solid #1e293b;">'
+                    f'{ir.get("injury_blurb", "No detailed blurb available.")}'
+                    f'</div>'
+                    f'<div style="color:#38bdf8; font-size:0.75rem; font-weight:600; margin-top:4px;">'
+                    f'💡 Strategy: {ir.get("draft_advice", "Monitor practice reports.")}'
+                    f'</div>'
+                    f'{get_player_injury_links_html(ir["name"])}'
+                    f'</div>'
+                )
+                st.markdown(wire_card, unsafe_allow_html=True)
 
 # --- Tab 10: Crossed Off / Drafted Players ---
 with tab_crossed:
