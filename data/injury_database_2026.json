@@ -340,8 +340,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T18:15:31Z",
+      "updated_formatted": "Sep 02, 2026 at 06:15 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/zay-flowers.php"
     },
@@ -532,8 +532,8 @@
       "blurb": "Reported as Questionable (Knee).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T19:00:31Z",
+      "updated_formatted": "Sep 02, 2026 at 07:00 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/ty-johnson.php"
     },
@@ -644,8 +644,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T17:45:31Z",
+      "updated_formatted": "Sep 02, 2026 at 05:45 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/jonathon-brooks.php"
     },
@@ -1716,8 +1716,8 @@
       "blurb": "Reported as IR (Back).",
       "is_season_out": false,
       "draft_advice": "Stash candidate if you can weather the opening month.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T18:05:31Z",
+      "updated_formatted": "Sep 02, 2026 at 06:05 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/isiah-pacheco.php"
     },
@@ -2586,7 +2586,7 @@
       "source_url": "https://www.fantasypros.com/nfl/players/cameron-mitchell.php"
     },
     "lequint allen": {
-      "player_name": "Lequint Allen",
+      "player_name": "LeQuint Allen",
       "status": "Questionable",
       "type": "Undisclosed",
       "tier": "WEEK_1_RISK",
@@ -2596,8 +2596,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T17:50:31Z",
+      "updated_formatted": "Sep 02, 2026 at 05:50 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/lequint-allen.php"
     },
@@ -3492,8 +3492,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T17:25:30Z",
+      "updated_formatted": "Sep 02, 2026 at 05:25 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/ollie-gordon.php"
     },
@@ -3752,22 +3752,6 @@
       "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/tyler-batty.php"
-    },
-    "jj mccarthy": {
-      "player_name": "Jj Mccarthy",
-      "status": "Questionable",
-      "type": "Undisclosed",
-      "tier": "WEEK_1_RISK",
-      "badge": "🟡 Q (Undisclosed)",
-      "timeline": "Target return: Week 1",
-      "return_date": null,
-      "blurb": "Reported as Questionable (Undisclosed).",
-      "is_season_out": false,
-      "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
-      "source": "Sleeper API",
-      "source_url": "https://www.fantasypros.com/nfl/players/jj-mccarthy.php"
     },
     "jacob thomas": {
       "player_name": "Jacob Thomas",
@@ -4260,8 +4244,8 @@
       "blurb": "Surgery",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T19:20:32Z",
+      "updated_formatted": "Sep 02, 2026 at 07:20 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/malik-nabers.php"
     },
@@ -4954,7 +4938,7 @@
       "source_url": "https://www.fantasypros.com/nfl/players/michael-pittman.php"
     },
     "dk metcalf": {
-      "player_name": "Dk Metcalf",
+      "player_name": "DK Metcalf",
       "status": "Questionable",
       "type": "Undisclosed",
       "tier": "WEEK_1_RISK",
@@ -4964,8 +4948,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T18:45:31Z",
+      "updated_formatted": "Sep 02, 2026 at 06:45 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/dk-metcalf.php"
     },
@@ -5172,8 +5156,8 @@
       "blurb": "Reported as Questionable (Foot).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T19:00:32Z",
+      "updated_formatted": "Sep 02, 2026 at 07:00 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/mike-evans.php"
     },
@@ -5556,8 +5540,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-02T17:20:30Z",
+      "updated_formatted": "Sep 02, 2026 at 05:20 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/players/emeka-egbuka.php"
     },
@@ -16292,6 +16276,20 @@
       "updated_formatted": "Sep 02, 2026 at 05:01 PM UTC",
       "source": "ESPN Official Injury API",
       "source_url": "https://www.fantasypros.com/nfl/players/josh-simmons.php"
+    },
+    "jj mccarthy": {
+      "status": "Injured Reserve",
+      "type": "Knee - Meniscus Surgery",
+      "tier": "SEASON_IR",
+      "badge": "🛑 IR (Meniscus)",
+      "timeline": "Out for 2026 Season",
+      "return_date": "2027-02-15",
+      "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
+      "is_season_out": true,
+      "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
+      "timestamp_utc": "2026-09-01T12:00:00Z",
+      "updated_formatted": "Sep 01, 2026 at 12:00 PM UTC",
+      "player_name": "Jj Mccarthy"
     }
   }
 }

@@ -281,12 +281,12 @@ st.markdown("""
         font-size: 0.84rem !important;
     }
 
-    /* Mobile Responsive Enhancements (auto-detected on phones/tablets) */
-    @media (max-width: 768px) {
+    /* Mobile & iPad / Tablet Responsive Enhancements (auto-detected on phones & iPads) */
+    @media (max-width: 1024px) {
         .block-container {
-            padding-left: 0.4rem !important;
-            padding-right: 0.4rem !important;
-            padding-top: 0.4rem !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+            padding-top: 0.5rem !important;
         }
         .war-room-header {
             flex-direction: column !important;
@@ -295,20 +295,28 @@ st.markdown("""
             padding: 8px 12px !important;
         }
         .war-room-title {
-            font-size: 1.15rem !important;
+            font-size: 1.2rem !important;
         }
         .best-avail-bar {
-            gap: 8px !important;
-            font-size: 0.72rem !important;
-            padding: 4px 8px !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+            font-size: 0.76rem !important;
+            padding: 6px 10px !important;
         }
         div.stButton > button {
-            padding: 0.35rem 0.5rem !important;
-            font-size: 0.82rem !important;
+            padding: 0.35rem 0.35rem !important;
+            font-size: 0.78rem !important;
+            white-space: nowrap !important;
+        }
+        [data-testid="column"] {
+            min-width: 0 !important;
         }
         [data-testid="stTab"] {
-            font-size: 0.76rem !important;
+            font-size: 0.78rem !important;
             padding: 3px 8px !important;
+        }
+        [data-testid="stDataFrame"] {
+            -webkit-overflow-scrolling: touch !important;
         }
     }
 </style>
@@ -336,6 +344,9 @@ if "user_slot" not in st.session_state:
 
 if "clock_seconds" not in st.session_state:
     st.session_state.clock_seconds = 90
+
+if "sidebar_collapsed" not in st.session_state:
+    st.session_state.sidebar_collapsed = False
 
 
 # -----------------------------------------------------------------------------
@@ -620,6 +631,51 @@ for p_idx in range(st.session_state.current_pick, TOTAL_PICKS + 1):
 
 picks_until_user = (next_picks[0] - st.session_state.current_pick) if next_picks else 0
 
+# Minimizer logic & CSS override when Live Draft Control is minimized
+if st.session_state.get("sidebar_collapsed", False):
+    st.markdown("""
+    <style>
+        [data-testid="stSidebar"], 
+        section[data-testid="stSidebar"],
+        [data-testid="stSidebarContent"] {
+            display: none !important;
+            width: 0px !important;
+            min-width: 0px !important;
+            max-width: 0px !important;
+            transform: translateX(-100%) !important;
+        }
+        [data-testid="stSidebarCollapsedControl"] {
+            display: none !important;
+        }
+        .stApp [data-testid="stAppViewContainer"] > section.main {
+            margin-left: 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .block-container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 0.6rem !important;
+            padding-right: 0.6rem !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # High-visibility remaximize bar at top of page
+    c_rem1, c_rem2 = st.columns([3.5, 6.5])
+    with c_rem1:
+        if st.button("▶ 🏆 Show Draft Control & Roster", key="btn_remaximize_banner", type="primary", use_container_width=True, help="Click to restore the Live Draft Control and starting lineup sidebar"):
+            st.session_state.sidebar_collapsed = False
+            st.rerun()
+    with c_rem2:
+        st.markdown("""
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 7px 14px; color: #38bdf8; font-size: 0.83rem; display: flex; align-items: center; gap: 8px; height: 100%;">
+            <span>📱</span> <span><strong>Full Screen Mode Active:</strong> Live Draft Control is minimized so tables and expert rankings take up 100% of your screen on Mobile & iPad. Click button to restore.</span>
+        </div>
+        """, unsafe_allow_html=True)
+
 st.markdown(f"""
 <div class="war-room-header">
     <div>
@@ -669,7 +725,7 @@ st.markdown(f"""
 # -----------------------------------------------------------------------------
 # 6. FAST ACTION QUICK-SEARCH BAR & LIVE CLOCK (TOP OF SCREEN)
 # -----------------------------------------------------------------------------
-search_col1, search_col2, search_col3, search_col4, search_col5 = st.columns([4, 1.3, 1.3, 0.8, 1.6])
+search_col1, search_col2, search_col3, search_col4, search_col5, search_col6 = st.columns([3.6, 1.2, 1.2, 0.7, 1.3, 1.2])
 
 # Format player choices for instant autocomplete
 player_options = {}
@@ -725,6 +781,14 @@ with search_col5:
         if st.button("🔄 Reset", use_container_width=True):
             st.session_state.clock_seconds = 90
             st.rerun()
+
+with search_col6:
+    is_min = st.session_state.get("sidebar_collapsed", False)
+    btn_label = "▶ 🏆 Control" if is_min else "📱 Fullscreen"
+    btn_help = "Show Live Draft Control sidebar" if is_min else "Minimize Live Draft Control to view consensus tables fullscreen on Mobile/iPad"
+    if st.button(btn_label, key="btn_toggle_sidebar_fastbar", help=btn_help, use_container_width=True):
+        st.session_state.sidebar_collapsed = not is_min
+        st.rerun()
 
 # If top selected player has an active injury/suspension warning, display immediate alert banner
 if selected_player_id:
@@ -817,7 +881,13 @@ if selected_player_id:
 # 7. SIDEBAR: 8-TEAM ROSTER TRACKER, DRAFT POSITION & NEEDS
 # -----------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 🏆 Live Draft Control")
+    sb_c1, sb_c2 = st.columns([3, 1.2])
+    with sb_c1:
+        st.markdown("### 🏆 Live Draft Control")
+    with sb_c2:
+        if st.button("◀ Hide", key="btn_hide_sidebar_top", help="Minimize Live Draft Control to expand table view on Mobile/iPad/Desktop", use_container_width=True):
+            st.session_state.sidebar_collapsed = True
+            st.rerun()
     
     # User Slot Picker
     user_slot_input = st.selectbox(
@@ -839,6 +909,11 @@ with st.sidebar:
             st.metric("Next Turn", "NOW! 🔥", delta="Your Pick", delta_color="normal")
         else:
             st.metric("Next Turn", f"in {picks_until_user} picks", delta=f"Pick #{next_picks[0]}" if next_picks else "Done")
+
+    # Mobile / iPad 1-click full screen tables button
+    if st.button("📱 Fullscreen Tables (Minimize)", key="btn_minimize_sidebar_mid", use_container_width=True, help="Hide sidebar to give maximum horizontal width to consensus ranking tables on iPad & Mobile"):
+        st.session_state.sidebar_collapsed = True
+        st.rerun()
 
     st.markdown("---")
     st.markdown("### 📋 My Starting Lineup (PPR)")

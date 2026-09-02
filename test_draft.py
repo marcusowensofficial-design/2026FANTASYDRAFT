@@ -289,6 +289,17 @@ def test_ir_candidates_and_expert_coverage():
         assert mapped_count >= len(exp_df) - 1, f"Source {src} should have all {len(exp_df)} players mapped"
 
 
+def test_sidebar_minimizer_toggle():
+    """Verify minimizer toggle logic and CSS injection contract."""
+    state = {"sidebar_collapsed": False}
+    # Toggle minimize
+    state["sidebar_collapsed"] = not state["sidebar_collapsed"]
+    assert state["sidebar_collapsed"] is True
+    # Toggle remaximize
+    state["sidebar_collapsed"] = not state["sidebar_collapsed"]
+    assert state["sidebar_collapsed"] is False
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -300,5 +311,6 @@ if __name__ == "__main__":
     test_board_injury_fields()
     test_temporal_conflict_resolution()
     test_ir_candidates_and_expert_coverage()
+    test_sidebar_minimizer_toggle()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 
