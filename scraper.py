@@ -16,6 +16,7 @@ import glob
 import json
 import sqlite3
 import logging
+import urllib.parse
 from datetime import datetime, timezone
 import unicodedata
 import difflib
@@ -42,6 +43,60 @@ DATA_DIR = Path(__file__).resolve().parent / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 PARQUET_FILE = DATA_DIR / "draft_board_2026.parquet"
 SQLITE_FILE = DATA_DIR / "draft_board.db"
+ROTOWIRE_MAP_FILE = DATA_DIR / "rotowire_player_map.json"
+_ROTOWIRE_CACHE: Optional[Dict[str, list]] = None
+
+
+def load_rotowire_player_map() -> Dict[str, list]:
+    """Loads cached RotoWire player ID and slug mapping."""
+    global _ROTOWIRE_CACHE
+    if _ROTOWIRE_CACHE is not None:
+        return _ROTOWIRE_CACHE
+    if ROTOWIRE_MAP_FILE.exists():
+        try:
+            with open(ROTOWIRE_MAP_FILE, "r", encoding="utf-8") as f:
+                _ROTOWIRE_CACHE = json.load(f)
+                return _ROTOWIRE_CACHE
+        except Exception as e:
+            logger.warning(f"Error loading {ROTOWIRE_MAP_FILE}: {e}")
+    _ROTOWIRE_CACHE = {}
+    return _ROTOWIRE_CACHE
+
+
+def get_rotowire_url(player_name: str, source_url: Optional[str] = None) -> str:
+    """
+    Returns the direct RotoWire player profile URL (e.g., https://www.rotowire.com/football/player/jahmyr-gibbs-16808).
+    Resolves canonical RotoWire player ID via rotowire_player_map.json.
+    Falls back gracefully if unmapped.
+    """
+    if source_url and "rotowire.com/football/player/" in source_url:
+        return source_url
+    
+    clean_k = re.sub(r"[^a-z0-9]", "", re.sub(r"\s+(jr|sr|ii|iii|iv|v)$", "", re.sub(r"[.'\"]", "", player_name.lower().strip())))
+    rw_map = load_rotowire_player_map()
+    rec = rw_map.get(clean_k)
+    if rec and isinstance(rec, (list, tuple)) and len(rec) >= 2:
+        rw_id, slug = rec[0], rec[1]
+        return f"https://www.rotowire.com/football/player/{slug}-{rw_id}"
+    
+    clean_q = urllib.parse.quote_plus(f"rotowire {player_name} nfl")
+    return f"https://www.google.com/search?q={clean_q}"
+
+
+def get_fantasypros_url(player_name: str, source_url: Optional[str] = None) -> str:
+    """
+    Returns the direct FantasyPros player news profile URL (e.g., https://www.fantasypros.com/nfl/news/jahmyr-gibbs.php).
+    Always routes to /nfl/news/ directory instead of /nfl/players/.
+    """
+    if source_url and "fantasypros.com" in source_url:
+        return source_url.replace("/nfl/players/", "/nfl/news/")
+    
+    clean_n = player_name.lower().replace("'", "").replace(".", "").strip()
+    for sfx in [" ii", " iii", " iv", " v"]:
+        if clean_n.endswith(sfx):
+            clean_n = clean_n[:-len(sfx)].strip()
+    slug = "-".join([w for w in re.split(r'[^a-z0-9]+', clean_n) if w])
+    return f"https://www.fantasypros.com/nfl/news/{slug}.php"
 
 # Team normalization mapping
 TEAM_ALIASES = {
@@ -456,7 +511,7 @@ def fetch_espn_live_injuries(timeout: int = 6) -> tuple[Dict[str, dict], set]:
                         "timestamp_utc": ts_utc,
                         "updated_formatted": format_display_timestamp(ts_utc),
                         "source": "ESPN Official Injury API",
-                        "source_url": f"https://www.fantasypros.com/nfl/players/{clean_name.replace(' ', '-')}.php"
+                        "source_url": get_fantasypros_url(clean_name)
                     }
             logger.info(f"Loaded {len(results)} live NFL player injuries and {len(active_players)} active players from ESPN API.")
     except Exception as e:
@@ -551,7 +606,7 @@ def fetch_sleeper_live_injuries(timeout: int = 5) -> Dict[str, dict]:
                     "timestamp_utc": ts_utc,
                     "updated_formatted": format_display_timestamp(ts_utc),
                     "source": "Sleeper API",
-                    "source_url": f"https://www.fantasypros.com/nfl/players/{clean_name.replace(' ', '-')}.php"
+                    "source_url": get_fantasypros_url(clean_name)
                 }
             logger.info(f"Loaded {len(results)} live player injuries from Sleeper API.")
     except Exception as e:

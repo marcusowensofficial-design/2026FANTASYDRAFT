@@ -22,6 +22,8 @@ from scraper import (
     normalize_position,
     to_unicode_strikethrough,
     enrich_board_with_injuries,
+    get_rotowire_url,
+    get_fantasypros_url,
     TEAM_BYE_WEEKS_2026,
     PARQUET_FILE,
     DATA_DIR
@@ -505,17 +507,10 @@ def reset_draft_board():
     st.toast("Draft board successfully reset!", icon="🔄")
 
 
-def get_player_injury_links_html(player_name: str, report_time: Optional[str] = None) -> str:
+def get_player_injury_links_html(player_name: str, report_time: Optional[str] = None, source_url: Optional[str] = None) -> str:
     """Generates direct profile and real-time injury tracking links for FantasyPros and RotoWire with timestamp."""
-    clean_n = player_name.lower().replace("'", "").replace(".", "").strip()
-    for sfx in [" jr", " sr", " ii", " iii", " iv", " v"]:
-        if clean_n.endswith(sfx):
-            clean_n = clean_n[:-len(sfx)].strip()
-    slug = "-".join([w for w in re.split(r'[^a-z0-9]+', clean_n) if w])
-    
-    fp_url = f"https://www.fantasypros.com/nfl/players/{slug}.php"
-    rw_q = urllib.parse.quote_plus(f"rotowire {player_name} nfl injury news")
-    rw_url = f"https://www.google.com/search?q={rw_q}"
+    fp_url = get_fantasypros_url(player_name, source_url)
+    rw_url = get_rotowire_url(player_name, source_url)
     
     time_html = ""
     if report_time:
@@ -525,10 +520,10 @@ def get_player_injury_links_html(player_name: str, report_time: Optional[str] = 
         f'<div style="margin-top:8px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.18); display:flex; flex-wrap:wrap; gap:8px; align-items:center;">'
         f'<span style="color:#cbd5e1; font-size:0.8rem; font-weight:700;">📡 Live Injury Wire & Beat History:</span>'
         f'<a href="{fp_url}" target="_blank" rel="noopener noreferrer" style="background:#1e293b; color:#38bdf8; text-decoration:none; padding:3px 10px; border-radius:5px; font-size:0.78rem; font-weight:700; border:1px solid #38bdf850; display:inline-flex; align-items:center; gap:4px;">'
-        f'⚡ FantasyPros Live Profile ↗'
+        f'⚡ FantasyPros Live News ↗'
         f'</a>'
         f'<a href="{rw_url}" target="_blank" rel="noopener noreferrer" style="background:#1e293b; color:#fb923c; text-decoration:none; padding:3px 10px; border-radius:5px; font-size:0.78rem; font-weight:700; border:1px solid #fb923c50; display:inline-flex; align-items:center; gap:4px;">'
-        f'📰 RotoWire Latest Beat News ↗'
+        f'📰 RotoWire Player Profile ↗'
         f'</a>'
         f'{time_html}'
         f'</div>'
@@ -823,7 +818,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')}
                 </div>
-                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'), tsp.get('source_url'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "SUSPENSION":
@@ -839,7 +834,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Mid-round stash')}</em>
                 </div>
-                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'), tsp.get('source_url'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "PUP_MULTI_WEEK":
@@ -855,7 +850,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Strategy: {tsp.get('draft_advice', 'Target in later rounds')}</em>
                 </div>
-                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'), tsp.get('source_url'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "OUT_WEEK_1":
@@ -871,7 +866,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')} &bull; <em>Draft Strategy: {tsp.get('draft_advice', 'Safe to draft; will only miss opening game.')}</em>
                 </div>
-                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'), tsp.get('source_url'))}
             </div>
             """, unsafe_allow_html=True)
         elif tsp.get("injury_tier") == "WEEK_1_RISK":
@@ -887,7 +882,7 @@ if selected_player_id:
                 <div style="color:#f3f4f6; font-size:0.8rem; margin-top:2px;">
                     {tsp.get('injury_blurb', '')}
                 </div>
-                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'))}
+                {get_player_injury_links_html(tsp['name'], tsp.get('injury_updated_formatted'), tsp.get('source_url'))}
             </div>
             """, unsafe_allow_html=True)
 
@@ -1587,7 +1582,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fca5a5; font-size:0.85rem; font-weight:600;">
                                 ⚠️ Draft Guidance: {sel_player.get('draft_advice', 'Do not draft in standard redraft leagues.')}
                             </div>
-                            {get_player_injury_links_html(p_name, report_ts)}
+                            {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "SUSPENSION":
@@ -1606,7 +1601,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#d8b4fe; font-size:0.85rem; font-weight:600;">
                                 💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as mid-round stash.')}
                             </div>
-                            {get_player_injury_links_html(p_name, report_ts)}
+                            {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "PUP_MULTI_WEEK":
@@ -1625,7 +1620,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fdba74; font-size:0.85rem; font-weight:600;">
                                 💡 Stash Strategy: {sel_player.get('draft_advice', 'Target as late-round stash.')}
                             </div>
-                            {get_player_injury_links_html(p_name, report_ts)}
+                            {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "OUT_WEEK_1":
@@ -1644,7 +1639,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fb923c; font-size:0.85rem; font-weight:600;">
                                 💡 Strategy: {sel_player.get('draft_advice', 'Confirmed out for Week 1 only; expected ready for Week 2.')}
                             </div>
-                            {get_player_injury_links_html(p_name, report_ts)}
+                            {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "WEEK_1_RISK":
@@ -1663,7 +1658,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             <div style="margin-top:4px; color:#fef08a; font-size:0.85rem; font-weight:600;">
                                 💡 Advice: {sel_player.get('draft_advice', 'Monitor practice reports.')}
                             </div>
-                            {get_player_injury_links_html(p_name, report_ts)}
+                            {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         </div>
                         """, unsafe_allow_html=True)
                     else:
@@ -1674,7 +1669,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             </div>
                             <span style="background:#064e3b; color:#34d399; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #059669;">HEALTHY</span>
                         </div>
-                        {get_player_injury_links_html(p_name, report_ts)}
+                        {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         """, unsafe_allow_html=True)
                     
                     b_c1, b_c2, b_c3, b_c4 = st.columns([1.5, 1.5, 1.4, 0.7])
@@ -2003,8 +1998,7 @@ with tab_steals:
             strategy = p.get("sleeper_strategy") or ""
             ts_str = p.get("sleeper_updated_formatted") or "Sep 2, 2026 at 11:45 AM UTC"
             source = p.get("sleeper_source") or "Beat Wire"
-            url_slug = urllib.parse.quote_plus(p_name)
-            rotowire_url = f"https://www.rotowire.com/football/player/{url_slug.lower().replace('+', '-')}"
+            rotowire_url = get_rotowire_url(p_name, p.get("source_url"))
 
             wire_card = (
                 f'<div style="background:#111827; border-left:4px solid #38bdf8; border-radius:6px; padding:12px 16px; margin-bottom:12px; border-top:1px solid #1f2937; border-right:1px solid #1f2937; border-bottom:1px solid #1f2937;">'
@@ -2221,7 +2215,7 @@ with tab_injuries:
                     f'<div style="color:#38bdf8; font-size:0.75rem; font-weight:600; margin-top:4px;">'
                     f'💡 Strategy: {ir.get("draft_advice", "Monitor practice reports.")}'
                     f'</div>'
-                    f'{get_player_injury_links_html(ir["name"], ir.get("injury_updated_formatted"))}'
+                    f'{get_player_injury_links_html(ir["name"], ir.get("injury_updated_formatted"), ir.get("source_url"))}'
                     f'</div>'
                 )
                 st.markdown(wire_card, unsafe_allow_html=True)

@@ -13,7 +13,9 @@ from scraper import (
     generate_synthetic_2026_data,
     load_or_generate_draft_board,
     to_unicode_strikethrough,
-    CURATED_2026_INJURY_LEDGER
+    CURATED_2026_INJURY_LEDGER,
+    get_rotowire_url,
+    get_fantasypros_url
 )
 
 
@@ -490,6 +492,50 @@ def test_expert_ranking_sort_guarantees():
             assert tail_desc_vals.isna().all(), f"All values after first NaN on {col} (descending) must be NaN (placed at bottom)"
 
 
+def test_fantasypros_and_rotowire_direct_links():
+    from app import get_player_injury_links_html
+
+    # 1. Test FantasyPros News URL defaults
+    gibbs_fp = get_fantasypros_url("Jahmyr Gibbs")
+    assert gibbs_fp == "https://www.fantasypros.com/nfl/news/jahmyr-gibbs.php", f"Expected news URL, got {gibbs_fp}"
+
+    # Converting old /nfl/players/ link to /nfl/news/
+    gibbs_fp_conv = get_fantasypros_url("Jahmyr Gibbs", "https://www.fantasypros.com/nfl/players/jahmyr-gibbs.php")
+    assert gibbs_fp_conv == "https://www.fantasypros.com/nfl/news/jahmyr-gibbs.php"
+
+    # Suffix handling
+    btj_fp = get_fantasypros_url("Brian Thomas Jr.")
+    assert btj_fp == "https://www.fantasypros.com/nfl/news/brian-thomas-jr.php"
+
+    # 2. Test RotoWire Direct Profile URLs
+    gibbs_rw = get_rotowire_url("Jahmyr Gibbs")
+    assert gibbs_rw == "https://www.rotowire.com/football/player/jahmyr-gibbs-16808", f"Expected Gibbs RotoWire URL, got {gibbs_rw}"
+
+    bijan_rw = get_rotowire_url("Bijan Robinson")
+    assert bijan_rw == "https://www.rotowire.com/football/player/bijan-robinson-16739"
+
+    cmc_rw = get_rotowire_url("Christian McCaffrey")
+    assert cmc_rw == "https://www.rotowire.com/football/player/christian-mccaffrey-11690"
+
+    lamb_rw = get_rotowire_url("CeeDee Lamb")
+    assert lamb_rw == "https://www.rotowire.com/football/player/ceedee-lamb-14411"
+
+    # Direct source_url passthrough
+    custom_rw = get_rotowire_url("Player X", "https://www.rotowire.com/football/player/player-x-99999")
+    assert custom_rw == "https://www.rotowire.com/football/player/player-x-99999"
+
+    # Fallback for unmapped DSTs
+    dst_rw = get_rotowire_url("Denver Broncos")
+    assert "google.com/search" in dst_rw and "Denver+Broncos" in dst_rw
+
+    # 3. Test HTML rendering in get_player_injury_links_html
+    html = get_player_injury_links_html("Jahmyr Gibbs", "Sep 2, 2026 at 10:30 AM UTC")
+    assert "https://www.fantasypros.com/nfl/news/jahmyr-gibbs.php" in html, "HTML must link to FP news directory"
+    assert "https://www.rotowire.com/football/player/jahmyr-gibbs-16808" in html, "HTML must link directly to RotoWire player profile"
+    assert "FantasyPros Live News" in html
+    assert "RotoWire Player Profile" in html
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -508,5 +554,6 @@ if __name__ == "__main__":
     test_injury_trap_guarantee()
     test_espn_official_top300_guarantee()
     test_expert_ranking_sort_guarantees()
+    test_fantasypros_and_rotowire_direct_links()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 
