@@ -1605,6 +1605,8 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "PUP_MULTI_WEEK":
+                        ret_dt = str(sel_player.get('injury_return_date', '') or '').strip()
+                        ret_disp = ret_dt if ret_dt and ret_dt.lower() != 'nan' and ret_dt.lower() != 'none' else 'Week 5'
                         st.markdown(f"""
                         <div style="background:#431407; border:2px solid #f97316; border-radius:8px; padding:12px 16px; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1612,7 +1614,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                                 <span style="background:#f97316; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">MULTI-WEEK STASH</span>
                             </div>
                             <div style="margin-top:6px; color:#ffedd5; font-size:0.9rem;">
-                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out minimum 4 weeks')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'PUP List')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 5')}
+                                <strong>Timeline:</strong> Out minimum first 4 games &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'PUP List')} &bull; <strong>Target Return:</strong> {ret_disp} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
                             </div>
                             <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
                                 {sel_player.get('injury_blurb', '')}
@@ -1624,6 +1626,8 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "OUT_WEEK_1":
+                        ret_dt = str(sel_player.get('injury_return_date', '') or '').strip()
+                        ret_disp = ret_dt if ret_dt and ret_dt.lower() != 'nan' and ret_dt.lower() != 'none' else 'Week 2'
                         st.markdown(f"""
                         <div style="background:#431407; border:2px solid #ea580c; border-radius:8px; padding:12px 16px; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1631,7 +1635,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                                 <span style="background:#ea580c; color:#fff; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">OUT WK 1 ONLY</span>
                             </div>
                             <div style="margin-top:6px; color:#fed7aa; font-size:0.9rem;">
-                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Out Wk 1 • Target Return: Week 2')} &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Short-term')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 2')}
+                                <strong>Timeline:</strong> Out Week 1 Only &bull; <strong>Diagnosis:</strong> {sel_player.get('injury_type', 'Short-term')} &bull; <strong>Target Return:</strong> {ret_disp} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
                             </div>
                             <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
                                 {sel_player.get('injury_blurb', '')}
@@ -1643,6 +1647,8 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                         </div>
                         """, unsafe_allow_html=True)
                     elif inj_tier == "WEEK_1_RISK":
+                        ret_dt = str(sel_player.get('injury_return_date', '') or '').strip()
+                        ret_disp = ret_dt if ret_dt and ret_dt.lower() != 'nan' and ret_dt.lower() != 'none' else 'Week 1'
                         st.markdown(f"""
                         <div style="background:#422006; border:2px solid #eab308; border-radius:8px; padding:12px 16px; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1650,7 +1656,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                                 <span style="background:#eab308; color:#000; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;">DAY-TO-DAY</span>
                             </div>
                             <div style="margin-top:6px; color:#fef9c3; font-size:0.9rem;">
-                                <strong>Timeline:</strong> {sel_player.get('injury_timeline', 'Week 1')} &bull; <strong>Status:</strong> {sel_player.get('injury_type', 'Questionable')} &bull; <strong>Target Return:</strong> {sel_player.get('injury_return_date', 'Week 1')}
+                                <strong>Timeline:</strong> Day-to-Day &bull; <strong>Status:</strong> {sel_player.get('injury_type', 'Questionable')} &bull; <strong>Target Return:</strong> {ret_disp} &bull; <strong>Consensus #{sel_player['consensus_rank']}</strong>
                             </div>
                             <div style="margin-top:4px; color:#f1f5f9; font-size:0.85rem;">
                                 {sel_player.get('injury_blurb', '')}
