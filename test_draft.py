@@ -161,9 +161,13 @@ def test_curated_injury_ledger():
     assert jjones["tier"] == "SUSPENSION"
     assert jjones["is_season_out"] is False
 
-    # Verify Rashee Rice and Nick Chubb are NOT in static ledger (active / retired in 2026)
+    # Verify Rashee Rice is NOT in static ledger (active in 2026) and retired players are protected
     assert "rashee rice" not in CURATED_2026_INJURY_LEDGER
-    assert "nick chubb" not in CURATED_2026_INJURY_LEDGER
+    assert "nick chubb" in CURATED_2026_INJURY_LEDGER
+    assert CURATED_2026_INJURY_LEDGER["nick chubb"]["is_season_out"] is True
+    assert "RETIRED" in CURATED_2026_INJURY_LEDGER["nick chubb"]["badge"]
+    assert "darren waller" in CURATED_2026_INJURY_LEDGER
+    assert CURATED_2026_INJURY_LEDGER["darren waller"]["is_season_out"] is True
 
 
 

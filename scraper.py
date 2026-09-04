@@ -430,6 +430,28 @@ CURATED_2026_INJURY_LEDGER = {
         "blurb": "Sustained torn ACL during preseason action; placed on season-ending injured reserve.",
         "is_season_out": True,
         "draft_advice": "DO NOT DRAFT in 2026 redraft leagues."
+    },
+    "darren waller": {
+        "status": "Retired",
+        "type": "Retired",
+        "tier": "SEASON_IR",
+        "badge": "🛑 RETIRED",
+        "timeline": "Retired from NFL",
+        "return_date": "2027-02-15",
+        "blurb": "Officially retired from the NFL in June 2024. Retained for historical reference.",
+        "is_season_out": True,
+        "draft_advice": "DO NOT DRAFT. Officially retired from NFL."
+    },
+    "nick chubb": {
+        "status": "Retired",
+        "type": "Retired",
+        "tier": "SEASON_IR",
+        "badge": "🛑 RETIRED",
+        "timeline": "Retired from NFL",
+        "return_date": "2027-02-15",
+        "blurb": "Retired from NFL. Not on any 2026 NFL depth chart.",
+        "is_season_out": True,
+        "draft_advice": "DO NOT DRAFT. Officially retired from NFL."
     }
 }
 
