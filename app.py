@@ -1873,7 +1873,7 @@ with tab_strategy:
     st.markdown("### 🧠 8-Team PPR War Room Strategy & Playbook")
     st.caption(
         "Master the ESPN 8-Team PPR format (**9 Starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DST, 1 K, 7 Bench, 1 IR Stash**). "
-        "Real-time tactical directives, dynamic target recommendations with 1-click draft actions, and ESPN ADP arbitrage exploits."
+        "Real-time tactical directives, dynamic target recommendations with 1-click draft actions, 5 cardinal strategic shifts, and ESPN ADP arbitrage exploits."
     )
 
     # 1. LIVE DRAFT CONTEXT & SMART ADVISOR
@@ -1942,10 +1942,11 @@ with tab_strategy:
     if scenario == "🚨 Early QB Panic / Run (Opponents drafting QBs in R2-3)":
         directive_title = "🛑 DO NOT PANIC: Exploit Falling Alpha WRs & Bellcow RBs"
         directive_body = (
-            "Opponents are burning premium Round 2–3 draft capital on a position where only 8 players start each week. "
-            "Every QB picked pushes a Tier-1 skill player directly down the board to you. Completely fade QB for now—hoover up elite WR1s "
-            "and RB1s (CeeDee Lamb [DAL], Justin Jefferson [MIN], Drake London [ATL], Kenneth Walker III [KC]). You will still be able to land "
-            "Lamar Jackson (BAL), Jalen Hurts (PHI), or Joe Burrow (CIN) in Rounds 6–8 with zero weekly point loss."
+            "Opponents drafting QBs in R2–3 means 25% of the league is punting skill positions for a round! "
+            "Every QB reached for pushes an elite Tier-1 skill player directly down the board to you. In an 8-team room where only 16 WRs "
+            "are drafted across the starting WR slots, you can easily secure three top-15 WRs or two top-15 WRs + two top-12 RBs by Round 5. "
+            "Completely fade QB for now—hoover up elite WR1s and RB1s (CeeDee Lamb [DAL], Justin Jefferson [MIN], Drake London [ATL], Kenneth Walker III [KC]). "
+            "You will still land Lamar Jackson (BAL), Jalen Hurts (PHI), or Joe Burrow (CIN) in Rounds 6–8 with zero weekly point loss."
         )
         target_positions = ["WR", "RB"]
         directive_color = "strategy-card-accent-purple"
@@ -1953,7 +1954,7 @@ with tab_strategy:
     elif scenario == "🚜 Heavy RB Hoard / Run (Opponents taking 10+ RBs in top 20)":
         directive_title = "🌊 PIVOT TO WR AVALANCHE + ELITE TE MISMATCH"
         directive_body = (
-            "Opponents are reaching for committee backs well above true market value. In full 1.0 PPR, top-10 WRs and elite "
+            "Opponents are reaching for low-ceiling committee backs well above true market value. In full 1.0 PPR, top-10 WRs and elite "
             "tight ends outscore RB2s by 12–18 fantasy points per week. Lock in 3 top-10 WRs and grab Brock Bowers (LV) or Trey McBride (ARI). "
             "Fill your RB2 and bench in Rounds 6–10 with high-touch ambiguity backs and elite contingent handcuffs (Chase Brown [CIN], Blake Corum [LAR], Zach Charbonnet [SEA])."
         )
@@ -1972,20 +1973,21 @@ with tab_strategy:
 
     else:  # Balanced / Normal Draft Flow
         if cur_rd <= 2:
-            directive_title = "🏛️ PHASE 1 (ROUNDS 1–2): HERO RB + ALPHA WR FOUNDATION"
+            directive_title = "🏛️ PHASE 1 (ROUNDS 1–2): HERO RB + ALPHA WR (CEILING OVER FLOOR)"
             directive_body = (
-                "Anchor your squad with at least one elite dual-threat Bellcow RB (Jahmyr Gibbs [DET], Bijan Robinson [ATL], CMC [SF], Jonathan Taylor [IND]) "
-                "and one Tier-1 Target-Hog WR (Ja'Marr Chase [CIN], Puka Nacua [LAR], Amon-Ra St. Brown [DET], CeeDee Lamb [DAL]). Having one guaranteed 20+ touch "
-                "bellcow in an 8-team league provides an unbeatable weekly scoring floor."
+                "Take the ceiling, not the floor! In an 8-team league, your top 16 picks are effectively two 1st-rounders. "
+                "Anchor your squad with the two highest-ceiling players available: elite dual-threat Bellcows (Jahmyr Gibbs [DET], Bijan Robinson [ATL], CMC [SF], Jonathan Taylor [IND]) "
+                "and Tier-1 Target-Hog WRs (Ja'Marr Chase [CIN], Puka Nacua [LAR], Amon-Ra St. Brown [DET], CeeDee Lamb [DAL]). "
+                "Do not reach for need—replacement level on waivers and the flex spot cover you."
             )
             target_positions = ["RB", "WR"]
             directive_color = "strategy-card-accent-blue"
         elif cur_rd <= 5:
-            directive_title = "🔨 PHASE 2 (ROUNDS 3–5): POSITIONAL HAMMERS (ELITE TE/QB) & VALUE WR2s"
+            directive_title = "🔨 PHASE 2 (ROUNDS 3–5): POSITIONAL HAMMERS (ELITE TE/QB) & SKILL AVALANCHE"
             directive_body = (
                 "Attack positional scarcity! In an 8-team league, Brock Bowers (LV, #22) or Trey McBride (ARI, #24) creates a +6 to +8 PPG weekly advantage "
-                "over the 6 teams streaming mid-tier TEs. If Josh Allen (BUF, #27) slides to Round 4, strike immediately for the rushing TD floor. "
-                "Otherwise, target high-spread ESPN steals like Kenneth Walker III (KC, +10), Drake London (ATL, +5), and Malik Nabers (NYG, +5)."
+                "over the 6 teams streaming mid-tier TEs. Taking an elite TE early or grabbing Josh Allen (BUF, #27) is highly viable because skill-position drop-off "
+                "is much flatter. Otherwise, scoop falling consensus steals like Kenneth Walker III (KC, +10), Drake London (ATL, +5), and Malik Nabers (NYG, +5)."
             )
             target_positions = ["TE", "QB", "WR", "RB"]
             directive_color = "strategy-card-accent-purple"
@@ -1993,16 +1995,18 @@ with tab_strategy:
             directive_title = "⚡ PHASE 3 (ROUNDS 6–8): SECURE DUAL-THREAT QB & HIGH-FLOOR FLEX"
             directive_body = (
                 "If you waited on QB, this is the golden pocket: Lamar Jackson (BAL, #42), Drake Maye (NE, #51), Joe Burrow (CIN, #57, +7 steal), or Jalen Hurts (PHI, #61, +5 steal). "
-                "At TE, Colston Loveland (CHI, #34, +8 steal) is an elite target. Lock down your FLEX spot with explosive WRs like Zay Flowers (BAL, +7) or DeVonta Smith (PHI, +5)."
+                "At TE, Colston Loveland (CHI, #34, +8 steal) is an elite target. Lock down your FLEX spot with explosive WRs like Zay Flowers (BAL, +7) or DeVonta Smith (PHI, +5). "
+                "Remember: never take a mid-tier QB—either lock in an elite dual threat or wait until Rounds 8–10+."
             )
             target_positions = ["QB", "TE", "WR"]
             directive_color = "strategy-card-accent-green"
         elif cur_rd <= 14:
             directive_title = "🚀 PHASE 4 (ROUNDS 9–14): 100% UPSIDE BENCH (NO SAFE FLOOR TRAPS!)"
             directive_body = (
-                "Never draft safe-floor possession receivers for your bench in an 8-team league. Dedicate all 7 bench slots to: "
+                "Draft for upside, not depth! In an 8-team league, your bench is nearly worthless for static points. Dedicate all 7 bench slots to: "
                 "1) Preseason breakout rookies (Brian Thomas Jr. [JAX, +18 steal], Caleb Williams [CHI, +18 steal]), and 2) Contingent league-winning handcuffs "
-                "(Blake Corum [LAR], Zach Charbonnet [SEA], Ray Davis [BUF]) who become instant top-10 RB1s if the starter misses time."
+                "(Blake Corum [LAR], Zach Charbonnet [SEA], Ray Davis [BUF]) who become instant top-10 RB1s if the starter misses time. "
+                "Never draft a backup QB, Kicker, or DST."
             )
             target_positions = ["WR", "RB", "QB", "TE"]
             directive_color = "strategy-card-accent-gold"
@@ -2109,22 +2113,23 @@ with tab_strategy:
     st.markdown("---")
 
     # 4. DEEP-DIVE STRATEGIC PLAYBOOK CARDS
-    st.markdown("#### 📚 Executive 8-Team Strategy Playbooks")
+    st.markdown("#### 📚 Executive 8-Team Strategy Playbooks & Master Guide")
 
     p_col1, p_col2 = st.columns(2)
 
     with p_col1:
         st.markdown("""
         <div class="strategy-card strategy-card-accent-blue">
-            <div class="strategy-header-title">📊 1. The 8-Team Mathematical Reality</div>
+            <div class="strategy-header-title">📊 1. The 8-Team Mathematical Reality: Tighter Margins & Scarcity Flip</div>
             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
-                In an 8-team league with 16 rounds, only <strong>128 total players</strong> are drafted. 
-                Players who would be drafted in Rounds 11–13 of a 12-team league are sitting on your <strong>free waiver wire</strong>!
+                In an 8-team league with 16 rounds, only <strong>128 total players</strong> are drafted across the entire league. 
+                Players who would be drafted in Rounds 11–13 of a 12-team league are sitting on your <strong>free waiver wire all season</strong>!
             </p>
-            <ul style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
-                <li><strong>The 'Every Team is Stacked' Fallacy:</strong> If your team looks 'pretty good,' you will finish 5th. Every opponent has Pro Bowl talent. You win exclusively through <em>insurmountable ceiling and positional mismatch (VORP)</em>.</li>
-                <li><strong>Zero Value in 'Floor' Starters:</strong> A safe possession WR who gets you 9 PPR points per game is a liability. Your opponents' starting lineups will average 140+ PPR points weekly.</li>
-                <li><strong>Onesie Dominance (TE/QB):</strong> Because only 8 QBs and 8 TEs start, an elite producer (Brock Bowers [LV] or Josh Allen [BUF]) outscoring opponent starters by 7+ PPG creates an immense compounding edge.</li>
+            <ul style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.55;">
+                <li><strong>The 'Every Team is Loaded' Paradox:</strong> If your roster looks 'pretty good,' you will finish 5th. Every opponent has Pro Bowl starters. Your margins are tighter: because opponents have a much higher chance of hitting on superstars, you are <strong>far more penalized for missing in the draft</strong>. Playing it safe guarantees mediocrity. Your edge comes strictly from maximizing <em>ceiling, not floor</em>.</li>
+                <li><strong>Zero Value in 'Floor' Starters:</strong> A safe committee RB or possession WR who gets you 9–10 PPR points per game is a weekly liability when opposing starting lineups average 140–150+ PPR points. Don't draft 'safe' RB2s—swing for players with league-winning ceilings.</li>
+                <li><strong>Scarcity Flips & Sky-High Replacement Level:</strong> The gap between your starters and the waiver wire is what wins championships. That gap is massive at the very top of each position (elite stars), while mid-round 'safe floor' guys are essentially identical to free agents. Your bench is strictly for bye weeks, injuries, and astronomical upside swings.</li>
+                <li><strong>The Waiver Wire Is Your 'Second Draft' Every Week:</strong> In-season, be the most aggressive waiver wire operator in the league. If a high-upside draft pick busts, the waiver wire offers immediate startable replacements. Roster exactly 1 QB, 1 K, and 1 DST—use all 7 bench slots for high-ceiling RB/WR lottery tickets and contingent handcuffs.</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -2153,7 +2158,6 @@ with tab_strategy:
         </div>
         """, unsafe_allow_html=True)
 
-    with p_col2:
         st.markdown("""
         <div class="strategy-card strategy-card-accent-green">
             <div class="strategy-header-title">🚑 3. The 17th Roster Spot 'IR Stash Hack'</div>
@@ -2169,9 +2173,43 @@ with tab_strategy:
         </div>
         """, unsafe_allow_html=True)
 
+    with p_col2:
         st.markdown("""
         <div class="strategy-card strategy-card-accent-purple">
-            <div class="strategy-header-title">🏆 4. Championship Roster Architecture</div>
+            <div class="strategy-header-title">🔑 4. The 5 Cardinal 8-Team Strategic Shifts</div>
+            <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.55;">
+                <strong>1. Prioritize Studs & Upside Over Safety:</strong><br>
+                <span style="color:#94a3b8;">Depth doesn't win championships in an 8-team league—superstars do. Stack your roster with high-upside players and don't be afraid to swing for the fences in every round. Safe, reliable, high-floor, low-ceiling guys are not valuable. If high-upside guys bust, the waiver wire will have far better options than you are used to in 12-team leagues. Don't draft 'safe' RB2s—swing for league-winning ceilings.</span><br><br>
+                <strong>2. You CAN Be Aggressive at QB and TE Early:</strong><br>
+                <span style="color:#94a3b8;">In 12-team leagues, taking Josh Allen or Brock Bowers early leaves glaring holes at RB/WR. But in 8-team leagues, there is no steep drop-off at skill positions. Drafting Brock Bowers (LV) in Round 2 and Josh Allen (BUF) in Round 4 creates an insurmountable weekly positional advantage while still allowing you to recover with top-tier starting RBs and WRs.</span><br><br>
+                <strong>3. The Waiver Wire Is Your Secret Weapon:</strong><br>
+                <span style="color:#94a3b8;">You can and should roster just 1 QB, 1 K, and 1 DST. Pick up bye-week coverage only for the week you need, then drop them immediately for extra skill-position depth. Do not draft a backup at any onesie position—it is a wasted roster spot that belongs on high-upside RB/WR lottery tickets.</span><br><br>
+                <strong>4. Push 'Wait on QB' to the EXTREME (The Fork in the Road):</strong><br>
+                <span style="color:#94a3b8;">Only 8 QBs start each week. With Allen, Daniels, Jackson, Maye, Hurts, Burrow, plus Dart, Lawrence, Prescott, Nix, Purdy, and Stafford, there are 12+ viable weekly starters. Even the last team to take a QB gets a top-12 option, and streaming is always open. <em>The Cardinal Rule:</em> Either grab an elite difference-maker early (Allen) or wait until Rounds 8–10+. <strong>Never draft a mid-tier QB in rounds 5–7!</strong></span><br><br>
+                <strong>5. Tight End Is a Sneaky Priority:</strong><br>
+                <span style="color:#94a3b8;">Tight end is fantasy's thinnest position, and elite options dry up fast. Even in an 8-team format, the gap between TE1/TE3 (Bowers, McBride, Loveland) and TE8 is massive. Securing a top-3 TE gives you a persistent positional edge that streaming opponents cannot match. If you miss the elite tier, wait until the very end—TE8 vs TE14 is indistinguishable noise.</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="strategy-card strategy-card-accent-blue">
+            <div class="strategy-header-title">📋 5. Master 8-Team Draft-Day Checklist & Round Blueprint</div>
+            <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.55;">
+                &bull; <strong>Rounds 1–2 (Ceiling, Not Floor):</strong> Take the two highest-ceiling players available, position-agnostic (Gibbs/Bijan/Nacua/Chase/JSN tier). In an 8-team room, you get two picks in the top 16 (basically two 1st-rounders). Do not reach for positional need—replacement level covers you.<br>
+                &bull; <strong>Rounds 3–5 (Skill Avalanche + Elite TE Window):</strong> Hammer WR/RB value. When opponents draft QBs early (25% of the league punting skill players for a round), elite WR2/RB2 talent falls directly to you. You can realistically emerge with three top-15 WRs or two top-15 WRs + two top-12 RBs. Elite TE (Bowers/McBride/Loveland) is prime here.<br>
+                &bull; <strong>QB Strategy (Rounds 8–10 or Early Hammer):</strong> One QB only! Either pay for Josh Allen early or wait until Rounds 8–10 for Lamar Jackson, Jalen Hurts, Drake Maye, or Joe Burrow. The waiver wire is your backup—never draft a second QB.<br>
+                &bull; <strong>RB Strategy (Pass-Catchers & Contingent Handcuffs):</strong> True three-down pass-catchers are rare (~6–8 players). If you miss early, don't panic-draft 10-point committee backs. Target ambiguous backfields and elite contingent handcuffs (Blake Corum, Zach Charbonnet, Ray Davis) who become instant RB1s if the starter misses time.<br>
+                &bull; <strong>Bench (Rounds 9–14 = 100% Upside):</strong> Dedicate your last 5–6 picks exclusively to lottery tickets: rookie breakouts, ambiguous situations, and backups to injury-prone starters. A boring WR4 who gets 80 targets is on waivers all year anyway.<br>
+                &bull; <strong>K & DST (Rounds 15–16):</strong> Last two picks, no exceptions! Stream both weekly off waivers based on Vegas spreads and matchups.<br>
+                &bull; <strong>In-Season (The Second Draft):</strong> Be the most active waiver manager in the league. With ~128 players rostered, the waiver wire is a weekly goldmine.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="strategy-card strategy-card-accent-purple">
+            <div class="strategy-header-title">🏆 6. Championship Roster Architecture</div>
             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
                 What an elite 8-Team PPR roster looks like after 16 rounds of value arbitrage (with distinct team pairings and no same-team WR stacks):
             </p>

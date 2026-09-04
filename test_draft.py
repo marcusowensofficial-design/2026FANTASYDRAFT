@@ -579,6 +579,11 @@ def test_strategy_tab_and_playbook_guarantees():
     assert "1. The 8-Team Mathematical Reality" in content
     assert "Top ESPN Arbitrage Steals & Traps" in content
     assert "The 17th Roster Spot 'IR Stash Hack'" in content
+    assert "The 5 Cardinal 8-Team Strategic Shifts" in content
+    assert "Prioritize Studs & Upside Over Safety" in content
+    assert "You CAN Be Aggressive at QB and TE Early" in content
+    assert "The Waiver Wire Is Your Secret Weapon" in content
+    assert "Master 8-Team Draft-Day Checklist & Round Blueprint" in content
     assert "Championship Roster Architecture" in content
 
     # 4. Verify 1-click action buttons on recommended cards

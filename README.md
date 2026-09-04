@@ -71,7 +71,13 @@ The primary interactive user interface designed to dominate 90-second pick clock
 3. **`🧠 Draft Strategy & Playbook`**:
    - **Hybrid Smart Sync Advisor**: Auto-detects current draft round and unfilled starting roster needs, paired with interactive opponent scenario counters (`Early QB Panic`, `Heavy RB Run`, `Blindly Following ESPN ADP`).
    - **Recommended Live Targets with 1-Click Draft**: Embedded `🟩 Draft (My Team)` and `⬛ Cross Off` buttons to draft immediately from the Strategy view.
-   - **Executive Playbook Cards**: Complete breakdowns for 8-Team PPR mathematical reality (why ceiling and VORP trump safe floor), round-by-round attack blueprint, the 17th roster spot "IR Stash Hack", and top ESPN arbitrage steals vs reach traps.
+   - **Executive 8-Team Playbook & Master Guide**:
+     - *The 8-Team Mathematical Reality*: Why "every team is loaded", how tighter margins punish draft misses, sky-high replacement level (~128 players rostered), and why ceiling trumps safe floor.
+     - *Top ESPN Arbitrage Steals & Traps*: Target consensus steals (+5 to +18 value) and let opponents take overvalued reach traps.
+     - *The 17th Roster Spot "IR Stash Hack"*: Step-by-step workflow for drafting a PUP/IR stud in Round 14–15 to unlock an immediate free Week 1 waiver pickup.
+     - *The 5 Cardinal 8-Team Strategic Shifts*: Prioritizing studs over safety, early aggressive QB/TE viability, waiver wire secret weapon, the QB fork-in-the-road (elite hammer vs. extreme wait), and tight end sneaky priority.
+     - *Master 8-Team Draft-Day Checklist & Round Blueprint*: Phase-by-phase drafting rules from Rounds 1–2 ceiling anchors down to final-round K/DST streaming.
+     - *Championship Roster Architecture*: Verified 16-round roster blueprint with zero same-team WR stacking and high-ceiling contingent handcuffs.
 4. **`🏃 Running Backs`**: RB-exclusive board with tier badges, touches projection, and injury alerts.
 5. **`🎯 Wide Receivers`**: Target share leaders and boundary/slot roles.
 6. **`🏈 Quarterbacks`**: Rushing floor QBs vs pocket passers.
