@@ -593,7 +593,8 @@ def test_strategy_tab_and_playbook_guarantees():
     assert "Lamar Jackson (BAL, Wk 13)" in content
     assert "Jahmyr Gibbs (DET, Wk 6)" in content
     assert "Kenneth Walker III (KC, Wk 5)" in content
-    assert "Jonathon Brooks (CAR, Wk 5)" in content
+    assert "Zach Charbonnet (SEA, Wk 11 - Reserve/PUP)" in content
+    assert "Tank Dell (HOU, Wk 8 - Reserve/IR)" in content
 
 
 if __name__ == "__main__":

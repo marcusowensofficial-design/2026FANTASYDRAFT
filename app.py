@@ -2137,12 +2137,13 @@ with tab_strategy:
             </p>
             <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.6;">
                 <strong style="color:#34d399;">🔥 Top Target Steals (Draft 1–2 Rounds Late):</strong><br>
-                &bull; <strong>Brian Thomas Jr. (WR, JAX)</strong>: Consensus #78 vs ESPN #96 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
-                &bull; <strong>Tucker Kraft (TE, GB)</strong>: Consensus #72 vs ESPN #91 (<span style="color:#34d399; font-weight:700;">+19 Steal</span>)<br>
-                &bull; <strong>Caleb Williams (QB, CHI)</strong>: Consensus #69 vs ESPN #87 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
-                &bull; <strong>Kenneth Walker III (RB, KC)</strong>: Consensus #18 vs ESPN #28 (<span style="color:#34d399; font-weight:700;">+10 Steal</span>)<br>
-                &bull; <strong>Colston Loveland (TE, CHI)</strong>: Consensus #34 vs ESPN #42 (<span style="color:#34d399; font-weight:700;">+8 Steal</span>)<br>
-                &bull; <strong>Drake London (WR, ATL)</strong>: Consensus #13 vs ESPN #18 (<span style="color:#34d399; font-weight:700;">+5 Steal</span>)<br>
+                &bull; <strong>Brian Thomas Jr. (WR, JAX, Wk 7)</strong>: Consensus #78 vs ESPN #96 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
+                &bull; <strong>Caleb Williams (QB, CHI, Wk 10)</strong>: Consensus #69 vs ESPN #87 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
+                &bull; <strong>Christian Watson (WR, GB, Wk 11)</strong>: Consensus #59 vs ESPN #74 (<span style="color:#34d399; font-weight:700;">+15 Steal</span>)<br>
+                &bull; <strong>Luther Burden III (WR, CHI, Wk 10)</strong>: Consensus #45 vs ESPN #59 (<span style="color:#34d399; font-weight:700;">+14 Steal</span>)<br>
+                &bull; <strong>Kenneth Walker III (RB, KC, Wk 5)</strong>: Consensus #18 vs ESPN #28 (<span style="color:#34d399; font-weight:700;">+10 Steal</span>)<br>
+                &bull; <strong>Colston Loveland (TE, CHI, Wk 10)</strong>: Consensus #34 vs ESPN #42 (<span style="color:#34d399; font-weight:700;">+8 Steal</span>)<br>
+                &bull; <strong>Drake London (WR, ATL, Wk 11)</strong>: Consensus #13 vs ESPN #18 (<span style="color:#34d399; font-weight:700;">+5 Steal</span>)<br>
                 <br>
                 <strong style="color:#f87171;">⚠️ Reach Traps to Avoid (Let Opponents Draft):</strong><br>
                 &bull; <strong>Ashton Jeanty (RB, LV)</strong>: Consensus #23 vs ESPN #17 (<span style="color:#f87171; font-weight:700;">-6 Reach Trap</span>)<br>
@@ -2160,7 +2161,7 @@ with tab_strategy:
                 Your ESPN setup features <strong>1 dedicated IR / Stash slot</strong>. Here is how to exploit it on draft day:
             </p>
             <ol style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
-                <li><strong>Target a PUP / Suspended Stud in Round 14–15:</strong> Intentionally draft an injured or suspended player with top-tier late-season ceiling (e.g. <em>Jonathon Brooks [CAR], T.J. Hockenson [MIN], or Rashee Rice [KC]</em>).</li>
+                <li><strong>Target a PUP / Multi-Week IR Stud in Round 14–15:</strong> Intentionally draft an injured player with massive late-season ceiling who is designated on Reserve/PUP or IR to open 2026 (e.g. <em>Zach Charbonnet [SEA, Reserve/PUP], Tank Dell [HOU, Reserve/IR], or Isiah Pacheco [DET, IR]</em>).</li>
                 <li><strong>Immediate Post-Draft Transfer:</strong> The second your draft concludes, move that player directly into your <strong>IR Slot</strong> in the ESPN fantasy app.</li>
                 <li><strong>Claim a Free Waiver Wire Player:</strong> With an empty bench spot now open, immediately claim the top available breakout candidate or backup running back from waivers <em>before Week 1 kicks off</em>.</li>
                 <li><strong>Result:</strong> You enter Week 1 with <strong>17 players</strong> on your roster while your league-mates only have 16!</li>
@@ -2183,18 +2184,18 @@ with tab_strategy:
                 WR2:  Drake London (ATL, Wk 11)        [R4, Pick 29] (+5 ESPN Steal - avoids DAL WR stack)<br>
                 TE:   Brock Bowers (LV, Wk 13)         [R5, Pick 36] (Positional hammer)<br>
                 FLEX: Malik Nabers (NYG, Wk 8)         [R7, Pick 52] (Target-hog WR)<br>
-                DST:  Denver Broncos (DEN, Wk 14)      [R15, Pick 116] (Week 1 Streamer)<br>
+                DST:  Denver Broncos (DEN, Wk 10)      [R15, Pick 116] (Week 1 Streamer)<br>
                 K:    Harrison Butker (KC, Wk 5)       [R16, Pick 125] (High-scoring offense)<br><br>
                 <strong>BENCH (7 High-Upside / League-Winner Slots):</strong><br>
                 B1: Brian Thomas Jr. (JAX, Wk 7)       [R8, Pick 61] (🚀 Rookie WR1 Breakout)<br>
-                B2: De'Von Achane (MIA, Wk 6)          [R7, Pick 52] (Explosive PPR ceiling)<br>
-                B3: Blake Corum (LAR, Wk 11)           [R9, Pick 68] (Contingent bellcow handcuff)<br>
-                B4: Caleb Williams (CHI, Wk 10)        [R10, Pick 77] (High-ceiling dual threat)<br>
-                B5: Tucker Kraft (GB, Wk 11)           [R11, Pick 84] (Red-zone breakout)<br>
-                B6: Zach Charbonnet (SEA, Wk 11)       [R12, Pick 93] (Contingent bellcow)<br>
-                B7: Zay Flowers (BAL, Wk 13)           [R13, Pick 100] (WR target leader)<br><br>
+                B2: Zay Flowers (BAL, Wk 13)           [R9, Pick 68] (Target monster WR)<br>
+                B3: Caleb Williams (CHI, Wk 10)        [R10, Pick 77] (High-ceiling dual threat)<br>
+                B4: Blake Corum (LAR, Wk 11)           [R11, Pick 84] (Contingent bellcow handcuff)<br>
+                B5: Colston Loveland (CHI, Wk 10)      [R12, Pick 93] (+8 TE Value Steal)<br>
+                B6: Christian Watson (GB, Wk 11)       [R13, Pick 100] (+15 Steal)<br>
+                B7: Keaton Mitchell (LAC, Wk 5)        [R14, Pick 109] (High-upside change-of-pace RB)<br><br>
                 <strong>IR STASH (17th Roster Spot Hack):</strong><br>
-                IR: Jonathon Brooks (CAR, Wk 5) or T.J. Hockenson (MIN, Wk 6) [R14, Pick 109]
+                IR: Zach Charbonnet (SEA, Wk 11 - Reserve/PUP) or Tank Dell (HOU, Wk 8 - Reserve/IR) [Round 14 Stash]
             </div>
         </div>
         """, unsafe_allow_html=True)
