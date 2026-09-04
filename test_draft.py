@@ -161,11 +161,9 @@ def test_curated_injury_ledger():
     assert jjones["tier"] == "SUSPENSION"
     assert jjones["is_season_out"] is False
 
-    # Verify Rashee Rice is NOT in static ledger (active in 2026) and retired players are protected
+    # Verify Rashee Rice and Nick Chubb are NOT in static ledger (active / unlisted)
     assert "rashee rice" not in CURATED_2026_INJURY_LEDGER
-    assert "nick chubb" in CURATED_2026_INJURY_LEDGER
-    assert CURATED_2026_INJURY_LEDGER["nick chubb"]["is_season_out"] is True
-    assert "RETIRED" in CURATED_2026_INJURY_LEDGER["nick chubb"]["badge"]
+    assert "nick chubb" not in CURATED_2026_INJURY_LEDGER
     assert "darren waller" in CURATED_2026_INJURY_LEDGER
     assert CURATED_2026_INJURY_LEDGER["darren waller"]["is_season_out"] is True
 
@@ -587,8 +585,8 @@ def test_strategy_tab_and_playbook_guarantees():
     assert "strat_draft_" in content
     assert "strat_cross_" in content
 
-    # 5. Verify Team Abbreviations & Independent Lineup Pairing (No DAL WR Stack, Nick Chubb Retired Note)
-    assert "Nick Chubb (RB, FA)</strong>: Officially retired from NFL" in content
+    # 5. Verify Team Abbreviations & Independent Lineup Pairing (No DAL WR Stack, No Nick Chubb)
+    assert "Nick Chubb" not in content, "Nick Chubb must not appear anywhere in app.py"
     assert "Drake London (ATL, Wk 11)" in content
     assert "avoids DAL WR stack" in content
     assert "CeeDee Lamb (DAL, Wk 14)" in content

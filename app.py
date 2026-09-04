@@ -1619,7 +1619,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                                 del st.session_state[f"table_select_{key_prefix}"]
                             st.rerun()
                 else:
-                    report_ts = sel_player.get("injury_updated_formatted") or "Sep 2, 2026 at 10:30 AM UTC"
+                    report_ts = sel_player.get("injury_updated_formatted") or "Sep 4, 2026 at 08:00 AM UTC"
                     # Available player: High-visibility injury / suspension alerts based on tier
                     if inj_tier == "SEASON_IR":
                         st.markdown(f"""
@@ -2147,8 +2147,7 @@ with tab_strategy:
                 <strong style="color:#f87171;">⚠️ Reach Traps to Avoid (Let Opponents Draft):</strong><br>
                 &bull; <strong>Ashton Jeanty (RB, LV)</strong>: Consensus #23 vs ESPN #17 (<span style="color:#f87171; font-weight:700;">-6 Reach Trap</span>)<br>
                 &bull; <strong>Trey Benson (RB, ARI)</strong>: Season-ending injury; do not draft!<br>
-                &bull; <strong>Jayden Higgins (WR, HOU)</strong>: Torn ACL; do not draft!<br>
-                &bull; <strong>Nick Chubb (RB, FA)</strong>: Officially retired from NFL; do not draft or stash!
+                &bull; <strong>Jayden Higgins (WR, HOU)</strong>: Torn ACL; do not draft!
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -2161,7 +2160,7 @@ with tab_strategy:
                 Your ESPN setup features <strong>1 dedicated IR / Stash slot</strong>. Here is how to exploit it on draft day:
             </p>
             <ol style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
-                <li><strong>Target a PUP / Suspended Stud in Round 14–15:</strong> Intentionally draft an injured or suspended player with top-tier late-season ceiling (e.g. <em>Jonathon Brooks [CAR], T.J. Hockenson [MIN], or Rashee Rice [KC]</em>). <em>Note: Nick Chubb is officially retired.</em></li>
+                <li><strong>Target a PUP / Suspended Stud in Round 14–15:</strong> Intentionally draft an injured or suspended player with top-tier late-season ceiling (e.g. <em>Jonathon Brooks [CAR], T.J. Hockenson [MIN], or Rashee Rice [KC]</em>).</li>
                 <li><strong>Immediate Post-Draft Transfer:</strong> The second your draft concludes, move that player directly into your <strong>IR Slot</strong> in the ESPN fantasy app.</li>
                 <li><strong>Claim a Free Waiver Wire Player:</strong> With an empty bench spot now open, immediately claim the top available breakout candidate or backup running back from waivers <em>before Week 1 kicks off</em>.</li>
                 <li><strong>Result:</strong> You enter Week 1 with <strong>17 players</strong> on your roster while your league-mates only have 16!</li>
@@ -2389,7 +2388,7 @@ with tab_steals:
             trend = p.get("preseason_snap_trend") or "Rising"
             blurb = p.get("sleeper_blurb") or ""
             strategy = p.get("sleeper_strategy") or ""
-            ts_str = p.get("sleeper_updated_formatted") or "Sep 2, 2026 at 11:45 AM UTC"
+            ts_str = p.get("sleeper_updated_formatted") or "Sep 4, 2026 at 08:00 AM UTC"
             source = p.get("sleeper_source") or "Beat Wire"
             rotowire_url = get_rotowire_url(p_name, p.get("source_url"))
 

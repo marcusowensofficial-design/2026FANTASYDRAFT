@@ -59,7 +59,7 @@ def format_user_friendly_utc(iso_ts: str) -> str:
         day = dt.strftime("%d").lstrip("0")
         return f"{month} {day}, {dt.year} at {hour}:{minute} {ampm} UTC"
     except Exception:
-        return "Sep 2, 2026 at 11:45 AM UTC"
+        return "Sep 4, 2026 at 08:00 AM UTC"
 
 
 # ==============================================================================
