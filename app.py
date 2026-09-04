@@ -1944,8 +1944,8 @@ with tab_strategy:
         directive_body = (
             "Opponents are burning premium Round 2–3 draft capital on a position where only 8 players start each week. "
             "Every QB picked pushes a Tier-1 skill player directly down the board to you. Completely fade QB for now—hoover up elite WR1s "
-            "and RB1s (CeeDee Lamb, Justin Jefferson, Drake London, Kenneth Walker III). You will still be able to land "
-            "Lamar Jackson, Jalen Hurts, or Joe Burrow in Rounds 6–8 with zero weekly point loss."
+            "and RB1s (CeeDee Lamb [DAL], Justin Jefferson [MIN], Drake London [ATL], Kenneth Walker III [KC]). You will still be able to land "
+            "Lamar Jackson (BAL), Jalen Hurts (PHI), or Joe Burrow (CIN) in Rounds 6–8 with zero weekly point loss."
         )
         target_positions = ["WR", "RB"]
         directive_color = "strategy-card-accent-purple"
@@ -1954,8 +1954,8 @@ with tab_strategy:
         directive_title = "🌊 PIVOT TO WR AVALANCHE + ELITE TE MISMATCH"
         directive_body = (
             "Opponents are reaching for committee backs well above true market value. In full 1.0 PPR, top-10 WRs and elite "
-            "tight ends outscore RB2s by 12–18 fantasy points per week. Lock in 3 top-10 WRs and grab Brock Bowers or Trey McBride. "
-            "Fill your RB2 and bench in Rounds 6–10 with high-touch ambiguity backs and elite contingent handcuffs (Chase Brown, Blake Corum, Zach Charbonnet)."
+            "tight ends outscore RB2s by 12–18 fantasy points per week. Lock in 3 top-10 WRs and grab Brock Bowers (LV) or Trey McBride (ARI). "
+            "Fill your RB2 and bench in Rounds 6–10 with high-touch ambiguity backs and elite contingent handcuffs (Chase Brown [CIN], Blake Corum [LAR], Zach Charbonnet [SEA])."
         )
         target_positions = ["WR", "TE"]
         directive_color = "strategy-card-accent-green"
@@ -1964,8 +1964,8 @@ with tab_strategy:
         directive_title = "⚡ EXPLOIT ESPN SPREAD INEFFICIENCIES (STEAL ARBITRAGE)"
         directive_body = (
             "Your league-mates are drafting directly down the default ESPN queue! Exploit this by waiting 1–2 full rounds on massive "
-            "consensus steals like Kenneth Walker III (+10 value), Brian Thomas Jr. (+20 value), Caleb Williams (+18 value), Tucker Kraft (+19 value), "
-            "and Zay Flowers (+7 value). Let opponents reach for ESPN trap players like Ashton Jeanty (-6 reach trap) and injured veterans."
+            "consensus steals like Kenneth Walker III (KC, +10 value), Brian Thomas Jr. (JAX, +18 value), Caleb Williams (CHI, +18 value), Tucker Kraft (GB, +19 value), "
+            "and Zay Flowers (BAL, +7 value). Let opponents reach for ESPN trap players like Ashton Jeanty (LV, -6 reach trap) and injured veterans."
         )
         target_positions = ["RB", "WR", "TE", "QB"]
         directive_color = "strategy-card-accent-gold"
@@ -1974,8 +1974,8 @@ with tab_strategy:
         if cur_rd <= 2:
             directive_title = "🏛️ PHASE 1 (ROUNDS 1–2): HERO RB + ALPHA WR FOUNDATION"
             directive_body = (
-                "Anchor your squad with at least one elite dual-threat Bellcow RB (Jahmyr Gibbs, Bijan Robinson, CMC, Jonathan Taylor) "
-                "and one Tier-1 Target-Hog WR (Ja'Marr Chase, Puka Nacua, Amon-Ra St. Brown, CeeDee Lamb). Having one guaranteed 20+ touch "
+                "Anchor your squad with at least one elite dual-threat Bellcow RB (Jahmyr Gibbs [DET], Bijan Robinson [ATL], CMC [SF], Jonathan Taylor [IND]) "
+                "and one Tier-1 Target-Hog WR (Ja'Marr Chase [CIN], Puka Nacua [LAR], Amon-Ra St. Brown [DET], CeeDee Lamb [DAL]). Having one guaranteed 20+ touch "
                 "bellcow in an 8-team league provides an unbeatable weekly scoring floor."
             )
             target_positions = ["RB", "WR"]
@@ -1983,17 +1983,17 @@ with tab_strategy:
         elif cur_rd <= 5:
             directive_title = "🔨 PHASE 2 (ROUNDS 3–5): POSITIONAL HAMMERS (ELITE TE/QB) & VALUE WR2s"
             directive_body = (
-                "Attack positional scarcity! In an 8-team league, Brock Bowers (#22) or Trey McBride (#24) creates a +6 to +8 PPG weekly advantage "
-                "over the 6 teams streaming mid-tier TEs. If Josh Allen (#27) slides to Round 4, strike immediately for the rushing TD floor. "
-                "Otherwise, target high-spread ESPN steals like Kenneth Walker III (+10), Drake London (+5), and Malik Nabers (+5)."
+                "Attack positional scarcity! In an 8-team league, Brock Bowers (LV, #22) or Trey McBride (ARI, #24) creates a +6 to +8 PPG weekly advantage "
+                "over the 6 teams streaming mid-tier TEs. If Josh Allen (BUF, #27) slides to Round 4, strike immediately for the rushing TD floor. "
+                "Otherwise, target high-spread ESPN steals like Kenneth Walker III (KC, +10), Drake London (ATL, +5), and Malik Nabers (NYG, +5)."
             )
             target_positions = ["TE", "QB", "WR", "RB"]
             directive_color = "strategy-card-accent-purple"
         elif cur_rd <= 8:
             directive_title = "⚡ PHASE 3 (ROUNDS 6–8): SECURE DUAL-THREAT QB & HIGH-FLOOR FLEX"
             directive_body = (
-                "If you waited on QB, this is the golden pocket: Lamar Jackson (#42), Drake Maye (#51), Joe Burrow (#57, +7 steal), or Jalen Hurts (#61, +5 steal). "
-                "At TE, Colston Loveland (#34, +8 steal) is an elite target. Lock down your FLEX spot with explosive WRs like Zay Flowers (+7) or DeVonta Smith (+5)."
+                "If you waited on QB, this is the golden pocket: Lamar Jackson (BAL, #42), Drake Maye (NE, #51), Joe Burrow (CIN, #57, +7 steal), or Jalen Hurts (PHI, #61, +5 steal). "
+                "At TE, Colston Loveland (CHI, #34, +8 steal) is an elite target. Lock down your FLEX spot with explosive WRs like Zay Flowers (BAL, +7) or DeVonta Smith (PHI, +5)."
             )
             target_positions = ["QB", "TE", "WR"]
             directive_color = "strategy-card-accent-green"
@@ -2001,15 +2001,15 @@ with tab_strategy:
             directive_title = "🚀 PHASE 4 (ROUNDS 9–14): 100% UPSIDE BENCH (NO SAFE FLOOR TRAPS!)"
             directive_body = (
                 "Never draft safe-floor possession receivers for your bench in an 8-team league. Dedicate all 7 bench slots to: "
-                "1) Preseason breakout rookies (Brian Thomas Jr. +20 steal, Caleb Williams +18 steal), and 2) Contingent league-winning handcuffs "
-                "(Blake Corum, Zach Charbonnet, Ray Davis) who become instant top-10 RB1s if the starter misses time."
+                "1) Preseason breakout rookies (Brian Thomas Jr. [JAX, +18 steal], Caleb Williams [CHI, +18 steal]), and 2) Contingent league-winning handcuffs "
+                "(Blake Corum [LAR], Zach Charbonnet [SEA], Ray Davis [BUF]) who become instant top-10 RB1s if the starter misses time."
             )
             target_positions = ["WR", "RB", "QB", "TE"]
             directive_color = "strategy-card-accent-gold"
         else:
             directive_title = "🚑 PHASE 5 (ROUNDS 15–16): THE IR STASH HACK & STREAMING DST/K"
             directive_body = (
-                "DO NOT draft a DST or Kicker early. Use Round 15 to draft a high-upside player on PUP/IR or suspension (Jonathon Brooks, Nick Chubb, Rashee Rice). "
+                "DO NOT draft a DST or Kicker early. Use Round 15 to draft a high-upside player on PUP/IR or suspension (Jonathon Brooks [CAR], T.J. Hockenson [MIN], Rashee Rice [KC]). "
                 "Post-draft, immediately move them to your dedicated IR slot and pick up a free Week 1 waiver wire player! Draft your streaming DST and Kicker in the final round."
             )
             target_positions = ["IR", "DST", "K"]
@@ -2090,7 +2090,7 @@ with tab_strategy:
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span class="pos-badge pos-{r_pos}">{r_pos}</span>
                     <strong style="font-size:0.95rem;">{r_name}</strong>
-                    <span style="color:#94a3b8; font-size:0.8rem;">{r_team} (Wk {r_bye})</span>
+                    <span style="color:#94a3b8; font-size:0.8rem;">({r_team} - Wk {r_bye})</span>
                 </div>
                 {inj_line}
                 """, unsafe_allow_html=True)
@@ -2124,7 +2124,7 @@ with tab_strategy:
             <ul style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
                 <li><strong>The 'Every Team is Stacked' Fallacy:</strong> If your team looks 'pretty good,' you will finish 5th. Every opponent has Pro Bowl talent. You win exclusively through <em>insurmountable ceiling and positional mismatch (VORP)</em>.</li>
                 <li><strong>Zero Value in 'Floor' Starters:</strong> A safe possession WR who gets you 9 PPR points per game is a liability. Your opponents' starting lineups will average 140+ PPR points weekly.</li>
-                <li><strong>Onesie Dominance (TE/QB):</strong> Because only 8 QBs and 8 TEs start, an elite producer (Brock Bowers or Josh Allen) outscoring opponent starters by 7+ PPG creates an immense compounding edge.</li>
+                <li><strong>Onesie Dominance (TE/QB):</strong> Because only 8 QBs and 8 TEs start, an elite producer (Brock Bowers [LV] or Josh Allen [BUF]) outscoring opponent starters by 7+ PPG creates an immense compounding edge.</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -2137,16 +2137,18 @@ with tab_strategy:
             </p>
             <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.6;">
                 <strong style="color:#34d399;">🔥 Top Target Steals (Draft 1–2 Rounds Late):</strong><br>
-                &bull; <strong>Brian Thomas Jr. (WR)</strong>: Consensus #76 vs ESPN #96 (<span style="color:#34d399; font-weight:700;">+20 Steal</span>)<br>
-                &bull; <strong>Tucker Kraft (TE)</strong>: Consensus #72 vs ESPN #91 (<span style="color:#34d399; font-weight:700;">+19 Steal</span>)<br>
-                &bull; <strong>Caleb Williams (QB)</strong>: Consensus #69 vs ESPN #87 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
-                &bull; <strong>Kenneth Walker III (RB)</strong>: Consensus #18 vs ESPN #28 (<span style="color:#34d399; font-weight:700;">+10 Steal</span>)<br>
-                &bull; <strong>Colston Loveland (TE)</strong>: Consensus #34 vs ESPN #42 (<span style="color:#34d399; font-weight:700;">+8 Steal</span>)<br>
+                &bull; <strong>Brian Thomas Jr. (WR, JAX)</strong>: Consensus #78 vs ESPN #96 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
+                &bull; <strong>Tucker Kraft (TE, GB)</strong>: Consensus #72 vs ESPN #91 (<span style="color:#34d399; font-weight:700;">+19 Steal</span>)<br>
+                &bull; <strong>Caleb Williams (QB, CHI)</strong>: Consensus #69 vs ESPN #87 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
+                &bull; <strong>Kenneth Walker III (RB, KC)</strong>: Consensus #18 vs ESPN #28 (<span style="color:#34d399; font-weight:700;">+10 Steal</span>)<br>
+                &bull; <strong>Colston Loveland (TE, CHI)</strong>: Consensus #34 vs ESPN #42 (<span style="color:#34d399; font-weight:700;">+8 Steal</span>)<br>
+                &bull; <strong>Drake London (WR, ATL)</strong>: Consensus #13 vs ESPN #18 (<span style="color:#34d399; font-weight:700;">+5 Steal</span>)<br>
                 <br>
                 <strong style="color:#f87171;">⚠️ Reach Traps to Avoid (Let Opponents Draft):</strong><br>
-                &bull; <strong>Ashton Jeanty (RB)</strong>: Consensus #23 vs ESPN #17 (<span style="color:#f87171; font-weight:700;">-6 Reach Trap</span>)<br>
-                &bull; <strong>Trey Benson (RB)</strong>: Season-ending injury; do not draft!<br>
-                &bull; <strong>Jayden Higgins (WR)</strong>: Torn ACL; do not draft!
+                &bull; <strong>Ashton Jeanty (RB, LV)</strong>: Consensus #23 vs ESPN #17 (<span style="color:#f87171; font-weight:700;">-6 Reach Trap</span>)<br>
+                &bull; <strong>Trey Benson (RB, ARI)</strong>: Season-ending injury; do not draft!<br>
+                &bull; <strong>Jayden Higgins (WR, HOU)</strong>: Torn ACL; do not draft!<br>
+                &bull; <strong>Nick Chubb (RB, FA)</strong>: Officially retired from NFL; do not draft or stash!
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -2159,7 +2161,7 @@ with tab_strategy:
                 Your ESPN setup features <strong>1 dedicated IR / Stash slot</strong>. Here is how to exploit it on draft day:
             </p>
             <ol style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
-                <li><strong>Target a PUP / Suspended Stud in Round 14–15:</strong> Intentionally draft an injured or suspended player with top-tier late-season ceiling (e.g. <em>Jonathon Brooks, Nick Chubb, T.J. Hockenson, or Rashee Rice</em>).</li>
+                <li><strong>Target a PUP / Suspended Stud in Round 14–15:</strong> Intentionally draft an injured or suspended player with top-tier late-season ceiling (e.g. <em>Jonathon Brooks [CAR], T.J. Hockenson [MIN], or Rashee Rice [KC]</em>). <em>Note: Nick Chubb is officially retired.</em></li>
                 <li><strong>Immediate Post-Draft Transfer:</strong> The second your draft concludes, move that player directly into your <strong>IR Slot</strong> in the ESPN fantasy app.</li>
                 <li><strong>Claim a Free Waiver Wire Player:</strong> With an empty bench spot now open, immediately claim the top available breakout candidate or backup running back from waivers <em>before Week 1 kicks off</em>.</li>
                 <li><strong>Result:</strong> You enter Week 1 with <strong>17 players</strong> on your roster while your league-mates only have 16!</li>
@@ -2171,28 +2173,29 @@ with tab_strategy:
         <div class="strategy-card strategy-card-accent-purple">
             <div class="strategy-header-title">🏆 4. Championship Roster Architecture</div>
             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
-                What an elite 8-Team PPR roster looks like after 16 rounds of value arbitrage:
+                What an elite 8-Team PPR roster looks like after 16 rounds of value arbitrage (with distinct team pairings and no same-team WR stacks):
             </p>
             <div style="font-size:0.8rem; background:#0b0f19; border:1px solid #1f2937; border-radius:6px; padding:10px 14px; font-family:monospace; line-height:1.5; color:#e2e8f0;">
                 <strong>STARTING NINE (PPR):</strong><br>
-                QB:  Lamar Jackson (R6, Pick 45) [25+ PPG rushing upside]<br>
-                RB1: Jahmyr Gibbs / CMC (R1, Pick 4) [Dual-threat bellcow]<br>
-                RB2: Kenneth Walker III (R3, Pick 20) [+10 ESPN Steal]<br>
-                WR1: CeeDee Lamb / Chase (R2, Pick 13) [150+ target alpha]<br>
-                WR2: George Pickens (R4, Pick 29) [+6 ESPN Steal]<br>
-                TE:  Brock Bowers (R5, Pick 36) [Positional hammer]<br>
-                FLEX:Malik Nabers (R7, Pick 52) [Target-hog WR]<br>
-                DST: Week 1 Streaming Defense (R15)<br>
-                K:   High-scoring offense Kicker (R16)<br><br>
+                QB:   Lamar Jackson (BAL, Wk 13)       [R6, Pick 45] (25+ PPG rushing upside)<br>
+                RB1:  Jahmyr Gibbs (DET, Wk 6)         [R1, Pick 4]  (Dual-threat bellcow)<br>
+                RB2:  Kenneth Walker III (KC, Wk 5)    [R3, Pick 20] (+10 ESPN Steal)<br>
+                WR1:  CeeDee Lamb (DAL, Wk 14)         [R2, Pick 13] (150+ target alpha)<br>
+                WR2:  Drake London (ATL, Wk 11)        [R4, Pick 29] (+5 ESPN Steal - avoids DAL WR stack)<br>
+                TE:   Brock Bowers (LV, Wk 13)         [R5, Pick 36] (Positional hammer)<br>
+                FLEX: Malik Nabers (NYG, Wk 8)         [R7, Pick 52] (Target-hog WR)<br>
+                DST:  Denver Broncos (DEN, Wk 14)      [R15, Pick 116] (Week 1 Streamer)<br>
+                K:    Harrison Butker (KC, Wk 5)       [R16, Pick 125] (High-scoring offense)<br><br>
                 <strong>BENCH (7 High-Upside / League-Winner Slots):</strong><br>
-                B1: Brian Thomas Jr. (WR, R8) [🚀 Rookie WR1 Breakout]<br>
-                B2: De'Von Achane (RB, R7) [Explosive PPR ceiling]<br>
-                B3: Blake Corum (RB, R9) [Contingent bellcow handcuff]<br>
-                B4: Caleb Williams (QB, R10) [High-ceiling dual threat]<br>
-                B5: Tucker Kraft (TE, R11) [Red-zone breakout]<br>
-                B6: Zach Charbonnet (RB, R12) [Contingent bellcow]<br>
-                B7: Zay Flowers (WR, R13) [WR target leader]<br><br>
-                <strong>IR STASH:</strong> Jonathon Brooks / Nick Chubb (R14)
+                B1: Brian Thomas Jr. (JAX, Wk 7)       [R8, Pick 61] (🚀 Rookie WR1 Breakout)<br>
+                B2: De'Von Achane (MIA, Wk 6)          [R7, Pick 52] (Explosive PPR ceiling)<br>
+                B3: Blake Corum (LAR, Wk 11)           [R9, Pick 68] (Contingent bellcow handcuff)<br>
+                B4: Caleb Williams (CHI, Wk 10)        [R10, Pick 77] (High-ceiling dual threat)<br>
+                B5: Tucker Kraft (GB, Wk 11)           [R11, Pick 84] (Red-zone breakout)<br>
+                B6: Zach Charbonnet (SEA, Wk 11)       [R12, Pick 93] (Contingent bellcow)<br>
+                B7: Zay Flowers (BAL, Wk 13)           [R13, Pick 100] (WR target leader)<br><br>
+                <strong>IR STASH (17th Roster Spot Hack):</strong><br>
+                IR: Jonathon Brooks (CAR, Wk 5) or T.J. Hockenson (MIN, Wk 6) [R14, Pick 109]
             </div>
         </div>
         """, unsafe_allow_html=True)

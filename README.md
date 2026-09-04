@@ -137,7 +137,7 @@ The primary interactive user interface designed to dominate 90-second pick clock
 - **4 Standardized Severity Tiers**:
   - 🛑 **Out for Season**: Season-ending IR (strikethrough + DO NOT DRAFT warnings).
   - ⛔ **Suspensions**: Disciplinary games missed with return timelines (e.g. Rashee Rice).
-  - ⚠️ **Multi-Week / PUP**: Out minimum first 4 weeks (e.g. Nick Chubb, Jonathon Brooks).
+  - ⚠️ **Multi-Week / PUP**: Out minimum first 4 weeks (e.g. Jonathon Brooks, T.J. Hockenson).
   - 🟡 **Week 1 Risk / Questionable**: Soft-tissue injuries, limited practice, and day-to-day status.
 - **Automated Git Commit Snippets**: Calculates diffs upon sync and prints formatted git commit messages for quick auditing.
 - **Storage**: Persisted to `data/injury_database_2026.json`.

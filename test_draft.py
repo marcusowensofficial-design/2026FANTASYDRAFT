@@ -583,6 +583,16 @@ def test_strategy_tab_and_playbook_guarantees():
     assert "strat_draft_" in content
     assert "strat_cross_" in content
 
+    # 5. Verify Team Abbreviations & Independent Lineup Pairing (No DAL WR Stack, Nick Chubb Retired Note)
+    assert "Nick Chubb (RB, FA)</strong>: Officially retired from NFL" in content
+    assert "Drake London (ATL, Wk 11)" in content
+    assert "avoids DAL WR stack" in content
+    assert "CeeDee Lamb (DAL, Wk 14)" in content
+    assert "Lamar Jackson (BAL, Wk 13)" in content
+    assert "Jahmyr Gibbs (DET, Wk 6)" in content
+    assert "Kenneth Walker III (KC, Wk 5)" in content
+    assert "Jonathon Brooks (CAR, Wk 5)" in content
+
 
 if __name__ == "__main__":
     test_player_normalization()
