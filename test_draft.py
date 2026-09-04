@@ -536,6 +536,54 @@ def test_fantasypros_and_rotowire_direct_links():
     assert "RotoWire Player Profile" in html
 
 
+def test_strategy_tab_and_playbook_guarantees():
+    """
+    Guarantees that the new 8-Team Draft Strategy & Playbook tab is properly registered
+    as Tab #3 in app.py with all 14 tabs and required strategic modules.
+    """
+    with open("app.py", "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Verify tab registration and ordering
+    assert "tab_all, tab_drafted, tab_strategy, tab_rb" in content, "tab_strategy must be slot #3 in app.py"
+    assert '"🧠 Draft Strategy & Playbook"' in content, "Tab title must be '🧠 Draft Strategy & Playbook'"
+
+    expected_tabs = [
+        "⚡ All Available",
+        "❌ Drafted Players",
+        "🧠 Draft Strategy & Playbook",
+        "🏃 Running Backs",
+        "🎯 Wide Receivers",
+        "🏈 Quarterbacks",
+        "🛡️ Tight Ends",
+        "⭐ FLEX Targets",
+        "🛡️ DST & Kickers",
+        "🔥 Value Steals & Sleepers",
+        "⚠️ Reach Traps",
+        "🚑 Injury & Suspension Report",
+        "📜 8-Team Grid & Log",
+        "📋 2026 Depth Chart Cheat Sheet"
+    ]
+    for tab_title in expected_tabs:
+        assert f'"{tab_title}"' in content, f"Tab '{tab_title}' must be present in st.tabs"
+
+    # 2. Verify Opponent Scenarios and Tactical Advisor
+    assert "Early QB Panic / Run" in content
+    assert "Heavy RB Hoard / Run" in content
+    assert "Blindly Following ESPN ADP" in content
+    assert "Balanced / Normal Draft Flow" in content
+
+    # 3. Verify Strategic Sections
+    assert "1. The 8-Team Mathematical Reality" in content
+    assert "Top ESPN Arbitrage Steals & Traps" in content
+    assert "The 17th Roster Spot 'IR Stash Hack'" in content
+    assert "Championship Roster Architecture" in content
+
+    # 4. Verify 1-click action buttons on recommended cards
+    assert "strat_draft_" in content
+    assert "strat_cross_" in content
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -555,5 +603,7 @@ if __name__ == "__main__":
     test_espn_official_top300_guarantee()
     test_expert_ranking_sort_guarantees()
     test_fantasypros_and_rotowire_direct_links()
+    test_strategy_tab_and_playbook_guarantees()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
+
 

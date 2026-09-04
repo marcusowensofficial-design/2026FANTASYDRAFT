@@ -244,6 +244,60 @@ st.markdown("""
         color: #f9fafb;
     }
 
+    /* Executive Cyber-Athletic Strategy Card Styles */
+    .strategy-card {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.85) 0%, rgba(15, 23, 42, 0.85) 100%);
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+    }
+    .strategy-card-accent-blue {
+        border-left: 4px solid #38bdf8;
+    }
+    .strategy-card-accent-green {
+        border-left: 4px solid #10b981;
+    }
+    .strategy-card-accent-purple {
+        border-left: 4px solid #a855f7;
+    }
+    .strategy-card-accent-gold {
+        border-left: 4px solid #f59e0b;
+    }
+    .strategy-card-accent-red {
+        border-left: 4px solid #ef4444;
+    }
+    .strategy-header-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .advisor-callout {
+        background: linear-gradient(90deg, rgba(30, 27, 75, 0.7) 0%, rgba(15, 23, 42, 0.7) 100%);
+        border: 1px solid #4338ca;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 14px;
+    }
+    .recom-card {
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        transition: all 0.15s ease-in-out;
+    }
+    .recom-card:hover {
+        border-color: #38bdf8;
+        background: #172033;
+    }
+
     /* Compact Streamlit button overrides */
     div.stButton > button {
         border-radius: 7px;
@@ -1061,9 +1115,10 @@ with st.sidebar:
 # -----------------------------------------------------------------------------
 # 8. MAIN VIEW TABS & MULTI-EXPERT DRAFT BOARD
 # -----------------------------------------------------------------------------
-tab_all, tab_drafted, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_reaches, tab_injuries, tab_grid, tab_depth = st.tabs([
+tab_all, tab_drafted, tab_strategy, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_reaches, tab_injuries, tab_grid, tab_depth = st.tabs([
     "⚡ All Available",
     "❌ Drafted Players",
+    "🧠 Draft Strategy & Playbook",
     "🏃 Running Backs",
     "🎯 Wide Receivers",
     "🏈 Quarterbacks",
@@ -1813,7 +1868,336 @@ with tab_drafted:
 
                 st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 4px 0 8px 0;'></div>", unsafe_allow_html=True)
 
-# --- Tab 3: Running Backs ---
+# --- Tab 3: Draft Strategy & Playbook ---
+with tab_strategy:
+    st.markdown("### 🧠 8-Team PPR War Room Strategy & Playbook")
+    st.caption(
+        "Master the ESPN 8-Team PPR format (**9 Starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DST, 1 K, 7 Bench, 1 IR Stash**). "
+        "Real-time tactical directives, dynamic target recommendations with 1-click draft actions, and ESPN ADP arbitrage exploits."
+    )
+
+    # 1. LIVE DRAFT CONTEXT & SMART ADVISOR
+    cur_pick = st.session_state.current_pick
+    cur_rd, cur_rpick, cur_team_on_clock, is_my_turn = get_snake_pick_info(cur_pick)
+    user_roster = get_user_roster()
+
+    # Calculate starter needs
+    starter_requirements = [
+        ("QB", 1, len(user_roster.get("QB", []))),
+        ("RB", 2, len(user_roster.get("RB", []))),
+        ("WR", 2, len(user_roster.get("WR", []))),
+        ("TE", 1, len(user_roster.get("TE", []))),
+        ("FLEX", 1, len(user_roster.get("FLEX", []))),
+        ("DST", 1, len(user_roster.get("DST", []))),
+        ("K", 1, len(user_roster.get("K", [])))
+    ]
+    unfilled_starters = [slot for slot, req, filled in starter_requirements if filled < req]
+    bench_filled = len(user_roster.get("BENCH", []))
+    ir_filled = len(user_roster.get("IR", []))
+
+    # Top Live Status Bar
+    ad_col1, ad_col2, ad_col3, ad_col4 = st.columns([2, 2, 2.5, 2])
+    with ad_col1:
+        st.metric("Draft Status", f"Round {min(cur_rd, 16)}", delta=f"Pick #{min(cur_pick, TOTAL_PICKS)} / {TOTAL_PICKS}")
+    with ad_col2:
+        if is_my_turn:
+            st.metric("Turn Status", "YOUR PICK NOW! 🔥", delta=f"Slot #{st.session_state.user_slot}", delta_color="normal")
+        else:
+            user_s = st.session_state.user_slot
+            next_user_picks = [p for p in range(cur_pick, TOTAL_PICKS + 1) if get_snake_pick_info(p)[2] == user_s]
+            if next_user_picks:
+                st.metric("Next Turn", f"In {next_user_picks[0] - cur_pick} picks", delta=f"Pick #{next_user_picks[0]}")
+            else:
+                st.metric("Draft Status", "Complete", delta="All Rounds Done")
+    with ad_col3:
+        needed_str = ", ".join(unfilled_starters) if unfilled_starters else "Starters Full! (Fill Bench)"
+        st.metric("Unfilled Starters", f"{len(unfilled_starters)} Left", delta=needed_str, delta_color="inverse" if unfilled_starters else "normal")
+    with ad_col4:
+        st.metric("Bench & IR Capacity", f"Bench: {bench_filled}/7", delta=f"IR: {ir_filled}/1 Stash", delta_color="normal")
+
+    st.markdown("---")
+
+    # 2. DYNAMIC SCENARIO SELECTOR & TACTICAL DIRECTIVE
+    st.markdown("#### 🎯 Live Tactical Advisor & Opponent Behavior Counter")
+
+    sc_c1, sc_c2 = st.columns([2.5, 3.5])
+    with sc_c1:
+        scenario = st.selectbox(
+            "What are your opponents doing right now?",
+            options=[
+                "🎯 Balanced / Normal Draft Flow",
+                "🚨 Early QB Panic / Run (Opponents drafting QBs in R2-3)",
+                "🚜 Heavy RB Hoard / Run (Opponents taking 10+ RBs in top 20)",
+                "📉 Blindly Following ESPN ADP (Opponents strictly following ESPN order)"
+            ],
+            key="strategy_scenario_select"
+        )
+
+    # Formulate tactical advice and target positions based on round and scenario
+    target_positions = []
+    directive_title = ""
+    directive_body = ""
+    directive_color = "strategy-card-accent-blue"
+
+    if scenario == "🚨 Early QB Panic / Run (Opponents drafting QBs in R2-3)":
+        directive_title = "🛑 DO NOT PANIC: Exploit Falling Alpha WRs & Bellcow RBs"
+        directive_body = (
+            "Opponents are burning premium Round 2–3 draft capital on a position where only 8 players start each week. "
+            "Every QB picked pushes a Tier-1 skill player directly down the board to you. Completely fade QB for now—hoover up elite WR1s "
+            "and RB1s (CeeDee Lamb, Justin Jefferson, Drake London, Kenneth Walker III). You will still be able to land "
+            "Lamar Jackson, Jalen Hurts, or Joe Burrow in Rounds 6–8 with zero weekly point loss."
+        )
+        target_positions = ["WR", "RB"]
+        directive_color = "strategy-card-accent-purple"
+
+    elif scenario == "🚜 Heavy RB Hoard / Run (Opponents taking 10+ RBs in top 20)":
+        directive_title = "🌊 PIVOT TO WR AVALANCHE + ELITE TE MISMATCH"
+        directive_body = (
+            "Opponents are reaching for committee backs well above true market value. In full 1.0 PPR, top-10 WRs and elite "
+            "tight ends outscore RB2s by 12–18 fantasy points per week. Lock in 3 top-10 WRs and grab Brock Bowers or Trey McBride. "
+            "Fill your RB2 and bench in Rounds 6–10 with high-touch ambiguity backs and elite contingent handcuffs (Chase Brown, Blake Corum, Zach Charbonnet)."
+        )
+        target_positions = ["WR", "TE"]
+        directive_color = "strategy-card-accent-green"
+
+    elif scenario == "📉 Blindly Following ESPN ADP (Opponents strictly following ESPN order)":
+        directive_title = "⚡ EXPLOIT ESPN SPREAD INEFFICIENCIES (STEAL ARBITRAGE)"
+        directive_body = (
+            "Your league-mates are drafting directly down the default ESPN queue! Exploit this by waiting 1–2 full rounds on massive "
+            "consensus steals like Kenneth Walker III (+10 value), Brian Thomas Jr. (+20 value), Caleb Williams (+18 value), Tucker Kraft (+19 value), "
+            "and Zay Flowers (+7 value). Let opponents reach for ESPN trap players like Ashton Jeanty (-6 reach trap) and injured veterans."
+        )
+        target_positions = ["RB", "WR", "TE", "QB"]
+        directive_color = "strategy-card-accent-gold"
+
+    else:  # Balanced / Normal Draft Flow
+        if cur_rd <= 2:
+            directive_title = "🏛️ PHASE 1 (ROUNDS 1–2): HERO RB + ALPHA WR FOUNDATION"
+            directive_body = (
+                "Anchor your squad with at least one elite dual-threat Bellcow RB (Jahmyr Gibbs, Bijan Robinson, CMC, Jonathan Taylor) "
+                "and one Tier-1 Target-Hog WR (Ja'Marr Chase, Puka Nacua, Amon-Ra St. Brown, CeeDee Lamb). Having one guaranteed 20+ touch "
+                "bellcow in an 8-team league provides an unbeatable weekly scoring floor."
+            )
+            target_positions = ["RB", "WR"]
+            directive_color = "strategy-card-accent-blue"
+        elif cur_rd <= 5:
+            directive_title = "🔨 PHASE 2 (ROUNDS 3–5): POSITIONAL HAMMERS (ELITE TE/QB) & VALUE WR2s"
+            directive_body = (
+                "Attack positional scarcity! In an 8-team league, Brock Bowers (#22) or Trey McBride (#24) creates a +6 to +8 PPG weekly advantage "
+                "over the 6 teams streaming mid-tier TEs. If Josh Allen (#27) slides to Round 4, strike immediately for the rushing TD floor. "
+                "Otherwise, target high-spread ESPN steals like Kenneth Walker III (+10), Drake London (+5), and Malik Nabers (+5)."
+            )
+            target_positions = ["TE", "QB", "WR", "RB"]
+            directive_color = "strategy-card-accent-purple"
+        elif cur_rd <= 8:
+            directive_title = "⚡ PHASE 3 (ROUNDS 6–8): SECURE DUAL-THREAT QB & HIGH-FLOOR FLEX"
+            directive_body = (
+                "If you waited on QB, this is the golden pocket: Lamar Jackson (#42), Drake Maye (#51), Joe Burrow (#57, +7 steal), or Jalen Hurts (#61, +5 steal). "
+                "At TE, Colston Loveland (#34, +8 steal) is an elite target. Lock down your FLEX spot with explosive WRs like Zay Flowers (+7) or DeVonta Smith (+5)."
+            )
+            target_positions = ["QB", "TE", "WR"]
+            directive_color = "strategy-card-accent-green"
+        elif cur_rd <= 14:
+            directive_title = "🚀 PHASE 4 (ROUNDS 9–14): 100% UPSIDE BENCH (NO SAFE FLOOR TRAPS!)"
+            directive_body = (
+                "Never draft safe-floor possession receivers for your bench in an 8-team league. Dedicate all 7 bench slots to: "
+                "1) Preseason breakout rookies (Brian Thomas Jr. +20 steal, Caleb Williams +18 steal), and 2) Contingent league-winning handcuffs "
+                "(Blake Corum, Zach Charbonnet, Ray Davis) who become instant top-10 RB1s if the starter misses time."
+            )
+            target_positions = ["WR", "RB", "QB", "TE"]
+            directive_color = "strategy-card-accent-gold"
+        else:
+            directive_title = "🚑 PHASE 5 (ROUNDS 15–16): THE IR STASH HACK & STREAMING DST/K"
+            directive_body = (
+                "DO NOT draft a DST or Kicker early. Use Round 15 to draft a high-upside player on PUP/IR or suspension (Jonathon Brooks, Nick Chubb, Rashee Rice). "
+                "Post-draft, immediately move them to your dedicated IR slot and pick up a free Week 1 waiver wire player! Draft your streaming DST and Kicker in the final round."
+            )
+            target_positions = ["IR", "DST", "K"]
+            directive_color = "strategy-card-accent-red"
+
+    with sc_c2:
+        st.markdown(f"""
+        <div class="strategy-card {directive_color}">
+            <div class="strategy-header-title">{directive_title}</div>
+            <div style="font-size:0.86rem; color:#cbd5e1; line-height:1.45;">
+                {directive_body}
+            </div>
+            <div style="margin-top:10px; font-size:0.8rem; font-weight:700; color:#38bdf8;">
+                🎯 Recommended Focus: <span style="color:#f8fafc;">{", ".join(target_positions)}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 3. LIVE RECOMMENDED TARGETS WITH 1-CLICK DRAFT
+    st.markdown("#### ⚡ Recommended Live Targets on Active Board")
+    st.caption("Top available players matching current tactical directive. Execute picks with 1-click without switching tabs.")
+
+    avail_pool = df_board[~df_board["is_drafted"]].copy()
+
+    # Exclude season ending IR from recommended targets
+    avail_pool = avail_pool[~avail_pool["is_season_out"]].copy()
+
+    # Filter by target positions if specified and not empty
+    if target_positions and "IR" not in target_positions:
+        pos_filter = [p for p in target_positions if p in ["QB", "RB", "WR", "TE", "DST", "K"]]
+        if pos_filter:
+            recom_df = avail_pool[avail_pool["pos"].isin(pos_filter)].copy()
+        else:
+            recom_df = avail_pool.copy()
+    else:
+        recom_df = avail_pool.copy()
+
+    # In IR phase, surface PUP/Suspension candidates
+    if "IR" in target_positions:
+        ir_cands = avail_pool[avail_pool["injury_tier"].isin(["PUP_MULTI_WEEK", "SUSPENSION", "OUT_WEEK_1"])]
+        if not ir_cands.empty:
+            recom_df = ir_cands.copy()
+
+    # Prioritize consensus rank
+    recom_df = recom_df.sort_values(by=["consensus_rank"]).head(6)
+
+    if recom_df.empty:
+        st.info("No active players currently match the targeted position criteria.")
+    else:
+        for _, r_row in recom_df.iterrows():
+            r_pid = r_row["player_id"]
+            r_name = r_row["name"]
+            r_pos = r_row["pos"]
+            r_team = r_row["team"]
+            r_bye = r_row["bye"]
+            r_tier = r_row["tier"]
+            r_crank = int(r_row["consensus_rank"])
+            r_espn = int(r_row["espn_rank"]) if pd.notna(r_row["espn_rank"]) and r_row["espn_rank"] < 900 else "N/A"
+            r_vdiff = int(r_row["value_diff"]) if pd.notna(r_row["value_diff"]) else 0
+            r_inj_badge = r_row.get("injury_badge", "")
+
+            # Value badge formatting
+            if r_vdiff >= 10:
+                v_badge_html = f"<span style='background:#064e3b; color:#34d399; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>🔥 +{r_vdiff} MEGA STEAL</span>"
+            elif r_vdiff >= 5:
+                v_badge_html = f"<span style='background:#1e3a8a; color:#60a5fa; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>⚡ +{r_vdiff} VALUE STEAL</span>"
+            elif r_vdiff <= -5:
+                v_badge_html = f"<span style='background:#7f1d1d; color:#f87171; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>⚠️ {r_vdiff} REACH TRAP</span>"
+            else:
+                v_badge_html = f"<span style='color:#94a3b8; font-size:0.75rem;'>Value: {r_vdiff:+d}</span>"
+
+            rc1, rc2, rc3, rc4, rc5 = st.columns([1, 3.5, 2.5, 1.8, 1.8])
+            with rc1:
+                st.markdown(f"**#{r_crank}**<br><span style='color:#94a3b8; font-size:0.72rem;'>Tier {r_tier}</span>", unsafe_allow_html=True)
+            with rc2:
+                inj_line = f"<div style='font-size:0.75rem; color:#f59e0b; margin-top:2px;'>{r_inj_badge}</div>" if r_inj_badge else ""
+                st.markdown(f"""
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="pos-badge pos-{r_pos}">{r_pos}</span>
+                    <strong style="font-size:0.95rem;">{r_name}</strong>
+                    <span style="color:#94a3b8; font-size:0.8rem;">{r_team} (Wk {r_bye})</span>
+                </div>
+                {inj_line}
+                """, unsafe_allow_html=True)
+            with rc3:
+                st.markdown(f"ESPN: <strong>#{r_espn}</strong> &bull; {v_badge_html}", unsafe_allow_html=True)
+            with rc4:
+                if st.button("🟩 Draft (My Team)", key=f"strat_draft_{r_pid}", use_container_width=True):
+                    execute_pick(r_pid, drafted_by_user=True)
+                    st.rerun()
+            with rc5:
+                if st.button("⬛ Cross Off", key=f"strat_cross_{r_pid}", use_container_width=True):
+                    execute_pick(r_pid, drafted_by_user=False)
+                    st.rerun()
+            st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 4px 0 8px 0;'></div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # 4. DEEP-DIVE STRATEGIC PLAYBOOK CARDS
+    st.markdown("#### 📚 Executive 8-Team Strategy Playbooks")
+
+    p_col1, p_col2 = st.columns(2)
+
+    with p_col1:
+        st.markdown("""
+        <div class="strategy-card strategy-card-accent-blue">
+            <div class="strategy-header-title">📊 1. The 8-Team Mathematical Reality</div>
+            <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
+                In an 8-team league with 16 rounds, only <strong>128 total players</strong> are drafted. 
+                Players who would be drafted in Rounds 11–13 of a 12-team league are sitting on your <strong>free waiver wire</strong>!
+            </p>
+            <ul style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
+                <li><strong>The 'Every Team is Stacked' Fallacy:</strong> If your team looks 'pretty good,' you will finish 5th. Every opponent has Pro Bowl talent. You win exclusively through <em>insurmountable ceiling and positional mismatch (VORP)</em>.</li>
+                <li><strong>Zero Value in 'Floor' Starters:</strong> A safe possession WR who gets you 9 PPR points per game is a liability. Your opponents' starting lineups will average 140+ PPR points weekly.</li>
+                <li><strong>Onesie Dominance (TE/QB):</strong> Because only 8 QBs and 8 TEs start, an elite producer (Brock Bowers or Josh Allen) outscoring opponent starters by 7+ PPG creates an immense compounding edge.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="strategy-card strategy-card-accent-gold">
+            <div class="strategy-header-title">⚡ 2. Top ESPN Arbitrage Steals & Traps</div>
+            <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
+                Our 11-expert consensus exposes huge flaws in the default ESPN draft room rankings:
+            </p>
+            <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.6;">
+                <strong style="color:#34d399;">🔥 Top Target Steals (Draft 1–2 Rounds Late):</strong><br>
+                &bull; <strong>Brian Thomas Jr. (WR)</strong>: Consensus #76 vs ESPN #96 (<span style="color:#34d399; font-weight:700;">+20 Steal</span>)<br>
+                &bull; <strong>Tucker Kraft (TE)</strong>: Consensus #72 vs ESPN #91 (<span style="color:#34d399; font-weight:700;">+19 Steal</span>)<br>
+                &bull; <strong>Caleb Williams (QB)</strong>: Consensus #69 vs ESPN #87 (<span style="color:#34d399; font-weight:700;">+18 Steal</span>)<br>
+                &bull; <strong>Kenneth Walker III (RB)</strong>: Consensus #18 vs ESPN #28 (<span style="color:#34d399; font-weight:700;">+10 Steal</span>)<br>
+                &bull; <strong>Colston Loveland (TE)</strong>: Consensus #34 vs ESPN #42 (<span style="color:#34d399; font-weight:700;">+8 Steal</span>)<br>
+                <br>
+                <strong style="color:#f87171;">⚠️ Reach Traps to Avoid (Let Opponents Draft):</strong><br>
+                &bull; <strong>Ashton Jeanty (RB)</strong>: Consensus #23 vs ESPN #17 (<span style="color:#f87171; font-weight:700;">-6 Reach Trap</span>)<br>
+                &bull; <strong>Trey Benson (RB)</strong>: Season-ending injury; do not draft!<br>
+                &bull; <strong>Jayden Higgins (WR)</strong>: Torn ACL; do not draft!
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with p_col2:
+        st.markdown("""
+        <div class="strategy-card strategy-card-accent-green">
+            <div class="strategy-header-title">🚑 3. The 17th Roster Spot 'IR Stash Hack'</div>
+            <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
+                Your ESPN setup features <strong>1 dedicated IR / Stash slot</strong>. Here is how to exploit it on draft day:
+            </p>
+            <ol style="font-size:0.82rem; color:#94a3b8; padding-left:18px; line-height:1.5;">
+                <li><strong>Target a PUP / Suspended Stud in Round 14–15:</strong> Intentionally draft an injured or suspended player with top-tier late-season ceiling (e.g. <em>Jonathon Brooks, Nick Chubb, T.J. Hockenson, or Rashee Rice</em>).</li>
+                <li><strong>Immediate Post-Draft Transfer:</strong> The second your draft concludes, move that player directly into your <strong>IR Slot</strong> in the ESPN fantasy app.</li>
+                <li><strong>Claim a Free Waiver Wire Player:</strong> With an empty bench spot now open, immediately claim the top available breakout candidate or backup running back from waivers <em>before Week 1 kicks off</em>.</li>
+                <li><strong>Result:</strong> You enter Week 1 with <strong>17 players</strong> on your roster while your league-mates only have 16!</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="strategy-card strategy-card-accent-purple">
+            <div class="strategy-header-title">🏆 4. Championship Roster Architecture</div>
+            <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
+                What an elite 8-Team PPR roster looks like after 16 rounds of value arbitrage:
+            </p>
+            <div style="font-size:0.8rem; background:#0b0f19; border:1px solid #1f2937; border-radius:6px; padding:10px 14px; font-family:monospace; line-height:1.5; color:#e2e8f0;">
+                <strong>STARTING NINE (PPR):</strong><br>
+                QB:  Lamar Jackson (R6, Pick 45) [25+ PPG rushing upside]<br>
+                RB1: Jahmyr Gibbs / CMC (R1, Pick 4) [Dual-threat bellcow]<br>
+                RB2: Kenneth Walker III (R3, Pick 20) [+10 ESPN Steal]<br>
+                WR1: CeeDee Lamb / Chase (R2, Pick 13) [150+ target alpha]<br>
+                WR2: George Pickens (R4, Pick 29) [+6 ESPN Steal]<br>
+                TE:  Brock Bowers (R5, Pick 36) [Positional hammer]<br>
+                FLEX:Malik Nabers (R7, Pick 52) [Target-hog WR]<br>
+                DST: Week 1 Streaming Defense (R15)<br>
+                K:   High-scoring offense Kicker (R16)<br><br>
+                <strong>BENCH (7 High-Upside / League-Winner Slots):</strong><br>
+                B1: Brian Thomas Jr. (WR, R8) [🚀 Rookie WR1 Breakout]<br>
+                B2: De'Von Achane (RB, R7) [Explosive PPR ceiling]<br>
+                B3: Blake Corum (RB, R9) [Contingent bellcow handcuff]<br>
+                B4: Caleb Williams (QB, R10) [High-ceiling dual threat]<br>
+                B5: Tucker Kraft (TE, R11) [Red-zone breakout]<br>
+                B6: Zach Charbonnet (RB, R12) [Contingent bellcow]<br>
+                B7: Zay Flowers (WR, R13) [WR target leader]<br><br>
+                <strong>IR STASH:</strong> Jonathon Brooks / Nick Chubb (R14)
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# --- Tab 4: Running Backs ---
 with tab_rb:
     rb_df = df_board[df_board["pos"] == "RB"].copy().reset_index(drop=True)
     render_draft_table(rb_df, key_prefix="rb")
