@@ -3,7 +3,7 @@
     "last_synced": "2026-09-05T14:30:57Z",
     "last_synced_formatted": "Sep 05, 2026 at 02:30 PM UTC",
     "version": "2026.1",
-    "total_records": 1017,
+    "total_records": 1016,
     "uncommitted_changes": 0,
     "uncommitted_players": [],
     "last_committed_timestamp": "2026-09-05T14:31:03Z"
@@ -100,8 +100,8 @@
       "blurb": "Underwent knee surgery and reverted to the Cardinals' season-ending injured reserve list. Out for the entire 2026 season.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in standard 2026 redraft leagues. Retained on board for dynasty/informational reference.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/trey-benson.php"
     },
@@ -569,22 +569,6 @@
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/tyrell-shavers.php"
     },
-    "terrel bernard": {
-      "player_name": "Terrel Bernard",
-      "status": "Questionable",
-      "type": "Undisclosed",
-      "tier": "WEEK_1_RISK",
-      "badge": "🟡 Q (Undisclosed)",
-      "timeline": "Target return: Week 1",
-      "return_date": null,
-      "blurb": "Reported as Questionable (Undisclosed).",
-      "is_season_out": false,
-      "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
-      "source": "ESPN Official Injury API",
-      "source_url": "https://www.fantasypros.com/nfl/news/terrel-bernard.php"
-    },
     "jude bowry": {
       "player_name": "Jude Bowry",
       "status": "Questionable",
@@ -644,8 +628,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T20:25:33Z",
-      "updated_formatted": "Sep 02, 2026 at 08:25 PM UTC",
+      "timestamp_utc": "2026-09-05T15:40:17Z",
+      "updated_formatted": "Sep 05, 2026 at 03:40 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/jonathon-brooks.php"
     },
@@ -2356,8 +2340,8 @@
       "blurb": "Suffered torn ACL during August preseason joint practice with Raiders; underwent reconstructive knee surgery and placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in standard 2026 redraft leagues. Out for the entire 2026 season.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/jayden-higgins.php"
     },
@@ -2892,17 +2876,17 @@
     "ashton jeanty": {
       "player_name": "Ashton Jeanty",
       "status": "Questionable",
-      "type": "Low-Ankle Sprain",
+      "type": "Knee",
       "tier": "WEEK_1_RISK",
-      "badge": "🟡 Q (Ankle)",
-      "timeline": "Day-to-Day (Target Week 1-2)",
-      "return_date": "Week 1",
-      "blurb": "Recovering from low-ankle sprain suffered Aug 23. Avoided IR on final 53-man roster cuts; observed working on the side with trainers on Sept 2-3. GM John Spytek stated he is in a good spot and could return sooner than expected; rookie Mike Washington Jr. provides insurance.",
+      "badge": "🟡 Q (Knee)",
+      "timeline": "Target return: Week 1",
+      "return_date": null,
+      "blurb": "Reported as Questionable (Knee).",
       "is_season_out": false,
-      "draft_advice": "Elite high-volume rookie RB; draft as planned with Mike Washington Jr. as late-round insurance if needed.",
-      "timestamp_utc": "2026-09-03T13:45:00Z",
-      "updated_formatted": "Sep 03, 2026 at 01:45 PM UTC",
-      "source": "Raiders Beat & RotoWire",
+      "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
+      "timestamp_utc": "2026-09-05T15:05:17Z",
+      "updated_formatted": "Sep 05, 2026 at 03:05 PM UTC",
+      "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/ashton-jeanty.php"
     },
     "chase roberts": {
@@ -3276,17 +3260,17 @@
     "puka nacua": {
       "player_name": "Puka Nacua",
       "status": "Questionable",
-      "type": "Psoas (Groin) Strain",
+      "type": "Undisclosed",
       "tier": "WEEK_1_RISK",
-      "badge": "🟡 Q (Groin)",
-      "timeline": "Day-to-Day (Ramping Up)",
-      "return_date": "Week 1",
-      "blurb": "Ramping up from a psoas (groin) muscle strain suffered in joint practice on Aug 11. Sidelined for early training camp but returned to individual work; Rams targeting him to start Week 1 vs SF in Australia on Sept 10. Avoided commissioner's exempt list.",
+      "badge": "🟡 Q (Undisclosed)",
+      "timeline": "Target return: Week 1",
+      "return_date": null,
+      "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
-      "draft_advice": "Locked WR1; monitor final practice reports before Melbourne kickoff.",
-      "timestamp_utc": "2026-09-03T13:45:00Z",
-      "updated_formatted": "Sep 03, 2026 at 01:45 PM UTC",
-      "source": "Rams Beat & NFL Network",
+      "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
+      "timestamp_utc": "2026-09-05T16:30:17Z",
+      "updated_formatted": "Sep 05, 2026 at 04:30 PM UTC",
+      "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/puka-nacua.php"
     },
     "justin dedich": {
@@ -3732,8 +3716,8 @@
       "blurb": "Suspended 3 games by the NFL for violating league substance abuse policy.",
       "is_season_out": false,
       "draft_advice": "Waiver watch candidate.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/jeshaun-jones.php"
     },
@@ -4052,8 +4036,8 @@
       "blurb": "Placed on season-ending injured reserve with severe hamstring tear.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/devin-neal.php"
     },
@@ -4180,8 +4164,8 @@
       "blurb": "Reported as Questionable (Neck).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:11:58Z",
-      "updated_formatted": "Sep 02, 2026 at 05:11 PM UTC",
+      "timestamp_utc": "2026-09-05T16:05:17Z",
+      "updated_formatted": "Sep 05, 2026 at 04:05 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/tyrone-tracy.php"
     },
@@ -4244,8 +4228,8 @@
       "blurb": "Suffered torn right ACL in late August training camp practice; placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/calvin-austin.php"
     },
@@ -5476,8 +5460,8 @@
       "blurb": "Reported as Questionable (Undisclosed).",
       "is_season_out": false,
       "draft_advice": "Questionable for Week 1 opener. Monitor practice participation.",
-      "timestamp_utc": "2026-09-02T17:20:30Z",
-      "updated_formatted": "Sep 02, 2026 at 05:20 PM UTC",
+      "timestamp_utc": "2026-09-05T15:20:17Z",
+      "updated_formatted": "Sep 05, 2026 at 03:20 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/emeka-egbuka.php"
     },
@@ -8356,8 +8340,8 @@
       "blurb": "Placed on season-ending injured reserve on August 1, 2026 to undergo surgery repairing an aggravated PCL. 6-12 month recovery timeline.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues. Out for the entire 2026 season.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/ricky-pearsall.php"
     },
@@ -12948,8 +12932,8 @@
       "blurb": "Sustained torn ACL during preseason action; placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "source": "Sleeper API",
       "source_url": "https://www.fantasypros.com/nfl/news/graham-mertz.php"
     },
@@ -16099,8 +16083,8 @@
       "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "player_name": "J.J. Mccarthy"
     },
     "rondale moore": {
@@ -16113,8 +16097,8 @@
       "blurb": "Suffered season-ending training camp knee/hamstring injury. Placed on season-ending IR.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "player_name": "Rondale Moore"
     },
     "josh simmons": {
@@ -16143,8 +16127,8 @@
       "blurb": "Underwent full meniscus repair surgery and was placed on season-ending injured reserve. Out for the entire 2026 season.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "player_name": "Jj Mccarthy"
     },
     "calvin austin iii": {
@@ -16157,8 +16141,8 @@
       "blurb": "Suffered torn right ACL in late August training camp practice; placed on season-ending injured reserve.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT in 2026 redraft leagues.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "player_name": "Calvin Austin Iii"
     },
     "r mason thomas": {
@@ -16251,8 +16235,8 @@
       "blurb": "Officially retired from the NFL in June 2024. Retained for historical reference.",
       "is_season_out": true,
       "draft_advice": "DO NOT DRAFT. Officially retired from NFL.",
-      "timestamp_utc": "2026-09-05T14:31:23Z",
-      "updated_formatted": "Sep 05, 2026 at 02:31 PM UTC",
+      "timestamp_utc": "2026-09-05T17:19:08Z",
+      "updated_formatted": "Sep 05, 2026 at 05:19 PM UTC",
       "player_name": "Darren Waller"
     },
     "jedrick wills": {
