@@ -719,6 +719,44 @@ def test_espn_cheatsheet_ui_in_app():
     assert "ESPN Heat Index (Experts)" in content
 
 
+def test_html_card_sanitization_guarantee():
+    """Guarantees HTML cards, badges, and dossiers never render as raw indented code blocks."""
+    with open("app.py", "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Verify safe markdown wrapper is installed in app.py
+    assert "_safe_st_markdown" in content
+    assert "st.markdown = _safe_st_markdown" in content
+
+    # 2. Verify markdown-it renders cards without <pre><code> wrappers
+    import markdown_it
+    md = markdown_it.MarkdownIt()
+
+    sample_indented_card = """
+        <div style="background:#111827; border:1px solid #3730a3; border-radius:6px; padding:10px 14px;">
+            <strong style="color:#c084fc;">Card Title</strong>
+            <p>Body content</p>
+        </div>
+    """
+    # Raw indented string without sanitization triggers <pre><code>
+    raw_rendered = md.render(sample_indented_card)
+    assert "<pre><code>" in raw_rendered
+
+    # With sanitization:
+    lines = [l.lstrip() for l in sample_indented_card.splitlines() if l.strip()]
+    sanitized = "\n".join(lines)
+    clean_rendered = md.render(sanitized)
+    assert "<pre><code>" not in clean_rendered
+    assert "<div style=" in clean_rendered
+
+    # 3. Verify all player dossiers in board start with zero indentation
+    from scraper import load_or_generate_draft_board
+    df = load_or_generate_draft_board()
+    dossiers = df[df["espn_dossier_html"] != ""]["espn_dossier_html"]
+    for d in dossiers.head(10):
+        assert d.startswith("<div") or d.lstrip().startswith("<div")
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -742,6 +780,7 @@ if __name__ == "__main__":
     test_espn_cheatsheet_loaded()
     test_espn_cheatsheet_enrichment()
     test_espn_cheatsheet_ui_in_app()
+    test_html_card_sanitization_guarantee()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
 
 

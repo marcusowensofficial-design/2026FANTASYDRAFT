@@ -795,23 +795,20 @@ def enrich_board_with_espn_cheatsheet(df: pd.DataFrame) -> pd.DataFrame:
             adp_str = f" &bull; <strong>Cheat Sheet ADP:</strong> {adp}" if adp else ""
             tier_str = f" &bull; <strong>ESPN Expert Tier:</strong> Tier {tier}" if tier else ""
 
-            dossier_html = f"""
-            <div style="background:#111827; border:1px solid #3730a3; border-radius:6px; padding:10px 14px; margin-top:8px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        <span style="font-weight:800; color:#c084fc; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">📋 ESPN Expert Dossier</span>
-                        {heat_badge}
-                        {fade_badge}
-                    </div>
-                    <div style="font-size:0.8rem; color:#94a3b8;">
-                        {tier_str}{adp_str}
-                    </div>
-                </div>
-                <ul style="margin:4px 0 0 16px; padding:0; font-size:0.84rem; line-height:1.45;">
-                    {dossier_body}
-                </ul>
-            </div>
-            """
+            dossier_lines = [
+                '<div style="background:#111827; border:1px solid #3730a3; border-radius:6px; padding:10px 14px; margin-top:8px;">',
+                '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">',
+                '<div style="display:flex; gap:6px; align-items:center;">',
+                '<span style="font-weight:800; color:#c084fc; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">📋 ESPN Expert Dossier</span>',
+                f'{heat_badge}',
+                f'{fade_badge}',
+                '</div>',
+                f'<div style="font-size:0.8rem; color:#94a3b8;">{tier_str}{adp_str}</div>',
+                '</div>',
+                f'<ul style="margin:4px 0 0 16px; padding:0; font-size:0.84rem; line-height:1.45;">{dossier_body}</ul>',
+                '</div>'
+            ]
+            dossier_html = "\n".join(dossier_lines)
 
             heat_indices.append(heat)
             badge_strings.append(" • ".join(badges))

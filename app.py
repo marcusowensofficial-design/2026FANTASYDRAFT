@@ -61,6 +61,34 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# -----------------------------------------------------------------------------
+# 0. STREAMLIT MARKDOWN HTML CODE-BLOCK PREVENTER
+# -----------------------------------------------------------------------------
+# Guarantees HTML cards, badges, alerts, and dossiers NEVER render as raw indented code blocks.
+# In CommonMark/markdown-it, lines with 4+ spaces of indentation are parsed as <pre><code>.
+# Stripping leading whitespace per line ensures all HTML elements start at column 0.
+_orig_st_markdown = st.markdown
+
+def _safe_st_markdown(body, *args, **kwargs):
+    if isinstance(body, str):
+        s_body = body.strip()
+        # Preserve genuine fenced code blocks
+        if s_body.startswith("```") or s_body.startswith("~~~"):
+            return _orig_st_markdown(body, *args, **kwargs)
+        
+        # If string contains HTML tags, strip leading indentation so markdown never treats it as code block
+        if ("<div" in body or "<span" in body or "<style" in body or "<table" in body or 
+            "<ul" in body or "<li" in body or "<p" in body or "<br" in body or "<strong" in body or 
+            "<hr" in body or "<a " in body):
+            lines = [l.lstrip() for l in body.splitlines()]
+            if s_body.startswith("<") and s_body.endswith(">"):
+                lines = [l for l in lines if l]
+            body = "\n".join(lines)
+            kwargs["unsafe_allow_html"] = True
+    return _orig_st_markdown(body, *args, **kwargs)
+
+st.markdown = _safe_st_markdown
+
 # Injected CSS for ultra-dense, responsive dark UI
 st.markdown("""
 <style>
