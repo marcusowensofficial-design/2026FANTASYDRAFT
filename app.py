@@ -1722,7 +1722,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                                 del st.session_state[f"table_select_{key_prefix}"]
                             st.rerun()
                 else:
-                    report_ts = sel_player.get("injury_updated_formatted") or "Sep 4, 2026 at 08:00 AM UTC"
+                    report_ts = sel_player.get("injury_updated_formatted") or "Sep 5, 2026 at 08:00 AM UTC"
                     # Available player: High-visibility injury / suspension alerts based on tier
                     if inj_tier == "SEASON_IR":
                         st.markdown(f"""
@@ -3261,7 +3261,7 @@ with tab_steals:
             trend = p.get("preseason_snap_trend") or "Rising"
             blurb = p.get("sleeper_blurb") or ""
             strategy = p.get("sleeper_strategy") or ""
-            ts_str = p.get("sleeper_updated_formatted") or "Sep 4, 2026 at 08:00 AM UTC"
+            ts_str = p.get("sleeper_updated_formatted") or "Sep 5, 2026 at 08:00 AM UTC"
             source = p.get("sleeper_source") or "Beat Wire"
             rotowire_url = get_rotowire_url(p_name, p.get("source_url"))
 

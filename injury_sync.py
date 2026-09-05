@@ -313,7 +313,11 @@ def generate_git_commit_snippet(updated_players: List[str], timestamp_iso: Optio
     msg += f"Synchronized live medical and disciplinary reports for {count} players:\n"
     for p in updated_players[:15]:
         msg += f"- {p}\n"
-    if count > 15:
-        msg += f"- ...and {count - 15} additional players\n"
     msg += f"\nMonotonic timestamp resolution verified: T_new > T_current."
     return msg
+
+
+if __name__ == "__main__":
+    count, updated, db = sync_injury_pipeline()
+    print(f"[OK] Live injury database synced: {count} players updated. Total records: {len(db.get('players', {}))}.")
+

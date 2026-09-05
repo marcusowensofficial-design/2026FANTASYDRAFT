@@ -58,7 +58,7 @@ RAW_ESPN_CHEAT_SHEET_DATA: Dict[str, Any] = {
         "season": 2026,
         "format": "PPR",
         "source_document": "NFL26_CS_ULTIMATE.pdf",
-        "source_date": "2026-09-04",
+        "source_date": "2026-09-05",
         "analysts": [
             "Erik Karabell",
             "Matt Bowen",

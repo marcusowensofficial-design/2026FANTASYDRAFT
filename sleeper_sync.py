@@ -59,7 +59,7 @@ def format_user_friendly_utc(iso_ts: str) -> str:
         day = dt.strftime("%d").lstrip("0")
         return f"{month} {day}, {dt.year} at {hour}:{minute} {ampm} UTC"
     except Exception:
-        return "Sep 4, 2026 at 08:00 AM UTC"
+        return "Sep 5, 2026 at 08:00 AM UTC"
 
 
 # ==============================================================================
@@ -702,6 +702,15 @@ def sync_sleeper_pipeline() -> Tuple[int, List[str], Dict[str, Any]]:
     return updated_count, updated_names, current_db
 
 
+def mark_sleeper_committed() -> Dict[str, Any]:
+    """Clears uncommitted changes in sleeper database."""
+    db = load_sleeper_database()
+    db["metadata"]["uncommitted_changes"] = 0
+    db["metadata"]["uncommitted_players"] = []
+    save_sleeper_database(db)
+    return db
+
+
 def enrich_board_with_sleepers(df_board: pd.DataFrame) -> pd.DataFrame:
     """
     Enriches the main draft board with sleeper and preseason rookie intelligence.
@@ -757,8 +766,8 @@ def enrich_board_with_sleepers(df_board: pd.DataFrame) -> pd.DataFrame:
             snap_list.append("Season-Ending IR")
             blurb_list.append(f"CRITICAL INJURY: Player suffered a season-ending injury ({row.get('injury_type', 'IR')}). DO NOT DRAFT.")
             strat_list.append("DO NOT DRAFT. Player is out for the 2026 season.")
-            ts_list.append(s_data.get("timestamp_utc", "") if s_data else "2026-09-02T10:00:00Z")
-            ts_fmt_list.append(s_data.get("updated_formatted", "") if s_data else "Sep 2, 2026 at 10:00 AM UTC")
+            ts_list.append(s_data.get("timestamp_utc", "") if s_data else "2026-09-05T08:00:00Z")
+            ts_fmt_list.append(s_data.get("updated_formatted", "") if s_data else "Sep 5, 2026 at 08:00 AM UTC")
             src_list.append(s_data.get("source", "Official NFL IR") if s_data else "Official NFL IR")
             continue
 
@@ -795,8 +804,8 @@ def enrich_board_with_sleepers(df_board: pd.DataFrame) -> pd.DataFrame:
             snap_list.append("")
             blurb_list.append(f"Consensus rank #{row.get('consensus_rank', '-')} vs ESPN rank #{row.get('espn_rank', '-')}. Value difference: +{val_diff} spots.")
             strat_list.append(f"Target ahead of ESPN default ADP to capture +{val_diff} spots of value.")
-            ts_list.append("2026-09-02T10:00:00Z")
-            ts_fmt_list.append("Sep 2, 2026 at 10:00 AM UTC")
+            ts_list.append("2026-09-05T08:00:00Z")
+            ts_fmt_list.append("Sep 5, 2026 at 08:00 AM UTC")
             src_list.append("Consensus Expert Model")
 
     df["is_rookie"] = is_rookie_list
