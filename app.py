@@ -487,6 +487,42 @@ def get_league_team_name(slot: int) -> str:
     return LEAGUE_TEAMS_2026.get(slot, {}).get("team_name", f"Team {slot}")
 
 
+def get_league_team_picks(slot: int) -> List[str]:
+    """Returns the list of 16 round picks for an 8-team draft slot."""
+    return LEAGUE_TEAMS_2026.get(slot, {}).get("picks", [])
+
+
+def format_username_dropdown(slot: int, cur_on_clock_slot: Optional[int] = None) -> str:
+    """Formats the username for dropdown with attached round picks (NO real owner names)."""
+    team_info = LEAGUE_TEAMS_2026.get(slot, {})
+    name = team_info.get("team_name", f"Team {slot}")
+    picks = team_info.get("picks", [])
+    # Display attached picks in dropdown: e.g. Chiefs Kingdom (Slot 1 • Picks: 1.1, 2.8, 3.1, 4.8, 5.1...)
+    picks_str = ", ".join(picks[:5]) + "..." if len(picks) > 5 else ", ".join(picks)
+    clock_tag = " 🔥 ON CLOCK" if cur_on_clock_slot is not None and slot == cur_on_clock_slot else ""
+    return f"{name} (Slot #{slot} • Picks: {picks_str}){clock_tag}"
+
+
+def set_active_username_slot(new_slot: int):
+    """
+    Updates the active draft user slot and aligns persona & is_user flags
+    across the entire draft board, draft history, and UI metrics.
+    """
+    if new_slot != st.session_state.get("user_slot"):
+        st.session_state.user_slot = new_slot
+        st.session_state["top_bar_team_picker"] = new_slot
+        st.session_state["sidebar_team_picker"] = new_slot
+        # Re-align is_user flag in history
+        for h in st.session_state.get("draft_history", []):
+            h["is_user"] = (h.get("team_slot") == new_slot)
+        # Re-align is_user flag in active DataFrame
+        if "draft_board" in st.session_state:
+            df = st.session_state.draft_board
+            if "team_slot" in df.columns:
+                df["is_user"] = (df["team_slot"] == new_slot)
+            st.session_state.draft_board = df
+
+
 if "draft_board" not in st.session_state:
     st.session_state.draft_board = load_or_generate_draft_board(force_refresh=False)
 
@@ -496,6 +532,9 @@ if "is_rookie" not in st.session_state.draft_board.columns:
 if "espn_heat_index" not in st.session_state.draft_board.columns:
     st.session_state.draft_board = enrich_board_with_espn_cheatsheet(st.session_state.draft_board)
 
+if "team_slot" not in st.session_state.draft_board.columns:
+    st.session_state.draft_board["team_slot"] = None
+
 if "draft_history" not in st.session_state:
     st.session_state.draft_history = []  # Stack of picks for undo
 
@@ -503,7 +542,7 @@ if "current_pick" not in st.session_state:
     st.session_state.current_pick = 1
 
 if "user_slot" not in st.session_state:
-    st.session_state.user_slot = 1  # User draft position (1 to 8)
+    st.session_state.user_slot = 1  # User draft position (1 to 8, default: Chiefs Kingdom)
 
 if "clock_seconds" not in st.session_state:
     st.session_state.clock_seconds = 90
@@ -535,9 +574,15 @@ def get_snake_pick_info(pick_num: int, total_teams: int = TOTAL_TEAMS) -> Tuple[
     return round_num, round_pick, team_num, is_user
 
 
-def execute_pick(player_id: str, drafted_by_user: bool = False, team_label: Optional[str] = None):
+def execute_pick(
+    player_id: str, 
+    drafted_by_user: bool = False, 
+    team_slot_override: Optional[int] = None,
+    team_label: Optional[str] = None
+):
     """
     Drafts a player, updates DataFrame in session state, and advances draft state.
+    Records the exact team slot and username who made the pick.
     """
     df = st.session_state.draft_board
     idx = df.index[df["player_id"] == player_id].tolist()
@@ -550,28 +595,30 @@ def execute_pick(player_id: str, drafted_by_user: bool = False, team_label: Opti
         return
 
     pick_num = st.session_state.current_pick
-    rd, rpick, team_num, is_user_turn = get_snake_pick_info(pick_num)
+    rd, rpick, cur_snake_team, is_user_turn = get_snake_pick_info(pick_num)
     
-    if team_label is None:
-        if drafted_by_user:
-            team_label = f"{get_league_team_name(st.session_state.user_slot)} (User)"
-            is_user = True
-        else:
-            # Explicitly drafted by another team / crossed off
-            if is_user_turn:
-                # If crossed off during user turn, assign to opponent
-                team_label = f"Opponent (Pick #{pick_num})"
-            else:
-                team_label = get_league_team_name(team_num)
-            is_user = False
+    if drafted_by_user:
+        assigned_slot = st.session_state.user_slot
+        is_user = True
+    elif team_slot_override is not None:
+        assigned_slot = team_slot_override
+        is_user = (assigned_slot == st.session_state.user_slot)
     else:
-        is_user = ("User" in team_label)
+        # Default to team whose turn it is on the snake pick clock
+        assigned_slot = cur_snake_team
+        is_user = (assigned_slot == st.session_state.user_slot)
+
+    assigned_team_name = get_league_team_name(assigned_slot)
+    if team_label is None:
+        team_label = assigned_team_name
 
     # Update row
     df.at[i, "is_drafted"] = True
     df.at[i, "draft_round"] = rd
     df.at[i, "pick_number"] = pick_num
+    df.at[i, "team_slot"] = assigned_slot
     df.at[i, "drafted_by"] = team_label
+    df.at[i, "is_user"] = is_user
 
     # Save to history stack for instant undo
     st.session_state.draft_history.append({
@@ -581,6 +628,8 @@ def execute_pick(player_id: str, drafted_by_user: bool = False, team_label: Opti
         "team": df.at[i, "team"],
         "pick_number": pick_num,
         "draft_round": rd,
+        "round_pick": rpick,
+        "team_slot": assigned_slot,
         "drafted_by": team_label,
         "is_user": is_user
     })
@@ -607,7 +656,9 @@ def undo_last_pick():
         df.at[i, "is_drafted"] = False
         df.at[i, "draft_round"] = 0
         df.at[i, "pick_number"] = 0
+        df.at[i, "team_slot"] = None
         df.at[i, "drafted_by"] = ""
+        df.at[i, "is_user"] = False
 
     st.session_state.current_pick = max(1, len(st.session_state.draft_history) + 1)
     st.session_state.draft_board = df
@@ -631,7 +682,9 @@ def restore_player(player_id: str):
     df.at[i, "is_drafted"] = False
     df.at[i, "draft_round"] = 0
     df.at[i, "pick_number"] = 0
+    df.at[i, "team_slot"] = None
     df.at[i, "drafted_by"] = ""
+    df.at[i, "is_user"] = False
 
     # Remove from history
     st.session_state.draft_history = [
@@ -650,7 +703,9 @@ def reset_draft_board():
     df["is_drafted"] = False
     df["draft_round"] = 0
     df["pick_number"] = 0
+    df["team_slot"] = None
     df["drafted_by"] = ""
+    df["is_user"] = False
     st.session_state.draft_board = df
     st.session_state.draft_history = []
     st.session_state.current_pick = 1
@@ -681,12 +736,12 @@ def get_player_injury_links_html(player_name: str, report_time: Optional[str] = 
     )
 
 
-def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
+def get_team_roster(team_slot: int) -> Dict[str, List[Dict[str, Any]]]:
     """
-    Computes user's 8-team PPR starting lineup (9 starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 D/ST, 1 K),
+    Computes any 8-team league member's PPR starting lineup (9 starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 D/ST, 1 K),
     7 bench slots, and 1 dedicated IR stash slot for injured/suspended players.
     """
-    user_picks = [p for p in st.session_state.draft_history if p.get("is_user", False)]
+    team_picks = [p for p in st.session_state.draft_history if p.get("team_slot") == team_slot]
     
     roster: Dict[str, List[Dict[str, Any]]] = {
         "QB": [],
@@ -704,7 +759,7 @@ def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
     ir_eligible = []
     active_pool = []
     
-    for p in user_picks:
+    for p in team_picks:
         p_id = p["player_id"]
         p_row = df_b[df_b["player_id"] == p_id]
         inj_tier = p_row.iloc[0].get("injury_tier", "") if not p_row.empty else ""
@@ -769,6 +824,14 @@ def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
             
     roster["BENCH"] = final_bench
     return roster
+
+
+def get_user_roster() -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Computes active chosen user's 8-team PPR starting lineup (9 starters: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 D/ST, 1 K),
+    7 bench slots, and 1 dedicated IR stash slot for injured/suspended players.
+    """
+    return get_team_roster(st.session_state.user_slot)
 
 
 # -----------------------------------------------------------------------------
@@ -841,7 +904,7 @@ st.markdown(f"""
         </div>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
-        {f'<div class="status-badge-ontheclock">🚨 YOU ARE ON THE CLOCK!</div>' if is_user_turn and st.session_state.current_pick <= TOTAL_PICKS else f'<div class="status-badge-clock">⏳ Team {cur_team} On Clock</div>'}
+        {f'<div class="status-badge-ontheclock">🚨 YOU ARE ON THE CLOCK!</div>' if is_user_turn and st.session_state.current_pick <= TOTAL_PICKS else f'<div class="status-badge-clock">⏳ {get_league_team_name(cur_team)} On Clock (Pick {cur_rd}.{cur_rpick})</div>'}
         <div class="status-badge-clock">
             <span>Round {cur_rd}</span> &bull; <span>Pick {cur_rpick}</span> &bull; <span style="color:#38bdf8;">Overall #{min(st.session_state.current_pick, TOTAL_PICKS)}</span>
         </div>
@@ -850,20 +913,20 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 4B. TOP WAR ROOM TEAM SELECTOR & ATTACHED ROUND PICK SCHEDULE
+# 4B. TOP WAR ROOM CHOOSE USERNAME DROPDOWN & ATTACHED ROUND PICK SCHEDULE
 # -----------------------------------------------------------------------------
-top_team_col1, top_team_col2 = st.columns([3.8, 6.2])
+top_team_col1, top_team_col2 = st.columns([4.2, 5.8])
 with top_team_col1:
     top_user_slot = st.selectbox(
-        "🏆 Select Your Team in Draft",
+        "👤 Choose Username",
         options=list(range(1, TOTAL_TEAMS + 1)),
         index=st.session_state.user_slot - 1,
-        format_func=lambda s: f"{get_league_team_name(s)} (Slot #{s}) {'🔥 ON CLOCK' if s == cur_team else ''}",
+        format_func=lambda s: format_username_dropdown(s, cur_team),
         key="top_bar_team_picker",
-        help="Select your team name to configure your draft slot, pick countdowns, and roster."
+        help="Choose your username to configure your draft slot, attach your 16-round picks, and guide your live draft."
     )
     if top_user_slot != st.session_state.user_slot:
-        st.session_state.user_slot = top_user_slot
+        set_active_username_slot(top_user_slot)
         st.rerun()
 
 with top_team_col2:
@@ -886,11 +949,11 @@ with top_team_col2:
         st.markdown(f"""
         <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid #38bdf8; border-radius: 8px; padding: 6px 12px; margin-top: 1px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:700; color:#38bdf8;">🏈 {cur_team_info.get('team_name')} (Slot #{st.session_state.user_slot})</span>
+                <span style="font-weight:700; color:#38bdf8;">🏈 Active Drafter: {cur_team_info.get('team_name')} (Slot #{st.session_state.user_slot})</span>
                 <span style="font-size:0.75rem; color:{'#f59e0b' if p_diff == 0 else '#e2e8f0'}; font-weight:700;">Next Turn: {diff_str}</span>
             </div>
             <div style="color: #94a3b8; font-size: 0.74rem; margin-top: 2px;">
-                Upcoming: {chips_str}
+                Upcoming Picks: {chips_str}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -900,6 +963,41 @@ with top_team_col2:
             <span style="font-weight:700; color:#10b981;">✓ {cur_team_info.get('team_name')}</span> &bull; All 16 Draft Rounds Completed!
         </div>
         """, unsafe_allow_html=True)
+
+    with st.expander(f"📋 View Attached 16-Round Picks & Pick Guide for {cur_team_info.get('team_name')}", expanded=False):
+        sched_chips = []
+        for rd_idx, (p_str, ovr) in enumerate(zip(all_team_picks, all_team_ovr), start=1):
+            past_pick = [h for h in st.session_state.draft_history if h.get("team_slot") == st.session_state.user_slot and h.get("draft_round") == rd_idx]
+            if past_pick:
+                p_item = past_pick[0]
+                status_txt = f"<span style='color:#10b981; font-weight:700;'>✓ {p_item['name']} ({p_item['pos']})</span>"
+                bg_c = "rgba(16, 185, 129, 0.15)"
+                border_c = "#059669"
+            elif ovr == st.session_state.current_pick:
+                status_txt = "<span style='color:#f59e0b; font-weight:800;'>🔥 ON CLOCK</span>"
+                bg_c = "rgba(245, 158, 11, 0.25)"
+                border_c = "#f59e0b"
+            elif ovr > st.session_state.current_pick:
+                diff = ovr - st.session_state.current_pick
+                status_txt = f"<span style='color:#94a3b8;'>In {diff} picks (#{ovr})</span>"
+                bg_c = "#0f172a"
+                border_c = "#334155"
+            else:
+                status_txt = "<span style='color:#64748b;'>Passed</span>"
+                bg_c = "#0f172a"
+                border_c = "#1e293b"
+
+            sched_chips.append(f"""
+            <div style="background:{bg_c}; border:1px solid {border_c}; border-radius:6px; padding:4px 8px; font-size:0.75rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#f8fafc;">Rd {rd_idx} ({p_str})</strong>
+                    {status_txt}
+                </div>
+            </div>
+            """)
+
+        st.markdown(f'<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px;">{"".join(sched_chips)}</div>', unsafe_allow_html=True)
+        st.caption("Snake Pick Logic: Odd rounds pick 1st to 8th • Even rounds reverse 8th to 1st. Use Tab 11 for the full league matrix.")
 
 
 
@@ -1104,16 +1202,17 @@ with st.sidebar:
             st.session_state.sidebar_collapsed = True
             st.rerun()
     
-    # User Team & Draft Slot Picker
+    # User Team & Draft Slot Picker ("Choose Username")
     user_slot_input = st.selectbox(
-        "🏆 Select Your Team in Draft",
+        "👤 Choose Username",
         options=list(range(1, TOTAL_TEAMS + 1)),
         index=st.session_state.user_slot - 1,
-        format_func=lambda s: f"{get_league_team_name(s)} (Slot #{s}) {'🔥 ON CLOCK' if s == cur_team else ''}",
-        key="sidebar_team_picker"
+        format_func=lambda s: format_username_dropdown(s, cur_team),
+        key="sidebar_team_picker",
+        help="Choose your username to configure your draft slot, attach your 16-round picks, and guide your live draft."
     )
     if user_slot_input != st.session_state.user_slot:
-        st.session_state.user_slot = user_slot_input
+        set_active_username_slot(user_slot_input)
         st.rerun()
 
     # Attached 16-Round Pick Schedule Card
@@ -1134,7 +1233,11 @@ with st.sidebar:
             elif is_past:
                 card_bg = "rgba(15, 23, 42, 0.6)"
                 border_c = "#1e293b"
-                status_icon = "<span style='color:#10b981;'>✓ Done</span>"
+                past_p = [h for h in st.session_state.draft_history if h.get("team_slot") == st.session_state.user_slot and h.get("draft_round") == rd_idx]
+                if past_p:
+                    status_icon = f"<span style='color:#10b981; font-weight:700;' title='{past_p[0]['name']}'>✓ {past_p[0]['name'][:12]} ({past_p[0]['pos']})</span>"
+                else:
+                    status_icon = "<span style='color:#10b981;'>✓ Done</span>"
             else:
                 card_bg = "#0f172a"
                 border_c = "#334155"
@@ -1167,7 +1270,7 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📋 My Starting Lineup (PPR)")
+    st.markdown(f"### 📋 {sel_team_info.get('team_name', 'My Team')} Lineup (PPR)")
 
     user_roster = get_user_roster()
     
@@ -1997,17 +2100,23 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                     if sel_player.get("espn_dossier_html"):
                         st.markdown(sel_player["espn_dossier_html"], unsafe_allow_html=True)
                     
-                    b_c1, b_c2, b_c3, b_c4 = st.columns([1.5, 1.5, 1.4, 0.7])
+                    # Determine team on the clock and active chosen username
+                    active_user_team = get_league_team_name(st.session_state.user_slot)
+                    _, _, on_clock_slot, _ = get_snake_pick_info(st.session_state.current_pick)
+                    on_clock_team = get_league_team_name(on_clock_slot)
+
+                    b_c1, b_c2, b_c3, b_c4 = st.columns([1.6, 1.6, 1.3, 0.7])
                     with b_c1:
-                        btn_label = f"🟩 Draft {p_name} (My Roster)"
+                        btn_label = f"🟩 Draft for {active_user_team}"
                         if inj_tier == "SEASON_IR":
                             btn_label += " ⚠️[IR RISK]"
                         if st.button(btn_label, key=f"btn_user_{p_id}_{key_prefix}", type="primary", use_container_width=True):
                             execute_pick(p_id, drafted_by_user=True)
                             st.rerun()
                     with b_c2:
-                        if st.button(f"⬛ Cross Off {p_name} (Other)", key=f"btn_opp_{p_id}_{key_prefix}", use_container_width=True):
-                            execute_pick(p_id, drafted_by_user=False)
+                        btn_opp_label = f"⬛ Draft for {on_clock_team} (#{min(st.session_state.current_pick, TOTAL_PICKS)})"
+                        if st.button(btn_opp_label, key=f"btn_opp_{p_id}_{key_prefix}", use_container_width=True, help=f"Assign pick #{st.session_state.current_pick} to {on_clock_team}"):
+                            execute_pick(p_id, drafted_by_user=False, team_slot_override=on_clock_slot)
                             st.rerun()
                     with b_c3:
                         if st.button("🔙 Return to Available", key=f"btn_return_sel_{p_id}_{key_prefix}", use_container_width=True, help="Clear search bar and return to all available players"):
@@ -2018,6 +2127,23 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                             if f"table_select_{key_prefix}" in st.session_state:
                                 del st.session_state[f"table_select_{key_prefix}"]
                             st.rerun()
+
+                    # Out-of-order team assignment expander
+                    with st.expander("🎯 Assign pick to a different team (out-of-order draft):", expanded=False):
+                        oc1, oc2 = st.columns([3, 1.5])
+                        with oc1:
+                            target_override_slot = st.selectbox(
+                                "Select Drafting Team:",
+                                options=list(range(1, TOTAL_TEAMS + 1)),
+                                index=on_clock_slot - 1,
+                                format_func=lambda s: f"{get_league_team_name(s)} (Slot #{s})",
+                                key=f"sel_override_team_{p_id}_{key_prefix}"
+                            )
+                        with oc2:
+                            st.write("")
+                            if st.button("Draft for Team", key=f"btn_draft_override_{p_id}_{key_prefix}", use_container_width=True):
+                                execute_pick(p_id, drafted_by_user=(target_override_slot == st.session_state.user_slot), team_slot_override=target_override_slot)
+                                st.rerun()
 
 
 # --- Tab 1: All Available ---
@@ -2042,12 +2168,12 @@ with tab_drafted:
         with mc1:
             st.metric("Total Removed", len(drafted_df))
         with mc2:
-            st.metric("On My Roster", user_drafted_count)
+            st.metric(f"On {get_league_team_name(st.session_state.user_slot)}", user_drafted_count)
         with mc3:
-            st.metric("Taken by Opponents / Crossed Off", opp_drafted_count)
+            st.metric("Taken by Other Teams", opp_drafted_count)
 
         # Filters for crossed off view
-        c_f1, c_f2, c_f3 = st.columns([3, 1.5, 1.5])
+        c_f1, c_f2, c_f3 = st.columns([3, 1.5, 1.8])
         with c_f1:
             search_crossed = st.text_input(
                 "Filter removed players",
@@ -2063,9 +2189,10 @@ with tab_drafted:
                 key="pos_crossed_off"
             )
         with c_f3:
+            drafter_options = ["All Removed", "My Team Only", "Other Teams Only"] + [get_league_team_name(s) for s in range(1, TOTAL_TEAMS + 1)]
             drafter_filter = st.selectbox(
-                "Drafted By",
-                options=["All Removed", "My Roster Only", "Opponents Only"],
+                "Drafted By Team",
+                options=drafter_options,
                 key="drafter_crossed_off"
             )
 
@@ -2082,10 +2209,12 @@ with tab_drafted:
         if pos_crossed:
             filtered_history = [h for h in filtered_history if h["pos"] in pos_crossed]
 
-        if drafter_filter == "My Roster Only":
+        if drafter_filter == "My Team Only":
             filtered_history = [h for h in filtered_history if h.get("is_user", False)]
-        elif drafter_filter == "Opponents Only":
+        elif drafter_filter == "Other Teams Only":
             filtered_history = [h for h in filtered_history if not h.get("is_user", False)]
+        elif drafter_filter != "All Removed":
+            filtered_history = [h for h in filtered_history if h.get("drafted_by") == drafter_filter or get_league_team_name(h.get("team_slot", 0)) == drafter_filter]
 
         if not filtered_history:
             st.info("No removed players match the selected filters.")
@@ -3636,49 +3765,334 @@ with tab_injuries:
 
 
 
-# --- Tab 11: 8-Team Draft Grid & Log ---
+# --- Tab 11: 8-Team League Dashboard & Rosters ---
 with tab_grid:
-    st.markdown("### 📊 8-Team Live Draft Matrix")
-    
-    # Construct 8-team grid
-    grid_rows = []
-    for rd in range(1, ROSTER_ROUNDS + 1):
-        row_data = {"Round": f"Rd {rd}"}
-        for team_idx in range(1, TOTAL_TEAMS + 1):
-            if rd % 2 == 1:
-                p_num = (rd - 1) * TOTAL_TEAMS + team_idx
-            else:
-                p_num = (rd - 1) * TOTAL_TEAMS + (TOTAL_TEAMS - team_idx + 1)
-            
-            team_col_label = f"{get_league_team_name(team_idx)} (S{team_idx})"
-            picked = [h for h in st.session_state.draft_history if h["pick_number"] == p_num]
-            if picked:
-                p = picked[0]
-                row_data[team_col_label] = f"{p['name']} ({p['pos']})"
-            elif p_num == st.session_state.current_pick:
-                row_data[team_col_label] = "⏳ ON CLOCK"
-            else:
-                row_data[team_col_label] = f"#{p_num}"
-        grid_rows.append(row_data)
+    st.markdown("## 📊 8-Team League Dashboard & Draft Command Center")
+    st.caption("Live multi-team command center tracking **Who Picked Who**, roster hierarchies for all 8 fantasy teams, round-by-round snake pick guides, and live board matrix.")
 
-    grid_df = pd.DataFrame(grid_rows)
-    st.dataframe(grid_df, use_container_width=True, hide_index=True)
+    subtab_who, subtab_matrix, subtab_schedule, subtab_log = st.tabs([
+        "👥 Who Picked Who (8-Team Rosters)",
+        "📋 8-Team Live Draft Matrix",
+        "🔄 Who's Picking Each Round (16-Round Guide)",
+        "📜 Chronological Draft Feed & Log"
+    ])
 
-    st.markdown("---")
-    st.markdown("### 📜 Chronological Draft Log")
-    if st.session_state.draft_history:
-        log_df = pd.DataFrame(st.session_state.draft_history)[["pick_number", "draft_round", "name", "pos", "team", "drafted_by"]]
-        log_df = log_df.rename(columns={
-            "pick_number": "Overall #",
-            "draft_round": "Round",
-            "name": "Player",
-            "pos": "Pos",
-            "team": "Team",
-            "drafted_by": "Drafted By"
-        })
-        st.dataframe(log_df.iloc[::-1], use_container_width=True, hide_index=True)
-    else:
-        st.caption("No picks made yet. Draft is at Pick #1.")
+    # -------------------------------------------------------------------------
+    # SUBTAB 1: WHO PICKED WHO (8-TEAM ROSTER INSPECTOR)
+    # -------------------------------------------------------------------------
+    with subtab_who:
+        st.markdown("### 👥 8-Team Roster Inspector & Team Needs")
+        st.caption("Select any team below to inspect their full 16-player roster, starting lineup, bench, bye week coverage, and round picks.")
+
+        insp_c1, insp_c2 = st.columns([4, 2.5])
+        with insp_c1:
+            chosen_inspect_slot = st.selectbox(
+                "🔍 Select Team to Inspect Full Lineup:",
+                options=list(range(1, TOTAL_TEAMS + 1)),
+                index=st.session_state.user_slot - 1,
+                format_func=lambda s: f"{get_league_team_name(s)} (Slot #{s}){' ⭐ YOUR ACTIVE TEAM' if s == st.session_state.user_slot else ''}{' 🔥 ON CLOCK' if s == cur_team else ''}",
+                key="dashboard_inspect_team_select"
+            )
+        with insp_c2:
+            st.write("")
+            if chosen_inspect_slot != st.session_state.user_slot:
+                if st.button(f"👉 Set {get_league_team_name(chosen_inspect_slot)} as My Persona", key="btn_switch_persona_insp", use_container_width=True, help="Switch active persona to this team so draft countdowns and board highlights follow them"):
+                    set_active_username_slot(chosen_inspect_slot)
+                    st.rerun()
+
+        insp_team_info = LEAGUE_TEAMS_2026.get(chosen_inspect_slot, {})
+        insp_team_name = insp_team_info.get("team_name", f"Team {chosen_inspect_slot}")
+        insp_picks = insp_team_info.get("picks", [])
+        insp_roster = get_team_roster(chosen_inspect_slot)
+        
+        # Calculate roster statistics for this team
+        insp_starters = [
+            p for slot_k in ["QB", "RB", "WR", "TE", "FLEX", "DST", "K"] 
+            for p in insp_roster.get(slot_k, [])
+        ]
+        insp_bench = insp_roster.get("BENCH", [])
+        insp_ir = insp_roster.get("IR", [])
+        insp_total_drafted = len(insp_starters) + len(insp_bench) + len(insp_ir)
+
+        # Team Header Banner
+        is_active_user_team = (chosen_inspect_slot == st.session_state.user_slot)
+        header_border = "#38bdf8" if is_active_user_team else "#3730a3"
+        header_bg = "rgba(56, 189, 248, 0.08)" if is_active_user_team else "rgba(15, 23, 42, 0.75)"
+        st.markdown(f"""
+        <div style="background:{header_bg}; border:1.5px solid {header_border}; border-radius:8px; padding:10px 16px; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:1.15rem; font-weight:800; color:{'#38bdf8' if is_active_user_team else '#f8fafc'};">
+                    🏈 {insp_team_name} (Draft Slot #{chosen_inspect_slot}) {'⭐ YOUR ACTIVE TEAM' if is_active_user_team else ''}
+                </span>
+                <span style="font-size:0.85rem; font-weight:700; color:#10b981;">
+                    Draft Progress: {insp_total_drafted} / 16 Picks
+                </span>
+            </div>
+            <div style="font-size:0.76rem; color:#94a3b8; margin-top:4px;">
+                <strong>Attached 16-Round Schedule:</strong> {', '.join(insp_picks)}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # 2-Column Roster Layout: Starters & Bench
+        r_col1, r_col2 = st.columns([5, 5])
+        with r_col1:
+            st.markdown("#### 🏆 Starting Lineup (9 Starters)")
+            starter_slot_configs = [
+                ("QB", 1),
+                ("RB", 2),
+                ("WR", 2),
+                ("TE", 1),
+                ("FLEX", 1),
+                ("DST", 1),
+                ("K", 1)
+            ]
+            for s_name, req_count in starter_slot_configs:
+                players_in_slot = insp_roster.get(s_name, [])
+                for idx in range(req_count):
+                    s_label = s_name if req_count == 1 else f"{s_name} {idx+1}"
+                    if idx < len(players_in_slot):
+                        pl = players_in_slot[idx]
+                        p_bye = TEAM_BYE_WEEKS_2026.get(pl.get("team", ""), 0)
+                        st.markdown(f"""
+                        <div class="roster-card">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="pos-badge pos-{pl['pos']}">{pl['pos']}</span>
+                                <span class="roster-player-name">{pl['name']}</span>
+                                <span style="font-size:0.72rem; color:#94a3b8;">({pl['team']} • Wk {p_bye})</span>
+                            </div>
+                            <div style="font-size:0.72rem; color:#38bdf8; font-weight:700;">
+                                Pick #{pl.get('pick_number', '?')} (Rd {pl.get('draft_round', '?')})
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="roster-card roster-card-empty">
+                            <span class="roster-slot-title">{s_label}</span>
+                            <span style="font-size:0.76rem; color:#64748b; font-style:italic;">Empty</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+        with r_col2:
+            st.markdown("#### 🪑 Bench (7 Slots) & 🚑 IR Stash")
+            for b_idx in range(7):
+                if b_idx < len(insp_bench):
+                    bp = insp_bench[b_idx]
+                    b_bye = TEAM_BYE_WEEKS_2026.get(bp.get("team", ""), 0)
+                    st.markdown(f"""
+                    <div class="roster-card">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="pos-badge pos-{bp['pos']}">{bp['pos']}</span>
+                            <span class="roster-player-name">{bp['name']}</span>
+                            <span style="font-size:0.72rem; color:#94a3b8;">({bp['team']} • Wk {b_bye})</span>
+                        </div>
+                        <div style="font-size:0.72rem; color:#38bdf8; font-weight:700;">
+                            Pick #{bp.get('pick_number', '?')} (Rd {bp.get('draft_round', '?')})
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="roster-card roster-card-empty">
+                        <span class="roster-slot-title">Bench {b_idx+1}</span>
+                        <span style="font-size:0.76rem; color:#64748b; font-style:italic;">Empty</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            # IR Stash Card
+            if insp_ir:
+                irp = insp_ir[0]
+                st.markdown(f"""
+                <div class="roster-card" style="border:1px solid #ea580c; background:#2d1205;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="background:#ea580c; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px;">IR STASH</span>
+                        <span class="roster-player-name" style="color:#fdba74;">{irp['name']}</span>
+                        <span style="font-size:0.72rem; color:#fed7aa;">({irp['pos']} - {irp['team']})</span>
+                    </div>
+                    <div style="font-size:0.72rem; color:#f97316; font-weight:700;">
+                        {irp.get('injury_badge', '⚠️ IR')} &bull; Pick #{irp.get('pick_number', '?')}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class="roster-card roster-card-empty" style="border:1px dashed #64748b;">
+                    <span class="roster-slot-title" style="color:#f59e0b;">IR Stash</span>
+                    <span style="font-size:0.76rem; color:#64748b; font-style:italic;">Empty (PUP / IR Stash Slot)</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("---")
+        # Comparative 8-Team Rosters at a Glance
+        with st.expander("📋 Compare All 8 Teams' Drafted Players Side-by-Side", expanded=False):
+            comp_cols = st.columns(4)
+            for s_idx in range(1, TOTAL_TEAMS + 1):
+                col_target = comp_cols[(s_idx - 1) % 4]
+                t_name = get_league_team_name(s_idx)
+                t_picks_made = [h for h in st.session_state.draft_history if h.get("team_slot") == s_idx]
+                with col_target:
+                    is_cur_user = (s_idx == st.session_state.user_slot)
+                    card_border = "#38bdf8" if is_cur_user else "#1e293b"
+                    card_title_color = "#38bdf8" if is_cur_user else "#f8fafc"
+                    
+                    st.markdown(f"""
+                    <div style="background:#0f172a; border:1px solid {card_border}; border-radius:6px; padding:8px 10px; margin-bottom:8px;">
+                        <strong style="color:{card_title_color}; font-size:0.85rem;">{t_name} (S#{s_idx})</strong>
+                        <div style="font-size:0.72rem; color:#94a3b8;">{len(t_picks_made)}/16 drafted</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if t_picks_made:
+                        for tp in t_picks_made:
+                            st.markdown(f"<div style='font-size:0.76rem; margin-bottom:2px;'><span class='pos-badge pos-{tp['pos']}'>{tp['pos']}</span> <strong>{tp['name']}</strong> <span style='color:#64748b;'>#{tp['pick_number']}</span></div>", unsafe_allow_html=True)
+                    else:
+                        st.caption("No picks made yet.")
+
+    # -------------------------------------------------------------------------
+    # SUBTAB 2: 8-TEAM LIVE DRAFT MATRIX
+    # -------------------------------------------------------------------------
+    with subtab_matrix:
+        st.markdown("### 📋 8-Team Live Draft Matrix Grid")
+        st.caption("Complete round-by-round draft grid showing who was picked at every draft slot. Your team column is marked with ⭐.")
+
+        grid_rows = []
+        for rd in range(1, ROSTER_ROUNDS + 1):
+            row_data = {"Round": f"Rd {rd}"}
+            for team_idx in range(1, TOTAL_TEAMS + 1):
+                if rd % 2 == 1:
+                    p_num = (rd - 1) * TOTAL_TEAMS + team_idx
+                else:
+                    p_num = (rd - 1) * TOTAL_TEAMS + (TOTAL_TEAMS - team_idx + 1)
+                
+                is_user_col = (team_idx == st.session_state.user_slot)
+                team_col_label = f"{get_league_team_name(team_idx)} (S{team_idx}){' ⭐' if is_user_col else ''}"
+                picked = [h for h in st.session_state.draft_history if h["pick_number"] == p_num]
+                if picked:
+                    p = picked[0]
+                    row_data[team_col_label] = f"{p['name']} ({p['pos']})"
+                elif p_num == st.session_state.current_pick:
+                    row_data[team_col_label] = "⏳ ON CLOCK"
+                else:
+                    row_data[team_col_label] = f"#{p_num}"
+            grid_rows.append(row_data)
+
+        grid_df = pd.DataFrame(grid_rows)
+        st.dataframe(grid_df, use_container_width=True, hide_index=True)
+
+        st.info("💡 **Snake Order Guide**: Odd rounds run 1 to 8 • Even rounds reverse 8 to 1. In rounds 1-2 turnarounds, Slot 8 drafts back-to-back at #8 and #9, while Slot 1 drafts back-to-back at #16 and #17.")
+
+    # -------------------------------------------------------------------------
+    # SUBTAB 3: WHO'S PICKING EACH ROUND (16-ROUND SNAKE GUIDE)
+    # -------------------------------------------------------------------------
+    with subtab_schedule:
+        st.markdown("### 🔄 Who's Picking Each Round • 16-Round Snake Pick Order")
+        st.caption("Complete breakdown showing the exact pick order of all 8 fantasy teams for every single round of the draft.")
+
+        sched_rows = []
+        for rd in range(1, ROSTER_ROUNDS + 1):
+            is_odd = (rd % 2 == 1)
+            start_pick = (rd - 1) * TOTAL_TEAMS + 1
+            end_pick = rd * TOTAL_TEAMS
+            direction_str = "1 ➔ 8 (Normal)" if is_odd else "8 ➔ 1 (Reverse)"
+
+            # Pick sequence for this round
+            order_slots = list(range(1, TOTAL_TEAMS + 1)) if is_odd else list(range(TOTAL_TEAMS, 0, -1))
+            order_team_names = [get_league_team_name(s) for s in order_slots]
+
+            # Find when active user picks in this round
+            user_idx_in_round = order_slots.index(st.session_state.user_slot) + 1
+            user_ovr_pick = start_pick + user_idx_in_round - 1
+            user_pick_label = f"{rd}.{user_idx_in_round}"
+
+            if user_ovr_pick < st.session_state.current_pick:
+                user_status = "✓ Done"
+            elif user_ovr_pick == st.session_state.current_pick:
+                user_status = "🔥 ON CLOCK NOW"
+            else:
+                user_status = f"In {user_ovr_pick - st.session_state.current_pick} picks"
+
+            sched_rows.append({
+                "Round": f"Round {rd}",
+                "Direction": direction_str,
+                "Pick Range": f"#{start_pick} - #{end_pick}",
+                "1st Pick": order_team_names[0],
+                "2nd Pick": order_team_names[1],
+                "3rd Pick": order_team_names[2],
+                "4th Pick": order_team_names[3],
+                "5th Pick": order_team_names[4],
+                "6th Pick": order_team_names[5],
+                "7th Pick": order_team_names[6],
+                "8th Pick": order_team_names[7],
+                f"Your Turn ({get_league_team_name(st.session_state.user_slot)})": f"Pick #{user_ovr_pick} ({user_pick_label}) &bull; {user_status}"
+            })
+
+        sched_df = pd.DataFrame(sched_rows)
+        st.dataframe(sched_df, use_container_width=True, hide_index=True)
+
+    # -------------------------------------------------------------------------
+    # SUBTAB 4: CHRONOLOGICAL DRAFT FEED & LOG
+    # -------------------------------------------------------------------------
+    with subtab_log:
+        st.markdown("### 📜 Chronological Draft Feed & Pick Audit Log")
+        if st.session_state.draft_history:
+            log_c1, log_c2, log_c3 = st.columns([3, 1.5, 1.5])
+            with log_c1:
+                log_search = st.text_input("Search Draft Feed", placeholder="Search player, drafter team, or position...", key="log_search_feed")
+            with log_c2:
+                log_team_filter = st.selectbox(
+                    "Filter by Team",
+                    options=["All Teams"] + [get_league_team_name(s) for s in range(1, TOTAL_TEAMS + 1)],
+                    key="log_filter_team"
+                )
+            with log_c3:
+                log_pos_filter = st.multiselect("Position", options=["QB", "RB", "WR", "TE", "DST", "K"], default=[], key="log_filter_pos")
+
+            filtered_log = list(reversed(st.session_state.draft_history))
+            if log_search:
+                ls = log_search.lower().strip()
+                filtered_log = [
+                    h for h in filtered_log
+                    if ls in h["name"].lower() or ls in h["team"].lower() or ls in h["pos"].lower() or ls in h.get("drafted_by", "").lower()
+                ]
+            if log_team_filter != "All Teams":
+                filtered_log = [
+                    h for h in filtered_log
+                    if h.get("drafted_by") == log_team_filter or get_league_team_name(h.get("team_slot", 0)) == log_team_filter
+                ]
+            if log_pos_filter:
+                filtered_log = [h for h in filtered_log if h["pos"] in log_pos_filter]
+
+            if not filtered_log:
+                st.info("No picks match the selected filters.")
+            else:
+                for lp in filtered_log:
+                    l_pid = lp["player_id"]
+                    l_slot = lp.get("team_slot", 0)
+                    is_my_pick = (l_slot == st.session_state.user_slot)
+                    badge_bg = "#064e3b" if is_my_pick else "#1e293b"
+                    badge_col = "#34d399" if is_my_pick else "#94a3b8"
+
+                    lc1, lc2, lc3, lc4, lc5 = st.columns([1.2, 3.5, 2.5, 2, 1.5])
+                    with lc1:
+                        st.markdown(f"**Pick #{lp['pick_number']}**<br><span style='color:#94a3b8; font-size:0.75rem;'>Rd {lp.get('draft_round', 1)}</span>", unsafe_allow_html=True)
+                    with lc2:
+                        st.markdown(f"""
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="pos-badge pos-{lp['pos']}">{lp['pos']}</span>
+                            <strong>{lp['name']}</strong>
+                            <span style="color:#94a3b8; font-size:0.8rem;">({lp['team']})</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with lc3:
+                        st.markdown(f"<span style='background:{badge_bg}; color:{badge_col}; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px;'>{lp.get('drafted_by', get_league_team_name(l_slot))}</span>", unsafe_allow_html=True)
+                    with lc4:
+                        st.markdown(f"<span style='color:#94a3b8; font-size:0.8rem;'>Round Pick #{lp.get('round_pick', '?')}</span>", unsafe_allow_html=True)
+                    with lc5:
+                        if st.button("🔄 Undo Pick", key=f"undo_log_btn_{l_pid}_{lp['pick_number']}", use_container_width=True):
+                            restore_player(l_pid)
+                            st.rerun()
+        else:
+            st.info("No picks made yet. Draft is currently at Pick #1.")
 
 # --- Tab 12: 2026 Depth Chart Cheat Sheet ---
 with tab_depth:
