@@ -428,6 +428,65 @@ TOTAL_TEAMS = 8
 ROSTER_ROUNDS = 16  # 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DST, 1 K, 7 Bench = 16
 TOTAL_PICKS = TOTAL_TEAMS * ROSTER_ROUNDS
 
+# -----------------------------------------------------------------------------
+# 2026 LEAGUE TEAMS & SNAKE PICK SCHEDULE (8 TEAMS, 16 ROUNDS)
+# -----------------------------------------------------------------------------
+LEAGUE_TEAMS_2026 = {
+    1: {
+        "slot": 1,
+        "team_name": "Chiefs Kingdom",
+        "picks": ["1.1", "2.8", "3.1", "4.8", "5.1", "6.8", "7.1", "8.8", "9.1", "10.8", "11.1", "12.8", "13.1", "14.8", "15.1", "16.8"],
+        "overall_picks": [1, 16, 17, 32, 33, 48, 49, 64, 65, 80, 81, 96, 97, 112, 113, 128],
+    },
+    2: {
+        "slot": 2,
+        "team_name": "Blind Horse Named Dank",
+        "picks": ["1.2", "2.7", "3.2", "4.7", "5.2", "6.7", "7.2", "8.7", "9.2", "10.7", "11.2", "12.7", "13.2", "14.7", "15.2", "16.7"],
+        "overall_picks": [2, 15, 18, 31, 34, 47, 50, 63, 66, 79, 82, 95, 98, 111, 114, 127],
+    },
+    3: {
+        "slot": 3,
+        "team_name": "Mickey's Team",
+        "picks": ["1.3", "2.6", "3.3", "4.6", "5.3", "6.6", "7.3", "8.6", "9.3", "10.6", "11.3", "12.6", "13.3", "14.6", "15.3", "16.6"],
+        "overall_picks": [3, 14, 19, 30, 35, 46, 51, 62, 67, 78, 83, 94, 99, 110, 115, 126],
+    },
+    4: {
+        "slot": 4,
+        "team_name": "Ivey League",
+        "picks": ["1.4", "2.5", "3.4", "4.5", "5.4", "6.5", "7.4", "8.5", "9.4", "10.5", "11.4", "12.5", "13.4", "14.5", "15.4", "16.5"],
+        "overall_picks": [4, 13, 20, 29, 36, 45, 52, 61, 68, 77, 84, 93, 100, 109, 116, 125],
+    },
+    5: {
+        "slot": 5,
+        "team_name": "Ja'marr You Not Entertained?",
+        "picks": ["1.5", "2.4", "3.5", "4.4", "5.5", "6.4", "7.5", "8.4", "9.5", "10.4", "11.5", "12.4", "13.5", "14.4", "15.5", "16.4"],
+        "overall_picks": [5, 12, 21, 28, 37, 44, 53, 60, 69, 76, 85, 92, 101, 108, 117, 124],
+    },
+    6: {
+        "slot": 6,
+        "team_name": "Mara's Monstrous Team",
+        "picks": ["1.6", "2.3", "3.6", "4.3", "5.6", "6.3", "7.6", "8.3", "9.6", "10.3", "11.6", "12.3", "13.6", "14.3", "15.6", "16.3"],
+        "overall_picks": [6, 11, 22, 27, 38, 43, 54, 59, 70, 75, 86, 91, 102, 107, 118, 123],
+    },
+    7: {
+        "slot": 7,
+        "team_name": "Joe Brrrr-utality",
+        "picks": ["1.7", "2.2", "3.7", "4.2", "5.7", "6.2", "7.7", "8.2", "9.7", "10.2", "11.7", "12.2", "13.7", "14.2", "15.7", "16.2"],
+        "overall_picks": [7, 10, 23, 26, 39, 42, 55, 58, 71, 74, 87, 90, 103, 106, 119, 122],
+    },
+    8: {
+        "slot": 8,
+        "team_name": "Double Brown",
+        "picks": ["1.8", "2.1", "3.8", "4.1", "5.8", "6.1", "7.8", "8.1", "9.8", "10.1", "11.8", "12.1", "13.8", "14.1", "15.8", "16.1"],
+        "overall_picks": [8, 9, 24, 25, 40, 41, 56, 57, 72, 73, 88, 89, 104, 105, 120, 121],
+    },
+}
+
+def get_league_team_name(slot: int) -> str:
+    """Returns the official fantasy team name for an 8-team draft slot."""
+    return LEAGUE_TEAMS_2026.get(slot, {}).get("team_name", f"Team {slot}")
+
+
 if "draft_board" not in st.session_state:
     st.session_state.draft_board = load_or_generate_draft_board(force_refresh=False)
 
@@ -495,7 +554,7 @@ def execute_pick(player_id: str, drafted_by_user: bool = False, team_label: Opti
     
     if team_label is None:
         if drafted_by_user:
-            team_label = f"User (Team {st.session_state.user_slot})"
+            team_label = f"{get_league_team_name(st.session_state.user_slot)} (User)"
             is_user = True
         else:
             # Explicitly drafted by another team / crossed off
@@ -503,7 +562,7 @@ def execute_pick(player_id: str, drafted_by_user: bool = False, team_label: Opti
                 # If crossed off during user turn, assign to opponent
                 team_label = f"Opponent (Pick #{pick_num})"
             else:
-                team_label = f"Team {team_num}"
+                team_label = get_league_team_name(team_num)
             is_user = False
     else:
         is_user = ("User" in team_label)
@@ -790,6 +849,60 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# -----------------------------------------------------------------------------
+# 4B. TOP WAR ROOM TEAM SELECTOR & ATTACHED ROUND PICK SCHEDULE
+# -----------------------------------------------------------------------------
+top_team_col1, top_team_col2 = st.columns([3.8, 6.2])
+with top_team_col1:
+    top_user_slot = st.selectbox(
+        "🏆 Select Your Team in Draft",
+        options=list(range(1, TOTAL_TEAMS + 1)),
+        index=st.session_state.user_slot - 1,
+        format_func=lambda s: f"{get_league_team_name(s)} (Slot #{s}) {'🔥 ON CLOCK' if s == cur_team else ''}",
+        key="top_bar_team_picker",
+        help="Select your team name to configure your draft slot, pick countdowns, and roster."
+    )
+    if top_user_slot != st.session_state.user_slot:
+        st.session_state.user_slot = top_user_slot
+        st.rerun()
+
+with top_team_col2:
+    cur_team_info = LEAGUE_TEAMS_2026.get(st.session_state.user_slot, {})
+    all_team_picks = cur_team_info.get("picks", [])
+    all_team_ovr = cur_team_info.get("overall_picks", [])
+    remaining_picks = [
+        (p, ovr, rd)
+        for rd, (p, ovr) in enumerate(zip(all_team_picks, all_team_ovr), start=1)
+        if ovr >= st.session_state.current_pick
+    ]
+
+    if remaining_picks:
+        next_p_label, next_ovr, next_rd = remaining_picks[0]
+        p_diff = next_ovr - st.session_state.current_pick
+        diff_str = "NOW! 🔥" if p_diff == 0 else f"in {p_diff} picks (Pick #{next_ovr})"
+        chips_str = " &bull; ".join(
+            [f"<strong>Rd {rd} ({p})</strong>: #{ovr}" for p, ovr, rd in remaining_picks[:5]]
+        )
+        st.markdown(f"""
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid #38bdf8; border-radius: 8px; padding: 6px 12px; margin-top: 1px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; color:#38bdf8;">🏈 {cur_team_info.get('team_name')} (Slot #{st.session_state.user_slot})</span>
+                <span style="font-size:0.75rem; color:{'#f59e0b' if p_diff == 0 else '#e2e8f0'}; font-weight:700;">Next Turn: {diff_str}</span>
+            </div>
+            <div style="color: #94a3b8; font-size: 0.74rem; margin-top: 2px;">
+                Upcoming: {chips_str}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid #10b981; border-radius: 8px; padding: 6px 12px; margin-top: 1px;">
+            <span style="font-weight:700; color:#10b981;">✓ {cur_team_info.get('team_name')}</span> &bull; All 16 Draft Rounds Completed!
+        </div>
+        """, unsafe_allow_html=True)
+
+
+
 
 # -----------------------------------------------------------------------------
 # 5. BEST AVAILABLE QUICK RADAR
@@ -991,16 +1104,52 @@ with st.sidebar:
             st.session_state.sidebar_collapsed = True
             st.rerun()
     
-    # User Slot Picker
+    # User Team & Draft Slot Picker
     user_slot_input = st.selectbox(
-        "Your Draft Slot (8-Team)",
-        options=list(range(1, 9)),
+        "🏆 Select Your Team in Draft",
+        options=list(range(1, TOTAL_TEAMS + 1)),
         index=st.session_state.user_slot - 1,
-        format_func=lambda x: f"Slot #{x} {'(Current Turn 🔥)' if x == cur_team else ''}"
+        format_func=lambda s: f"{get_league_team_name(s)} (Slot #{s}) {'🔥 ON CLOCK' if s == cur_team else ''}",
+        key="sidebar_team_picker"
     )
     if user_slot_input != st.session_state.user_slot:
         st.session_state.user_slot = user_slot_input
         st.rerun()
+
+    # Attached 16-Round Pick Schedule Card
+    sel_team_info = LEAGUE_TEAMS_2026.get(st.session_state.user_slot, {})
+    with st.expander(f"📋 {sel_team_info.get('team_name', 'Your Team')} Pick Schedule (16 Rounds)", expanded=False):
+        picks_list = sel_team_info.get("picks", [])
+        overall_list = sel_team_info.get("overall_picks", [])
+
+        schedule_html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.76rem;">'
+        for rd_idx, (p_str, ovr) in enumerate(zip(picks_list, overall_list), start=1):
+            is_past = ovr < st.session_state.current_pick
+            is_cur = ovr == st.session_state.current_pick
+
+            if is_cur:
+                card_bg = "rgba(56, 189, 248, 0.25)"
+                border_c = "#38bdf8"
+                status_icon = "<span style='color:#f59e0b; font-weight:800;'>🔥 NOW</span>"
+            elif is_past:
+                card_bg = "rgba(15, 23, 42, 0.6)"
+                border_c = "#1e293b"
+                status_icon = "<span style='color:#10b981;'>✓ Done</span>"
+            else:
+                card_bg = "#0f172a"
+                border_c = "#334155"
+                status_icon = f"<span style='color:#64748b;'>#{ovr}</span>"
+
+            schedule_html += f'''
+            <div style="background:{card_bg}; border:1px solid {border_c}; border-radius:5px; padding:3px 6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:#f8fafc;">Rd {rd_idx}: {p_str}</span>
+                    <span style="font-size:0.7rem;">{status_icon}</span>
+                </div>
+            </div>
+            '''
+        schedule_html += '</div>'
+        st.markdown(schedule_html, unsafe_allow_html=True)
 
     # Draft Progress Summary Metrics
     m1, m2 = st.columns(2)
@@ -2016,7 +2165,7 @@ with tab_strategy:
         st.metric("Draft Status", f"Round {min(cur_rd, 16)}", delta=f"Pick #{min(cur_pick, TOTAL_PICKS)} / {TOTAL_PICKS}")
     with ad_col2:
         if is_my_turn:
-            st.metric("Turn Status", "YOUR PICK NOW! 🔥", delta=f"Slot #{st.session_state.user_slot}", delta_color="normal")
+            st.metric("Turn Status", "YOUR PICK NOW! 🔥", delta=f"{get_league_team_name(st.session_state.user_slot)} (Slot #{st.session_state.user_slot})", delta_color="normal")
         else:
             user_s = st.session_state.user_slot
             next_user_picks = [p for p in range(cur_pick, TOTAL_PICKS + 1) if get_snake_pick_info(p)[2] == user_s]
@@ -3501,14 +3650,15 @@ with tab_grid:
             else:
                 p_num = (rd - 1) * TOTAL_TEAMS + (TOTAL_TEAMS - team_idx + 1)
             
+            team_col_label = f"{get_league_team_name(team_idx)} (S{team_idx})"
             picked = [h for h in st.session_state.draft_history if h["pick_number"] == p_num]
             if picked:
                 p = picked[0]
-                row_data[f"Team {team_idx}"] = f"{p['name']} ({p['pos']})"
+                row_data[team_col_label] = f"{p['name']} ({p['pos']})"
             elif p_num == st.session_state.current_pick:
-                row_data[f"Team {team_idx}"] = "⏳ ON CLOCK"
+                row_data[team_col_label] = "⏳ ON CLOCK"
             else:
-                row_data[f"Team {team_idx}"] = f"#{p_num}"
+                row_data[team_col_label] = f"#{p_num}"
         grid_rows.append(row_data)
 
     grid_df = pd.DataFrame(grid_rows)

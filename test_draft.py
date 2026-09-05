@@ -757,7 +757,50 @@ def test_html_card_sanitization_guarantee():
         assert d.startswith("<div") or d.lstrip().startswith("<div")
 
 
+
+
+def test_league_teams_and_pick_schedule():
+    """
+    Guarantees the 8-team fantasy league configuration, team names,
+    round pick structures, and privacy requirements (no real names).
+    """
+    with open("app.py", "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Verify LEAGUE_TEAMS_2026 is present with all 8 official team names
+    assert "LEAGUE_TEAMS_2026" in content
+    expected_teams = {
+        1: "Chiefs Kingdom",
+        2: "Blind Horse Named Dank",
+        3: "Mickey's Team",
+        4: "Ivey League",
+        5: "Ja'marr You Not Entertained?",
+        6: "Mara's Monstrous Team",
+        7: "Joe Brrrr-utality",
+        8: "Double Brown",
+    }
+    for slot, name in expected_teams.items():
+        assert f'"team_name": "{name}"' in content or f"'team_name': '{name}'" in content, f"Team {name} missing for slot {slot}"
+
+    # 2. Verify Pick Structure definitions
+    assert "1.1" in content and "16.8" in content  # Slot 1 bounds
+    assert "1.8" in content and "16.1" in content  # Slot 8 bounds
+
+    # 3. Verify Team Selector Dropdowns exist in both top banner and sidebar
+    assert "top_bar_team_picker" in content, "Top bar team picker dropdown missing"
+    assert "sidebar_team_picker" in content, "Sidebar team picker dropdown missing"
+
+    # 4. Verify attached pick schedule display
+    assert "Pick Schedule (16 Rounds)" in content, "Attached pick schedule missing"
+
+    # 5. Verify Privacy Guarantee: User real names must NOT appear in team definitions
+    real_names = ["Jeff Owens", "Austin Ivey", "Mara Searcy", "Michelle Owens", "Matthew Owens"]
+    for rn in real_names:
+        assert rn not in content, f"Privacy violation: Real name '{rn}' found in app.py"
+
+
 if __name__ == "__main__":
+    test_league_teams_and_pick_schedule()
     test_player_normalization()
     test_consensus_calculation()
     test_snake_draft_math()
