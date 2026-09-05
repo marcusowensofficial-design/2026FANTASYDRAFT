@@ -547,13 +547,14 @@ def test_strategy_tab_and_playbook_guarantees():
         content = f.read()
 
     # 1. Verify tab registration and ordering
-    assert "tab_all, tab_drafted, tab_strategy, tab_rb" in content, "tab_strategy must be slot #3 in app.py"
+    assert "tab_all, tab_drafted, tab_strategy, tab_espn_cs, tab_rb" in content, "tab_strategy and tab_espn_cs must be in app.py"
     assert '"🧠 Draft Strategy & Playbook"' in content, "Tab title must be '🧠 Draft Strategy & Playbook'"
 
     expected_tabs = [
         "⚡ All Available",
         "❌ Drafted Players",
         "🧠 Draft Strategy & Playbook",
+        "📋 ESPN Expert Cheat Sheet",
         "🏃 Running Backs",
         "🎯 Wide Receivers",
         "🏈 Quarterbacks",
@@ -602,6 +603,122 @@ def test_strategy_tab_and_playbook_guarantees():
     assert "Tank Dell (HOU, Wk 8 - Reserve/IR)" in content
 
 
+def test_espn_cheatsheet_loaded():
+    """Verify ESPN Ultimate Cheat Sheet raw data integrity and player indexing."""
+    from espn_cheatsheet import (
+        RAW_ESPN_CHEAT_SHEET_DATA,
+        build_player_espn_index,
+        load_espn_cheatsheet
+    )
+
+    # 1. Verify metadata
+    meta = RAW_ESPN_CHEAT_SHEET_DATA.get("metadata", {})
+    assert meta.get("season") == 2026
+    assert meta.get("format") == "PPR"
+    assert len(meta.get("analysts", [])) >= 9
+
+    # 2. Verify all 16 required sections exist
+    required_sections = [
+        "karabell_do_not_draft",
+        "karabell_do_draft",
+        "clay_draft_board",
+        "schefter_picks_to_target",
+        "florio_league_winners",
+        "field_favorites",
+        "loza_late_round_fliers",
+        "moody_top_insurance_rbs",
+        "have_skills_need_opportunity",
+        "bowen_qb_tiers",
+        "bowen_top_targets",
+        "karabell_rb_tiers",
+        "karabell_wr_tiers",
+        "bowen_te_tiers",
+        "moody_top_draft_values",
+        "cockcroft_deep_sleepers"
+    ]
+    for sec in required_sections:
+        assert sec in RAW_ESPN_CHEAT_SHEET_DATA, f"Missing required cheat sheet section: {sec}"
+
+    # 3. Verify Clay's 16 rounds
+    clay_rounds = RAW_ESPN_CHEAT_SHEET_DATA["clay_draft_board"]["rounds"]
+    assert len(clay_rounds) == 16
+    assert clay_rounds[1]["round"] == 2
+    assert "Achane" in clay_rounds[1]["player"]
+
+    # 4. Verify player index builds with > 150 unique players
+    index = build_player_espn_index()
+    assert len(index) >= 150
+    assert "kenneth walker" in index
+    assert "justin jefferson" in index
+    assert "tyler shough" in index
+
+
+def test_espn_cheatsheet_enrichment():
+    """Verify draft board DataFrame enrichment with ESPN heat index, tiers, and badges."""
+    from espn_cheatsheet import enrich_board_with_espn_cheatsheet, clean_name_key
+    from scraper import load_or_generate_draft_board
+
+    df = load_or_generate_draft_board()
+
+    # Verify required ESPN columns exist
+    required_cols = [
+        "espn_heat_index",
+        "espn_expert_badges",
+        "espn_expert_tier",
+        "espn_adp_cheat_sheet",
+        "clay_round",
+        "clay_note",
+        "is_espn_target",
+        "is_espn_fade",
+        "espn_dossier_html"
+    ]
+    for col in required_cols:
+        assert col in df.columns, f"Missing enriched column: {col}"
+
+    # Verify heat index values
+    assert df["espn_heat_index"].max() >= 3, "Top players should have 3+ endorsements"
+
+    # Verify Karabell fade tag
+    fades = df[df["is_espn_fade"]]
+    assert len(fades) >= 15, "Should have identified at least 15 Karabell fades"
+
+    # Verify Clay blueprint tags
+    clay_tagged = df[df["clay_round"].notna()]
+    assert len(clay_tagged) >= 8, "Should have tagged Mike Clay's specific round targets"
+
+
+def test_espn_cheatsheet_ui_in_app():
+    """Verify ESPN Cheat Sheet War Room UI components and integration in app.py."""
+    with open("app.py", "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Verify imports and session state
+    assert "from espn_cheatsheet import" in content
+    assert "RAW_ESPN_CHEAT_SHEET_DATA" in content
+    assert "clean_name_key" in content
+    assert "tab_espn_cs" in content
+    assert '"📋 ESPN Expert Cheat Sheet"' in content
+
+    # 2. Verify all 4 War Room subviews
+    assert "Mike Clay's 16-Round Blueprint" in content
+    assert "ESPN Consensus Heat Radar" in content
+    assert "Positional Tiers Matrix (Bowen & Karabell)" in content
+    assert "Analyst Rolodex & Specialized Target Lists" in content
+
+    # 3. Verify Karabell Fade alert
+    assert "KARABELL FADE" in content
+    assert "KARABELL FADE ALERT" in content
+
+    # 4. Verify Clay Blueprint in strategy tab
+    assert "CLAY BLUEPRINT" in content
+    assert "ROUND" in content
+    assert "strat_clay_draft_" in content
+
+    # 5. Verify ESPN Badges column and filters
+    assert "ESPN Badges" in content
+    assert "ESPN Heat Index (Experts)" in content
+
+
 if __name__ == "__main__":
     test_player_normalization()
     test_consensus_calculation()
@@ -622,6 +739,10 @@ if __name__ == "__main__":
     test_expert_ranking_sort_guarantees()
     test_fantasypros_and_rotowire_direct_links()
     test_strategy_tab_and_playbook_guarantees()
+    test_espn_cheatsheet_loaded()
+    test_espn_cheatsheet_enrichment()
+    test_espn_cheatsheet_ui_in_app()
     print("[ALL TESTS PASSED SUCCESSFULLY!]")
+
 
 

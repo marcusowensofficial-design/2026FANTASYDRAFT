@@ -43,6 +43,13 @@ from sleeper_sync import (
     enrich_board_with_sleepers,
     format_user_friendly_utc
 )
+from espn_cheatsheet import (
+    load_espn_cheatsheet,
+    build_player_espn_index,
+    enrich_board_with_espn_cheatsheet,
+    clean_name_key,
+    RAW_ESPN_CHEAT_SHEET_DATA
+)
 
 # -----------------------------------------------------------------------------
 # 1. STREAMLIT PAGE CONFIGURATION & CUSTOM DARK THEME CSS
@@ -398,6 +405,9 @@ if "draft_board" not in st.session_state:
 
 if "is_rookie" not in st.session_state.draft_board.columns:
     st.session_state.draft_board = enrich_board_with_sleepers(st.session_state.draft_board)
+
+if "espn_heat_index" not in st.session_state.draft_board.columns:
+    st.session_state.draft_board = enrich_board_with_espn_cheatsheet(st.session_state.draft_board)
 
 if "draft_history" not in st.session_state:
     st.session_state.draft_history = []  # Stack of picks for undo
@@ -1115,10 +1125,11 @@ with st.sidebar:
 # -----------------------------------------------------------------------------
 # 8. MAIN VIEW TABS & MULTI-EXPERT DRAFT BOARD
 # -----------------------------------------------------------------------------
-tab_all, tab_drafted, tab_strategy, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_reaches, tab_injuries, tab_grid, tab_depth = st.tabs([
+tab_all, tab_drafted, tab_strategy, tab_espn_cs, tab_rb, tab_wr, tab_qb, tab_te, tab_flex, tab_dstk, tab_steals, tab_reaches, tab_injuries, tab_grid, tab_depth = st.tabs([
     "⚡ All Available",
     "❌ Drafted Players",
     "🧠 Draft Strategy & Playbook",
+    "📋 ESPN Expert Cheat Sheet",
     "🏃 Running Backs",
     "🎯 Wide Receivers",
     "🏈 Quarterbacks",
@@ -1168,7 +1179,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     hide_unranked_key = f"hide_unranked_{key_prefix}_{sort_ver}"
 
     # In-table search, sorting & filtering bar
-    f_c1, f_c2, f_c3, f_c4 = st.columns([2.0, 1.0, 1.5, 1.5])
+    f_c1, f_c2, f_c3, f_c4, f_c5 = st.columns([1.8, 0.9, 1.4, 1.3, 1.1])
     with f_c1:
         curr_q = st.session_state.get(search_key, "")
         if curr_q:
@@ -1199,9 +1210,32 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             placeholder="All Tiers"
         )
     with f_c3:
+        espn_filter = st.selectbox(
+            "ESPN Cheat Sheet Filter",
+            options=[
+                "All Players",
+                "⭐ ESPN Heat (2+ Experts)",
+                "🎯 Karabell Do Draft",
+                "🛑 Karabell Fade (Overvalued)",
+                "📋 Clay Blueprint Target",
+                "⭐ Schefter Target",
+                "🏆 Florio League Winner",
+                "💎 Field Favorite",
+                "🏹 Bowen Top Target",
+                "🚀 Loza Flier",
+                "🛡️ Moody Handcuff RB",
+                "🔥 Moody Value",
+                "💤 Cockcroft Deep Sleeper"
+            ],
+            index=0,
+            key=f"espn_filter_{key_prefix}_{sort_ver}",
+            help="Filter players by official ESPN Ultimate Cheat Sheet expert endorsements and fade tags."
+        )
+    with f_c4:
         sort_options = [
             "Consensus (Default)",
             "ESPN (Top 300)",
+            "ESPN Heat Index (Experts)",
             "Draft Sharks (#1)",
             "Footballguys (#2)",
             "FantasyPros (#3)",
@@ -1220,7 +1254,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             key=sort_by_key,
             help="Choose an expert ranking source to sort by. Guarantees ranks start cleanly at 1 or 300, never at None."
         )
-    with f_c4:
+    with f_c5:
         sort_dir_options = [
             "Lowest to High (1 → 300)",
             "High to Lowest (300 → 1)"
@@ -1311,10 +1345,37 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     if tier_filter:
         df_display = df_display[df_display["tier"].isin(tier_filter)].reset_index(drop=True)
 
+    # Apply ESPN Cheat Sheet Expert Filter
+    if espn_filter == "⭐ ESPN Heat (2+ Experts)" and "espn_heat_index" in df_display.columns:
+        df_display = df_display[df_display["espn_heat_index"] >= 2].reset_index(drop=True)
+    elif espn_filter == "🎯 Karabell Do Draft" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Karabell Target", na=False)].reset_index(drop=True)
+    elif espn_filter == "🛑 Karabell Fade (Overvalued)" and "is_espn_fade" in df_display.columns:
+        df_display = df_display[df_display["is_espn_fade"]].reset_index(drop=True)
+    elif espn_filter == "📋 Clay Blueprint Target" and "clay_round" in df_display.columns:
+        df_display = df_display[df_display["clay_round"].notna()].reset_index(drop=True)
+    elif espn_filter == "⭐ Schefter Target" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Schefter", na=False)].reset_index(drop=True)
+    elif espn_filter == "🏆 Florio League Winner" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Florio", na=False)].reset_index(drop=True)
+    elif espn_filter == "💎 Field Favorite" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Field", na=False)].reset_index(drop=True)
+    elif espn_filter == "🏹 Bowen Top Target" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Bowen", na=False)].reset_index(drop=True)
+    elif espn_filter == "🚀 Loza Flier" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Loza", na=False)].reset_index(drop=True)
+    elif espn_filter == "🛡️ Moody Handcuff RB" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Moody Handcuff", na=False)].reset_index(drop=True)
+    elif espn_filter == "🔥 Moody Value" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Moody Value", na=False)].reset_index(drop=True)
+    elif espn_filter == "💤 Cockcroft Deep Sleeper" and "espn_expert_badges" in df_display.columns:
+        df_display = df_display[df_display["espn_expert_badges"].str.contains("Cockcroft", na=False)].reset_index(drop=True)
+
     # Dictionary mapping user-friendly names to dataframe columns
     SORT_COL_MAP = {
         "Consensus (Default)": "consensus_rank",
         "ESPN (Top 300)": "espn_rank",
+        "ESPN Heat Index (Experts)": "espn_heat_index",
         "Draft Sharks (#1)": "draftsharks_rank",
         "Footballguys (#2)": "footballguys_rank",
         "FantasyPros (#3)": "fantasypros_rank",
@@ -1340,6 +1401,12 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
     # 3. In BOTH directions, unranked players (NaN / None) are placed at the BOTTOM, NEVER at the top!
     if sort_col in df_display.columns:
         if sort_by == "Value Steals (ESPN Diff)":
+            df_display = df_display.sort_values(
+                by=[sort_col, "consensus_rank"],
+                ascending=[not is_ascending if sort_direction == "Lowest to High (1 → 300)" else is_ascending, True],
+                na_position="last"
+            ).reset_index(drop=True)
+        elif sort_by == "ESPN Heat Index (Experts)":
             df_display = df_display.sort_values(
                 by=[sort_col, "consensus_rank"],
                 ascending=[not is_ascending if sort_direction == "Lowest to High (1 → 300)" else is_ascending, True],
@@ -1467,6 +1534,9 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
             if col in df_display.columns:
                 display_cols.append(col)
 
+    if "espn_expert_badges" in df_display.columns:
+        display_cols.append("espn_expert_badges")
+
     col_rename = {
         "avail_rank": "Rank #",
         "player_display_name": "Player Name",
@@ -1480,6 +1550,7 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
         "consensus_rank": "Consensus",
         "value_diff": "Value Diff",
         "espn_rank": "ESPN",
+        "espn_expert_badges": "ESPN Badges",
         "draftsharks_rank": "Draft Sharks (#1)",
         "footballguys_rank": "Footballguys (#2)",
         "fantasypros_rank": "FantasyPros (#3)",
@@ -1557,6 +1628,10 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                 help="Positive = ESPN undervalues player (STEAL). Negative = ESPN overvalues player (REACH)."
             ),
             "ESPN": st.column_config.NumberColumn(width="small", format="%d", help="Official ESPN 2026 API Draft Rank"),
+            "ESPN Badges": st.column_config.TextColumn(
+                width="medium",
+                help="Official ESPN Ultimate Cheat Sheet Expert Endorsements (Karabell, Schefter, Florio, Clay, Bowen, Moody, Loza, Cockcroft, Yates)"
+            ),
             "Draft Sharks (#1)": st.column_config.NumberColumn(width="small", format="%d", help="Draft Sharks (#1 Accuracy Champion). Published Top 250 (cells display None for players outside Top 250)."),
             "Footballguys (#2)": st.column_config.NumberColumn(width="small", format="%d", help="Footballguys (#2 Accuracy Champion). Published Top 200 (cells display None for players outside Top 200)."),
             "FantasyPros (#3)": st.column_config.NumberColumn(width="small", format="%d", help="FantasyPros 50+ Expert Consensus Rank (ECR)."),
@@ -1732,6 +1807,18 @@ def render_draft_table(df_subset: pd.DataFrame, key_prefix: str = "main", show_g
                         </div>
                         {get_player_injury_links_html(p_name, report_ts, sel_player.get('source_url'))}
                         """, unsafe_allow_html=True)
+                    
+                    # High-visibility Karabell Fade Warning
+                    if sel_player.get("is_espn_fade", False):
+                        st.markdown(f"""
+                        <div style="background:#451a03; border:1.5px solid #f59e0b; border-radius:6px; padding:9px 14px; margin-top:8px; font-size:0.86rem; color:#fef3c7; box-shadow:0 2px 8px rgba(245,158,11,0.25);">
+                            <strong style="color:#fbbf24; text-transform:uppercase; letter-spacing:0.5px;">🛑 KARABELL FADE ALERT:</strong> Erik Karabell rates <strong>{p_name}</strong> as <em>NOT worth current ADP ({sel_player.get('espn_adp_cheat_sheet', 'N/A')})</em>. {sel_player.get('karabell_fade_note', 'Target ONLY if they slide significantly past ADP.')}
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                    # Official ESPN Expert Dossier (All endorsements, notes, and tiers)
+                    if sel_player.get("espn_dossier_html"):
+                        st.markdown(sel_player["espn_dossier_html"], unsafe_allow_html=True)
                     
                     b_c1, b_c2, b_c3, b_c4 = st.columns([1.5, 1.5, 1.4, 0.7])
                     with b_c1:
@@ -2033,6 +2120,88 @@ with tab_strategy:
         """, unsafe_allow_html=True)
 
     # 3. LIVE RECOMMENDED TARGETS WITH 1-CLICK DRAFT
+    # Check Mike Clay's 16-Round Blueprint target for the user's current round
+    if 1 <= cur_rd <= 16:
+        clay_rounds = RAW_ESPN_CHEAT_SHEET_DATA.get("clay_draft_board", {}).get("rounds", [])
+        if cur_rd - 1 < len(clay_rounds):
+            clay_cur = clay_rounds[cur_rd - 1]
+            c_target_player = clay_cur.get("player", "")
+            c_target_alt = clay_cur.get("alt_player", "")
+            c_pos = clay_cur.get("pos", "")
+            c_note = clay_cur.get("note", "")
+
+            # Look up primary target in draft board
+            c_match = None
+            for _, p_row in df_board.iterrows():
+                if clean_name_key(p_row.get("name", "")) == clean_name_key(c_target_player):
+                    c_match = p_row
+                    break
+
+            if c_match is not None:
+                c_drafted = c_match["is_drafted"]
+                c_user = c_match.get("drafted_by_user", False)
+                c_pid = c_match["player_id"]
+                c_pname = c_match["name"]
+                c_crank = int(c_match["consensus_rank"]) if pd.notna(c_match.get("consensus_rank")) else "N/A"
+                c_espn = int(c_match["espn_rank"]) if pd.notna(c_match.get("espn_rank")) and c_match.get("espn_rank") < 900 else "N/A"
+
+                if not c_drafted:
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1.5px solid #6366f1; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(99,102,241,0.25);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="background:#4f46e5; color:#ffffff; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem; letter-spacing:0.5px;">📋 CLAY BLUEPRINT &bull; ROUND {cur_rd} TARGET</span>
+                                <strong style="color:#e0e7ff; font-size:1.05rem;">{c_pname}</strong>
+                                <span class="pos-badge pos-{c_match['pos']}">{c_match['pos']}</span>
+                                <span style="color:#94a3b8; font-size:0.82rem;">({c_match['team']} &bull; Wk {c_match['bye']})</span>
+                            </div>
+                            <span style="background:#064e3b; color:#34d399; font-weight:800; padding:3px 10px; border-radius:4px; font-size:0.78rem; border:1px solid #059669;">🟢 AVAILABLE ON BOARD</span>
+                        </div>
+                        <div style="margin-top:6px; color:#cbd5e1; font-size:0.84rem;">
+                            <strong>Consensus #{c_crank}</strong> &bull; <strong>ESPN #{c_espn}</strong> &bull; <span style="color:#a5b4fc;">Strategy:</span> <em>{c_note}</em>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    clay_c1, clay_c2, _ = st.columns([1.6, 1.4, 4.0])
+                    with clay_c1:
+                        if st.button(f"🟩 Draft {c_pname} (My Team)", key=f"strat_clay_draft_{c_pid}", use_container_width=True, type="primary"):
+                            execute_pick(c_pid, drafted_by_user=True)
+                            st.rerun()
+                    with clay_c2:
+                        if st.button(f"⬛ Cross Off", key=f"strat_clay_cross_{c_pid}", use_container_width=True):
+                            execute_pick(c_pid, drafted_by_user=False)
+                            st.rerun()
+                else:
+                    tag_txt = "ON YOUR ROSTER" if c_user else "TAKEN BY OPPONENT"
+                    tag_bg = "#1e3a8a" if c_user else "#374151"
+                    st.markdown(f"""
+                    <div style="background:#0b0f19; border: 1px dashed #475569; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span style="color:#818cf8; font-weight:700; font-size:0.78rem;">📋 CLAY BLUEPRINT &bull; ROUND {cur_rd} TARGET:</span>
+                                <span style="text-decoration:line-through; color:#94a3b8; font-size:0.95rem; margin-left:6px;">{c_pname} ({c_match['pos']} - {c_match['team']})</span>
+                            </div>
+                            <span style="background:{tag_bg}; color:#cbd5e1; font-weight:700; padding:2px 8px; border-radius:4px; font-size:0.75rem;">{tag_txt}</span>
+                        </div>
+                        <div style="margin-top:4px; color:#94a3b8; font-size:0.8rem;">
+                            <em>Clay's Plan: {c_note}</em> &bull; Target is taken; pivot to top available recommendations below!
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="background: #0f172a; border: 1px solid #312e81; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="background:#4338ca; color:#fff; font-weight:700; padding:2px 8px; border-radius:4px; font-size:0.75rem;">📋 CLAY BLUEPRINT &bull; ROUND {cur_rd} FOCUS</span>
+                        <strong style="color:#e0e7ff; font-size:0.95rem;">{clay_cur.get('target', 'Best Available')}</strong>
+                        <span style="color:#94a3b8; font-size:0.82rem;">({c_pos})</span>
+                    </div>
+                    <div style="margin-top:4px; color:#94a3b8; font-size:0.82rem;">
+                        <em>Clay's Directive:</em> {c_note}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
     st.markdown("#### ⚡ Recommended Live Targets on Active Board")
     st.caption("Top available players matching current tactical directive. Execute picks with 1-click without switching tabs.")
 
@@ -2237,6 +2406,643 @@ with tab_strategy:
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+
+# -----------------------------------------------------------------------------
+# --- Tab: ESPN Expert Cheat Sheet War Room ---
+# -----------------------------------------------------------------------------
+with tab_espn_cs:
+    st.markdown("### 📋 ESPN Ultimate 2026 Fantasy Cheat Sheet War Room")
+    st.caption(
+        "Official 2026 preseason draft intelligence and consensus directly extracted from ESPN's senior fantasy editorial team: "
+        "**Erik Karabell, Matt Bowen, Mike Clay, Adam Schefter, Field Yates, Matt Florio, Eric Moody, Liz Loza, and Tristan H. Cockcroft**."
+    )
+
+    # 1. Top KPI Summary Cards
+    kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
+    
+    total_indexed = len(build_player_espn_index())
+    heat_2plus = len(df_board[df_board["espn_heat_index"] >= 2])
+    
+    # Calculate Clay blueprint available
+    clay_named_targets = [
+        r.get("player") for r in RAW_ESPN_CHEAT_SHEET_DATA.get("clay_draft_board", {}).get("rounds", [])
+        if r.get("player") and "Best" not in r.get("player", "") and "Breakout" not in r.get("player", "") and "Kicker" not in r.get("player", "")
+    ]
+    clay_avail_count = 0
+    for ct in clay_named_targets:
+        match_p = df_board[df_board["name"].apply(clean_name_key) == clean_name_key(ct)]
+        if not match_p.empty and not match_p.iloc[0]["is_drafted"]:
+            clay_avail_count += 1
+
+    # Calculate Karabell targets available
+    karabell_targets = [p.get("name") for p in RAW_ESPN_CHEAT_SHEET_DATA.get("karabell_do_draft", {}).get("players", [])]
+    karabell_avail_count = 0
+    for kt in karabell_targets:
+        match_p = df_board[df_board["name"].apply(clean_name_key) == clean_name_key(kt)]
+        if not match_p.empty and not match_p.iloc[0]["is_drafted"]:
+            karabell_avail_count += 1
+
+    karabell_fades_count = len(df_board[df_board["is_espn_fade"]])
+
+    with kpi_col1:
+        st.markdown(f"""
+        <div class="strategy-card strategy-card-accent-blue" style="padding:10px 14px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Cheat Sheet Pool</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#38bdf8;">{total_indexed}</div>
+            <div style="font-size:0.75rem; color:#cbd5e1;">Players Indexed from PDF</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with kpi_col2:
+        st.markdown(f"""
+        <div class="strategy-card strategy-card-accent-purple" style="padding:10px 14px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Heat Consensus (2+)</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#c084fc;">{heat_2plus}</div>
+            <div style="font-size:0.75rem; color:#cbd5e1;">Endorsed by 2+ Analysts</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with kpi_col3:
+        st.markdown(f"""
+        <div class="strategy-card strategy-card-accent-green" style="padding:10px 14px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Clay Blueprint Avail</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#34d399;">{clay_avail_count} / {len(clay_named_targets)}</div>
+            <div style="font-size:0.75rem; color:#cbd5e1;">Available on Active Board</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with kpi_col4:
+        st.markdown(f"""
+        <div class="strategy-card strategy-card-accent-gold" style="padding:10px 14px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Karabell Targets</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#fbbf24;">{karabell_avail_count} / {len(karabell_targets)}</div>
+            <div style="font-size:0.75rem; color:#cbd5e1;">Do Draft Targets Avail</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with kpi_col5:
+        st.markdown(f"""
+        <div class="strategy-card strategy-card-accent-red" style="padding:10px 14px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Karabell Fades</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#f87171;">{karabell_fades_count}</div>
+            <div style="font-size:0.75rem; color:#cbd5e1;">Flagged Overvalued Traps</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin-top:14px;'></div>", unsafe_allow_html=True)
+
+    # 2. Subview Selection
+    cs_subview = st.radio(
+        "Select ESPN Intelligence Module:",
+        [
+            "📋 Mike Clay's 16-Round Blueprint",
+            "🔥 ESPN Consensus Heat Radar",
+            "📊 Positional Tiers Matrix (Bowen & Karabell)",
+            "👥 Analyst Rolodex & Specialized Target Lists"
+        ],
+        horizontal=True,
+        key="espn_cs_subview_radio"
+    )
+
+    st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 10px 0 16px 0;'></div>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # MODULE 1: MIKE CLAY'S 16-ROUND BLUEPRINT
+    # =========================================================================
+    if cs_subview == "📋 Mike Clay's 16-Round Blueprint":
+        st.markdown("#### 📋 Mike Clay's Round-by-Round 16-Round Draft Blueprint")
+        st.caption(
+            "Mike Clay's recommended blueprint for navigating all 16 rounds of a PPR draft. "
+            "Picks synchronize with your active draft board in real time."
+        )
+
+        clay_data = RAW_ESPN_CHEAT_SHEET_DATA.get("clay_draft_board", {})
+        c_rounds = clay_data.get("rounds", [])
+
+        # Round status summary
+        total_rounds = len(c_rounds)
+        rounds_user_drafted = 0
+        rounds_taken = 0
+        rounds_avail = 0
+
+        for r_item in c_rounds:
+            p_name = r_item.get("player", "")
+            if "Best" not in p_name and "Breakout" not in p_name and "Kicker" not in p_name:
+                m = df_board[df_board["name"].apply(clean_name_key) == clean_name_key(p_name)]
+                if not m.empty:
+                    row_m = m.iloc[0]
+                    if row_m["is_drafted"]:
+                        if row_m.get("drafted_by_user", False):
+                            rounds_user_drafted += 1
+                        else:
+                            rounds_taken += 1
+                    else:
+                        rounds_avail += 1
+
+        b_sc1, b_sc2, b_sc3 = st.columns(3)
+        with b_sc1:
+            st.metric("Blueprint Targets Available", f"{rounds_avail} / {len(clay_named_targets)}")
+        with b_sc2:
+            st.metric("Secured on Your Roster", f"{rounds_user_drafted}")
+        with b_sc3:
+            st.metric("Taken by Opponents", f"{rounds_taken}")
+
+        st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
+
+        for r_item in c_rounds:
+            r_num = r_item["round"]
+            r_target = r_item["target"]
+            r_player = r_item.get("player", "")
+            r_alt = r_item.get("alt_player", "")
+            r_pos = r_item.get("pos", "")
+            r_team = r_item.get("team", "")
+            r_note = r_item.get("note", "")
+
+            # Highlight current round
+            is_current_round = (r_num == cur_rd)
+            card_border = "2px solid #6366f1" if is_current_round else "1px solid #1e293b"
+            card_bg = "linear-gradient(90deg, #1e1b4b 0%, #0b0f19 100%)" if is_current_round else "#0b0f19"
+            round_badge_color = "#4f46e5" if is_current_round else "#1e293b"
+            cur_tag = "<span style='background:#4f46e5; color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-left:8px;'>👈 ACTIVE ROUND</span>" if is_current_round else ""
+
+            # Check if this round targets a specific named player
+            p_match = None
+            if r_player and "Best" not in r_player and "Breakout" not in r_player and "Kicker" not in r_player:
+                found = df_board[df_board["name"].apply(clean_name_key) == clean_name_key(r_player)]
+                if not found.empty:
+                    p_match = found.iloc[0]
+
+            col_r1, col_r2, col_r3, col_r4 = st.columns([1.2, 4.5, 2.5, 2.5])
+
+            with col_r1:
+                st.markdown(f"""
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:{round_badge_color}; border-radius:8px; padding:10px; height:100%;">
+                    <div style="font-size:0.72rem; color:#94a3b8; font-weight:700;">ROUND</div>
+                    <div style="font-size:1.6rem; font-weight:900; color:#ffffff;">{r_num}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with col_r2:
+                pos_pill = f"<span class='pos-badge pos-{r_pos}'>{r_pos}</span>" if r_pos in ["QB", "RB", "WR", "TE", "DST", "K"] else f"<span style='background:#334155; color:#cbd5e1; font-weight:700; padding:2px 6px; border-radius:4px; font-size:0.75rem;'>{r_pos}</span>"
+                st.markdown(f"""
+                <div style="display:flex; align-items:center; gap:8px;">
+                    {pos_pill}
+                    <strong style="font-size:1.05rem; color:#f8fafc;">{r_target}</strong>
+                    {cur_tag}
+                </div>
+                <div style="margin-top:4px; font-size:0.84rem; color:#cbd5e1; line-height:1.4;">
+                    <strong style="color:#a5b4fc;">Clay's Blueprint:</strong> {r_note}
+                </div>
+                """, unsafe_allow_html=True)
+
+            if p_match is not None:
+                p_id = p_match["player_id"]
+                p_drafted = p_match["is_drafted"]
+                p_user = p_match.get("drafted_by_user", False)
+                p_crank = int(p_match["consensus_rank"]) if pd.notna(p_match.get("consensus_rank")) else "N/A"
+                p_espn = int(p_match["espn_rank"]) if pd.notna(p_match.get("espn_rank")) and p_match.get("espn_rank") < 900 else "N/A"
+                p_val = int(p_match.get("value_diff", 0)) if pd.notna(p_match.get("value_diff")) else 0
+
+                val_pill = f"<span style='color:#34d399; font-weight:700;'>+{p_val}</span>" if p_val > 0 else (f"<span style='color:#f87171; font-weight:700;'>{p_val}</span>" if p_val < 0 else "0")
+
+                with col_r3:
+                    if not p_drafted:
+                        st.markdown(f"""
+                        <div style="font-size:0.82rem; color:#cbd5e1;">
+                            <div>Status: <span style="background:#064e3b; color:#34d399; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem;">🟢 AVAILABLE</span></div>
+                            <div style="margin-top:4px;">Consensus: <strong>#{p_crank}</strong> &bull; ESPN: <strong>#{p_espn}</strong> (Diff: {val_pill})</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif p_user:
+                        st.markdown(f"""
+                        <div style="font-size:0.82rem; color:#cbd5e1;">
+                            <span style="background:#1e3a8a; color:#93c5fd; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem;">🏆 ON YOUR ROSTER</span>
+                            <div style="margin-top:4px; color:#94a3b8;">Consensus #{p_crank}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div style="font-size:0.82rem; color:#94a3b8;">
+                            <span style="background:#374151; color:#d1d5db; font-weight:700; padding:2px 8px; border-radius:4px; font-size:0.75rem;">❌ TAKEN BY OPPONENT</span>
+                            <div style="margin-top:4px;">Consensus #{p_crank}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                with col_r4:
+                    if not p_drafted:
+                        btn_c1, btn_c2 = st.columns([1.2, 1.0])
+                        with btn_c1:
+                            if st.button("🟩 Draft", key=f"clay_board_draft_{p_id}_{r_num}", use_container_width=True, type="primary"):
+                                execute_pick(p_id, drafted_by_user=True)
+                                st.rerun()
+                        with btn_c2:
+                            if st.button("⬛ Cross", key=f"clay_board_cross_{p_id}_{r_num}", use_container_width=True):
+                                execute_pick(p_id, drafted_by_user=False)
+                                st.rerun()
+                    else:
+                        if st.button("🔄 Restore", key=f"clay_board_restore_{p_id}_{r_num}", use_container_width=True):
+                            restore_player(p_id)
+                            st.rerun()
+            else:
+                with col_r3:
+                    st.markdown("""
+                    <div style="font-size:0.82rem; color:#94a3b8;">
+                        <span style="background:#1e293b; color:#94a3b8; font-weight:700; padding:2px 8px; border-radius:4px; font-size:0.75rem;">🎯 SITUATIONAL DIRECTIVE</span>
+                        <div style="margin-top:4px;">Draft best value matching directive</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col_r4:
+                    st.caption("See Live Recommendations")
+
+            st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 8px 0 12px 0;'></div>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # MODULE 2: ESPN CONSENSUS HEAT RADAR
+    # =========================================================================
+    elif cs_subview == "🔥 ESPN Consensus Heat Radar":
+        st.markdown("#### 🔥 ESPN Consensus Heat Radar (Ranked by Endorsement Count)")
+        st.caption(
+            "Identifies players who received multiple independent endorsements across the 9 ESPN analysts. "
+            "High heat signifies unanimous draft-day conviction."
+        )
+
+        hr_f1, hr_f2, hr_f3, hr_f4 = st.columns([2.2, 1.5, 1.8, 2.5])
+        with hr_f1:
+            heat_min = st.selectbox(
+                "Minimum Heat Level",
+                options=[
+                    "All Endorsed (1+ Analysts)",
+                    "🔥 2+ Analysts (Consensus Smash)",
+                    "🔥🔥 3+ Analysts (Super-Consensus)",
+                    "🔥🔥🔥 4+ Analysts (Elite Target)"
+                ],
+                index=1,
+                key="hr_heat_min"
+            )
+        with hr_f2:
+            hr_pos = st.selectbox(
+                "Position",
+                options=["All Positions", "QB", "RB", "WR", "TE", "DST", "K"],
+                index=0,
+                key="hr_pos_filter"
+            )
+        with hr_f3:
+            hr_avail_only = st.checkbox("Available on Board Only", value=True, key="hr_avail_only")
+        with hr_f4:
+            hr_search = st.text_input("Search Player or Team", placeholder="Type name or team...", key="hr_search")
+
+        # Parse minimum heat
+        min_h = 1
+        if "2+" in heat_min:
+            min_h = 2
+        elif "3+" in heat_min:
+            min_h = 3
+        elif "4+" in heat_min:
+            min_h = 4
+
+        df_heat = df_board[df_board["espn_heat_index"] >= min_h].copy()
+
+        if hr_pos != "All Positions":
+            df_heat = df_heat[df_heat["pos"] == hr_pos]
+
+        if hr_avail_only:
+            df_heat = df_heat[~df_heat["is_drafted"]]
+
+        if hr_search:
+            s_q = hr_search.lower().strip()
+            df_heat = df_heat[
+                df_heat["name"].str.lower().str.contains(s_q, na=False) |
+                df_heat["team"].str.lower().str.contains(s_q, na=False)
+            ]
+
+        df_heat = df_heat.sort_values(by=["espn_heat_index", "consensus_rank"], ascending=[False, True]).reset_index(drop=True)
+
+        st.markdown(f"**Found {len(df_heat)} players matching Heat Index &ge; {min_h}**")
+
+        if df_heat.empty:
+            st.info("No players match the selected heat and position filters.")
+        else:
+            for _, h_row in df_heat.iterrows():
+                h_id = h_row["player_id"]
+                h_name = h_row["name"]
+                h_pos = h_row["pos"]
+                h_team = h_row["team"]
+                h_bye = h_row["bye"]
+                h_heat = int(h_row["espn_heat_index"])
+                h_badges = h_row.get("espn_expert_badges", "")
+                h_crank = int(h_row["consensus_rank"]) if pd.notna(h_row.get("consensus_rank")) else "N/A"
+                h_espn = int(h_row["espn_rank"]) if pd.notna(h_row.get("espn_rank")) and h_row.get("espn_rank") < 900 else "N/A"
+                h_drafted = h_row["is_drafted"]
+                h_user = h_row.get("drafted_by_user", False)
+                h_dossier = h_row.get("espn_dossier_html", "")
+
+                heat_stars = "🔥" * min(h_heat, 5)
+                heat_pill_color = "#f59e0b" if h_heat >= 3 else "#38bdf8"
+
+                hc1, hc2, hc3, hc4 = st.columns([1.2, 4.0, 2.5, 2.3])
+                with hc1:
+                    st.markdown(f"""
+                    <div style="background:#111827; border:1px solid {heat_pill_color}; border-radius:6px; padding:6px; text-align:center;">
+                        <div style="font-size:1.1rem; font-weight:800; color:{heat_pill_color};">{h_heat} Analysts</div>
+                        <div style="font-size:0.75rem; letter-spacing:1px;">{heat_stars}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with hc2:
+                    st.markdown(f"""
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="pos-badge pos-{h_pos}">{h_pos}</span>
+                        <strong style="font-size:1.05rem; color:#f8fafc;">{h_name}</strong>
+                        <span style="color:#94a3b8; font-size:0.82rem;">({h_team} &bull; Wk {h_bye})</span>
+                    </div>
+                    <div style="margin-top:3px; font-size:0.76rem; color:#cbd5e1;">
+                        {h_badges}
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with hc3:
+                    st.markdown(f"""
+                    <div style="font-size:0.82rem; color:#cbd5e1;">
+                        Consensus: <strong>#{h_crank}</strong> &bull; ESPN: <strong>#{h_espn}</strong>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with hc4:
+                    if not h_drafted:
+                        bc1, bc2 = st.columns([1.2, 1.0])
+                        with bc1:
+                            if st.button("🟩 Draft", key=f"hr_draft_{h_id}", use_container_width=True, type="primary"):
+                                execute_pick(h_id, drafted_by_user=True)
+                                st.rerun()
+                        with bc2:
+                            if st.button("⬛ Cross", key=f"hr_cross_{h_id}", use_container_width=True):
+                                execute_pick(h_id, drafted_by_user=False)
+                                st.rerun()
+                    else:
+                        d_lbl = "ON ROSTER" if h_user else "TAKEN"
+                        st.markdown(f"<span style='color:#94a3b8; font-size:0.8rem; font-weight:700;'>[{d_lbl}]</span>", unsafe_allow_html=True)
+
+                # Show expandable official dossier
+                if h_dossier:
+                    with st.expander(f"📖 Analyst Breakdown & Notes for {h_name} ({h_heat} Analysts)", expanded=False):
+                        st.markdown(h_dossier, unsafe_allow_html=True)
+
+                st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 6px 0 10px 0;'></div>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # MODULE 3: POSITIONAL TIERS MATRIX (BOWEN & KARABELL)
+    # =========================================================================
+    elif cs_subview == "📊 Positional Tiers Matrix (Bowen & Karabell)":
+        st.markdown("#### 📊 Official ESPN Positional Tiers Matrix")
+        st.caption(
+            "Authoritative tiers established in NFL26_CS_ULTIMATE.pdf by **Erik Karabell** (Running Backs & Wide Receivers) "
+            "and **Matt Bowen** (Quarterbacks & Tight Ends). Monitor tier cliff alerts to draft ahead of drop-offs."
+        )
+
+        tier_pos_choice = st.radio(
+            "Select Position Tier Matrix:",
+            [
+                "🏃 Running Backs (Erik Karabell - 13 Tiers)",
+                "🎯 Wide Receivers (Erik Karabell - 11 Tiers)",
+                "🏈 Quarterbacks (Matt Bowen - 5 Tiers)",
+                "🛡️ Tight Ends (Matt Bowen - 3 Tiers)"
+            ],
+            horizontal=True,
+            key="tier_pos_choice"
+        )
+
+        tier_config = {}
+        if "Running Backs" in tier_pos_choice:
+            tier_config = RAW_ESPN_CHEAT_SHEET_DATA.get("karabell_rb_tiers", {})
+        elif "Wide Receivers" in tier_pos_choice:
+            tier_config = RAW_ESPN_CHEAT_SHEET_DATA.get("karabell_wr_tiers", {})
+        elif "Quarterbacks" in tier_pos_choice:
+            tier_config = RAW_ESPN_CHEAT_SHEET_DATA.get("bowen_qb_tiers", {})
+        elif "Tight Ends" in tier_pos_choice:
+            tier_config = RAW_ESPN_CHEAT_SHEET_DATA.get("bowen_te_tiers", {})
+
+        tiers_dict = tier_config.get("tiers", {})
+        analyst_author = tier_config.get("analyst", "ESPN Expert")
+        pos_target = tier_config.get("position", "")
+
+        for t_num, p_names in tiers_dict.items():
+            # Count available players in this tier
+            tier_total = len(p_names)
+            tier_avail_players = []
+            tier_drafted_players = []
+
+            for p_name in p_names:
+                m = df_board[df_board["name"].apply(clean_name_key) == clean_name_key(p_name)]
+                if not m.empty:
+                    p_data = m.iloc[0]
+                    if p_data["is_drafted"]:
+                        tier_drafted_players.append(p_data)
+                    else:
+                        tier_avail_players.append(p_data)
+                else:
+                    # Player not in top 300 / unranked
+                    tier_drafted_players.append({"name": p_name, "is_drafted": True, "drafted_by_user": False, "consensus_rank": 999, "player_id": p_name})
+
+            avail_count = len(tier_avail_players)
+            is_depleted = (avail_count == 0)
+            is_cliff = (avail_count == 1)
+
+            # Tier Header Banner
+            header_bg = "#3b0764" if t_num == 1 else ("#1e293b" if avail_count > 1 else ("#451a03" if is_cliff else "#0f172a"))
+            header_border = "#c084fc" if t_num == 1 else ("#eab308" if is_cliff else ("#475569" if not is_depleted else "#334155"))
+            badge_status = f"<span style='background:#064e3b; color:#34d399; font-weight:800; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>{avail_count} / {tier_total} AVAILABLE</span>" if not is_depleted else "<span style='background:#374151; color:#94a3b8; font-weight:700; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>TIER DEPLETED</span>"
+
+            cliff_msg = f"<span style='color:#fbbf24; font-weight:700; font-size:0.8rem; margin-left:10px;'>⚠️ TIER CLIFF: Only 1 player remaining!</span>" if is_cliff else ""
+
+            st.markdown(f"""
+            <div style="background:{header_bg}; border:1.5px solid {header_border}; border-radius:8px; padding:10px 14px; margin:14px 0 8px 0; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <strong style="color:#ffffff; font-size:1.05rem;">Tier {t_num}</strong>
+                    <span style="color:#94a3b8; font-size:0.82rem;">({analyst_author})</span>
+                    {cliff_msg}
+                </div>
+                <div>
+                    {badge_status}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Render Available Players First
+            if tier_avail_players:
+                cols = st.columns(min(len(tier_avail_players), 3))
+                for idx, p_row in enumerate(tier_avail_players):
+                    p_id = p_row["player_id"]
+                    p_n = p_row["name"]
+                    p_t = p_row["team"]
+                    p_b = p_row["bye"]
+                    p_cr = int(p_row["consensus_rank"]) if pd.notna(p_row.get("consensus_rank")) else "N/A"
+                    p_espn = int(p_row["espn_rank"]) if pd.notna(p_row.get("espn_rank")) and p_row.get("espn_rank") < 900 else "N/A"
+                    p_heat = int(p_row.get("espn_heat_index", 0))
+                    p_heat_str = f" &bull; 🔥 {p_heat} Experts" if p_heat >= 2 else ""
+
+                    with cols[idx % len(cols)]:
+                        st.markdown(f"""
+                        <div style="background:#111827; border:1px solid #1e293b; border-radius:6px; padding:8px 10px; margin-bottom:6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#f8fafc; font-size:0.95rem;">{p_n}</strong>
+                                <span style="color:#94a3b8; font-size:0.78rem;">{p_t} (Wk {p_b})</span>
+                            </div>
+                            <div style="font-size:0.78rem; color:#cbd5e1; margin-top:2px;">
+                                Consensus: <strong>#{p_cr}</strong> &bull; ESPN: <strong>#{p_espn}</strong>{p_heat_str}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        b1, b2 = st.columns([1.2, 1.0])
+                        with b1:
+                            if st.button("🟩 Draft", key=f"tier_draft_{p_id}_{t_num}", use_container_width=True, type="primary"):
+                                execute_pick(p_id, drafted_by_user=True)
+                                st.rerun()
+                        with b2:
+                            if st.button("⬛ Cross", key=f"tier_cross_{p_id}_{t_num}", use_container_width=True):
+                                execute_pick(p_id, drafted_by_user=False)
+                                st.rerun()
+
+            # Render Drafted / Taken Players (Strikethrough)
+            if tier_drafted_players:
+                drafted_names_html = []
+                for p_d in tier_drafted_players:
+                    is_u = p_d.get("drafted_by_user", False)
+                    u_lbl = "(My Team)" if is_u else "(Opponent)"
+                    u_col = "#93c5fd" if is_u else "#64748b"
+                    drafted_names_html.append(f"<span style='text-decoration:line-through; color:#64748b;'>{p_d['name']}</span> <span style='font-size:0.75rem; color:{u_col};'>{u_lbl}</span>")
+
+                st.markdown(f"""
+                <div style="font-size:0.8rem; color:#64748b; margin-top:4px; padding-left:4px;">
+                    <strong>Drafted:</strong> {" &bull; ".join(drafted_names_html)}
+                </div>
+                """, unsafe_allow_html=True)
+
+    # =========================================================================
+    # MODULE 4: ANALYST ROLODEX & SPECIALIZED TARGET LISTS
+    # =========================================================================
+    elif cs_subview == "👥 Analyst Rolodex & Specialized Target Lists":
+        st.markdown("#### 👥 Analyst Rolodex & Specialized Target Lists")
+        st.caption(
+            "Browse each ESPN expert's individual draft board, priority sleepers, league winners, and warning fades."
+        )
+
+        LIST_MAPPING = {
+            "🎯 Erik Karabell: 'Do Draft' List": "karabell_do_draft",
+            "🛑 Erik Karabell: 'Do Not Draft' Fades": "karabell_do_not_draft",
+            "🏹 Matt Bowen: Top Targets": "bowen_top_targets",
+            "⭐ Adam Schefter: Picks to Target": "schefter_picks_to_target",
+            "🏆 Matt Florio: League Winners": "florio_league_winners",
+            "💎 Field Yates: Field's Favorites": "field_favorites",
+            "🚀 Liz Loza: Late-Round Fliers": "loza_late_round_fliers",
+            "🛡️ Eric Moody: Top Insurance RBs (Handcuffs)": "moody_top_insurance_rbs",
+            "🔥 Eric Moody: Top Draft-Day Values": "moody_top_draft_values",
+            "💤 Tristan H. Cockcroft: Deep Sleepers": "cockcroft_deep_sleepers",
+            "⚡ ESPN Staff: Have Skills, Need Opportunity": "have_skills_need_opportunity"
+        }
+
+        sel_list_name = st.selectbox(
+            "Select Expert List:",
+            options=list(LIST_MAPPING.keys()),
+            index=0,
+            key="espn_cs_list_select"
+        )
+
+        list_key = LIST_MAPPING[sel_list_name]
+        list_obj = RAW_ESPN_CHEAT_SHEET_DATA.get(list_key, {})
+
+        l_title = list_obj.get("title", "")
+        l_analyst = list_obj.get("analyst", "")
+        l_desc = list_obj.get("description", "")
+        l_badge = list_obj.get("badge", "")
+        l_players = list_obj.get("players", [])
+
+        # Special Alert for Karabell Fades
+        if list_key == "karabell_do_not_draft":
+            st.markdown(f"""
+            <div style="background:#451a03; border:2px solid #ef4444; border-radius:8px; padding:12px 16px; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <strong style="color:#f87171; font-size:1.05rem;">🛑 KARABELL'S OFFICIAL DRAFT-DAY WARNING</strong>
+                </div>
+                <div style="margin-top:4px; font-size:0.86rem; color:#fef2f2; line-height:1.45;">
+                    Erik Karabell rates these 18 players as <strong>NOT worth their current ESPN ADP</strong> due to excessive injury mileage, split-backfield timeshares, or unproven passing situations.
+                    <strong>Key Advice:</strong> Do NOT reach for them at cost. However, Karabell notes they are <em>OK to draft if they slide 2+ full rounds past their ADP</em>!
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div style="background:#111827; border:1px solid #3730a3; border-radius:8px; padding:12px 16px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#c084fc; font-size:1.05rem;">{l_title}</strong>
+                    <span style="background:#1e1b4b; color:#818cf8; font-weight:700; padding:2px 8px; border-radius:4px; font-size:0.78rem;">{l_analyst}</span>
+                </div>
+                <div style="margin-top:4px; font-size:0.84rem; color:#cbd5e1;">
+                    {l_desc}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Render players in this list
+        st.markdown(f"**Total Players in List: {len(l_players)}**")
+
+        for p_item in l_players:
+            p_n = p_item.get("name", "")
+            p_pos = p_item.get("pos", "")
+            p_team = p_item.get("team", "")
+            p_adp = p_item.get("adp", "N/A")
+            p_note = p_item.get("note", "")
+
+            # Match against df_board
+            m_found = df_board[df_board["name"].apply(clean_name_key) == clean_name_key(p_n)]
+            m_row = m_found.iloc[0] if not m_found.empty else None
+
+            p_id = m_row["player_id"] if m_row is not None else p_n
+            is_drafted = m_row["is_drafted"] if m_row is not None else False
+            is_user = m_row.get("drafted_by_user", False) if m_row is not None else False
+            crank = int(m_row["consensus_rank"]) if m_row is not None and pd.notna(m_row.get("consensus_rank")) else "N/A"
+
+            lc1, lc2, lc3, lc4 = st.columns([1.0, 4.5, 2.5, 2.0])
+
+            with lc1:
+                pos_badge_class = f"pos-badge pos-{p_pos}" if p_pos in ["QB", "RB", "WR", "TE", "DST", "K"] else ""
+                st.markdown(f"<span class='{pos_badge_class}'>{p_pos}</span>", unsafe_allow_html=True)
+
+            with lc2:
+                name_style = "text-decoration:line-through; color:#94a3b8;" if is_drafted else "color:#f8fafc; font-weight:700;"
+                st.markdown(f"""
+                <div>
+                    <span style="{name_style} font-size:1.0rem;">{p_n}</span>
+                    <span style="color:#94a3b8; font-size:0.82rem; margin-left:6px;">({p_team})</span>
+                </div>
+                <div style="font-size:0.83rem; color:#cbd5e1; margin-top:2px;">
+                    <strong style="color:#38bdf8;">Note:</strong> {p_note}
+                </div>
+                """, unsafe_allow_html=True)
+
+            with lc3:
+                adp_info = f"ADP: <strong>{p_adp}</strong>" if p_adp != "N/A" else ""
+                st.markdown(f"""
+                <div style="font-size:0.82rem; color:#cbd5e1;">
+                    Consensus: <strong>#{crank}</strong> &bull; {adp_info}
+                </div>
+                """, unsafe_allow_html=True)
+
+            with lc4:
+                if not is_drafted and m_row is not None:
+                    bc1, bc2 = st.columns([1.2, 1.0])
+                    with bc1:
+                        if st.button("🟩 Draft", key=f"rolodex_draft_{p_id}_{list_key}", use_container_width=True, type="primary"):
+                            execute_pick(p_id, drafted_by_user=True)
+                            st.rerun()
+                    with bc2:
+                        if st.button("⬛ Cross", key=f"rolodex_cross_{p_id}_{list_key}", use_container_width=True):
+                            execute_pick(p_id, drafted_by_user=False)
+                            st.rerun()
+                elif is_drafted and m_row is not None:
+                    d_tag = "ON ROSTER" if is_user else "TAKEN"
+                    st.markdown(f"<span style='color:#94a3b8; font-size:0.8rem; font-weight:700;'>[{d_tag}]</span>", unsafe_allow_html=True)
+                else:
+                    st.caption("Deep Player")
+
+            st.markdown("<div style='border-bottom: 1px solid #1e293b; margin: 4px 0 8px 0;'></div>", unsafe_allow_html=True)
+
 
 # --- Tab 4: Running Backs ---
 with tab_rb:

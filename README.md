@@ -11,12 +11,13 @@ A high-performance, dark-mode 8-Team PPR Draft Board and Live War Room built wit
 ```text
 FANTASYDRAFT/
 │
-├── app.py                         # Production Streamlit live draft war room UI (2,200+ LOC)
+├── app.py                         # Production Streamlit live draft war room UI (2,800+ LOC)
 ├── app.bat                        # 1-Click Windows launcher (starts server & opens browser)
 ├── scraper.py                     # Multi-expert consensus engine, normalizer, 5-layer medical safety
+├── espn_cheatsheet.py             # ESPN Ultimate Cheat Sheet engine, multi-expert indexer & board enrichment
 ├── sleeper_sync.py                # Preseason rookie dominance & sleeper intelligence sync pipeline
 ├── injury_sync.py                 # Live NFL injury & suspension temporal sync engine
-├── test_draft.py                  # Pytest unit & integration test suite (18 test suites)
+├── test_draft.py                  # Pytest unit & integration test suite (22 test suites)
 ├── requirements.txt               # Project dependencies
 ├── README.md                      # Authoritative architecture and onboarding documentation
 │
@@ -28,6 +29,8 @@ FANTASYDRAFT/
     ├── draft_board.db             # SQLite database cache of the consensus draft board
     ├── injury_database_2026.json  # Tracked NFL injuries, return dates, tiers, and ISO timestamps
     ├── sleeper_database_2026.json # Preseason rookie breakouts, snap trends, grades, and camp buzz
+    ├── espn_ultimate_cheatsheet_2026.json # Compiled ESPN Ultimate Cheat Sheet database (165 players indexed)
+    ├── NFL26_CS_ULTIMATE.pdf      # Official ESPN Senior Fantasy Editorial Ultimate Cheat Sheet source PDF
     ├── rotowire_player_map.json   # Authoritative player name -> RotoWire player profile slug/ID map
     ├── depthchart.jpg             # High-res ESPN Official 2026 NFL Depth Chart cheat sheet
     │
@@ -218,6 +221,25 @@ To rebuild `draft_board_2026.parquet` and `draft_board.db` from all expert text 
 python scraper.py
 ```
 *(Or click **📥 Force Re-Scrape / Refresh** in the app's sidebar under `⚙️ Export & Board Options`).*
+
+### 6. Compiling the ESPN Ultimate Cheat Sheet Engine
+To parse and compile `data/NFL26_CS_ULTIMATE.pdf` into `data/espn_ultimate_cheatsheet_2026.json`:
+```powershell
+python espn_cheatsheet.py
+```
+
+---
+
+## 📋 ESPN Ultimate 2026 Cheat Sheet War Room
+
+Directly ingests and structures ESPN's official 2026 preseason *"The Ultimate Fantasy Football Cheat Sheet"* (`data/NFL26_CS_ULTIMATE.pdf`) authored by ESPN's senior editorial team (*Erik Karabell, Matt Bowen, Mike Clay, Adam Schefter, Field Yates, Matt Florio, Eric Moody, Liz Loza, and Tristan H. Cockcroft*).
+
+### Features:
+1. **Multi-Expert Consensus Heat Radar**: Computes the `espn_heat_index` (count of analysts independently recommending each player). Players with 2+, 3+, or 4+ endorsements are highlighted as consensus smash targets.
+2. **Mike Clay's 16-Round Draft Blueprint**: A live round-by-round draft guide integrated into both the dedicated cheat sheet tab and the tactical advisor in Tab 3 (`Draft Strategy & Playbook`), featuring real-time availability tracking and 1-click draft actions.
+3. **Official Positional Tiers Matrix**: Interactive positional tier grids for **Erik Karabell's RB/WR Tiers** and **Matt Bowen's QB/TE Tiers**, complete with real-time tier depletion counters and cliff alerts (*"Only 1 player remains in this tier!"*).
+4. **Analyst Rolodex & Specialized Target Lists**: Full access to all 11 published expert lists (Schefter's Targets, Florio's League Winners, Field's Favorites, Moody's Insurance Handcuffs, Loza's Late-Round Fliers, Cockcroft's Deep Sleepers, and Breakout Talents).
+5. **Karabell "Do Not Draft" Fade Warnings**: Automatic identification and warning banners for the 18 players Erik Karabell warns are overvalued at current ADP, alerting the user to only target them if they slide 2+ rounds.
 
 ---
 

@@ -1334,13 +1334,20 @@ def merge_and_finalize_board(
     except Exception as e:
         logger.warning(f"Failed to enrich board with sleepers: {e}")
 
+    # Merge comprehensive ESPN Ultimate 2026 Cheat Sheet intelligence
+    try:
+        from espn_cheatsheet import enrich_board_with_espn_cheatsheet
+        base_df = enrich_board_with_espn_cheatsheet(base_df)
+    except Exception as e:
+        logger.warning(f"Failed to enrich board with ESPN cheat sheet: {e}")
+
     # Search slug
     base_df["search_slug"] = base_df.apply(
-        lambda r: f"{clean_player_name(r['name']).lower()} {r['team'].lower()} {r['pos'].lower()} bye{r['bye']} {r.get('injury_status', '').lower()} {r.get('injury_badge', '').lower()}",
+        lambda r: f"{clean_player_name(r['name']).lower()} {r['team'].lower()} {r['pos'].lower()} bye{r['bye']} {r.get('injury_status', '').lower()} {r.get('injury_badge', '').lower()} {r.get('espn_expert_badges', '').lower()} {r.get('sleeper_badge', '').lower()}",
         axis=1
     )
 
-    logger.info(f"Consensus engine built board with {len(base_df)} live players (including real-time injuries).")
+    logger.info(f"Consensus engine built board with {len(base_df)} live players (including real-time injuries and ESPN cheat sheet).")
     return base_df
 
 
@@ -1452,14 +1459,20 @@ def load_or_generate_draft_board(force_refresh: bool = False) -> pd.DataFrame:
     if not force_refresh and PARQUET_FILE.exists():
         try:
             df = pd.read_parquet(PARQUET_FILE)
-            if "injury_tier" in df.columns:
-                logger.info(f"Loaded {len(df)} players from Parquet cache: {PARQUET_FILE}")
-                return df
-            else:
+            needs_save = False
+            if "injury_tier" not in df.columns:
                 logger.info("Cached Parquet board missing injury intelligence fields; enriching...")
                 df = enrich_board_with_injuries(df)
+                needs_save = True
+            if "espn_heat_index" not in df.columns:
+                logger.info("Cached Parquet board missing ESPN cheat sheet fields; enriching...")
+                from espn_cheatsheet import enrich_board_with_espn_cheatsheet
+                df = enrich_board_with_espn_cheatsheet(df)
+                needs_save = True
+            if needs_save:
                 save_to_cache(df)
-                return df
+            logger.info(f"Loaded {len(df)} players from Parquet cache: {PARQUET_FILE}")
+            return df
         except Exception as e:
             logger.warning(f"Failed to load Parquet cache ({e}), rebuilding...")
 
